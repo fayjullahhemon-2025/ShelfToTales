@@ -1,8 +1,12 @@
 package com.example.shelftotales.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -16,6 +20,7 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
 
     private final SecretKey signingKey;
     private final long expirationMs;
@@ -75,8 +80,15 @@ public class JwtService {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT token expired: {}", e.getMessage());
+            throw new JwtException("Token expired", e);
+        } catch (JwtException e) {
+            log.warn("Invalid JWT token: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Invalid JWT token: " + e.getMessage());
+            log.error("Unexpected error parsing JWT: {}", e.getMessage());
+            throw new JwtException("Invalid JWT token", e);
         }
     }
 }
