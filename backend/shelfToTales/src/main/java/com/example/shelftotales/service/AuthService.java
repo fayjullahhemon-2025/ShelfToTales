@@ -8,7 +8,9 @@ import com.example.shelftotales.model.Role;
 import com.example.shelftotales.model.User;
 import com.example.shelftotales.repository.UserRepository;
 import com.example.shelftotales.security.JwtService;
+import com.example.shelftotales.util.PasswordValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,42 +28,53 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (repository.existsByEmail(request.getEmail())) {
+        try {
+            if (repository.existsByEmail(request.getEmail())) {
+                throw new IllegalArgumentException("Email already registered");
+            }
+
+            PasswordValidator.validate(request.getPassword());
+
+            var user = User.builder()
+                    .fullName(request.getFullName())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .role(Role.USER)
+                    .authProvider(AuthProvider.LOCAL)
+                    .build();
+            repository.save(user);
+            var jwtToken = jwtService.generateToken(user);
+            return AuthResponse.builder()
+                    .id(user.getId())
+                    .token(jwtToken)
+                    .email(user.getEmail())
+                    .fullName(user.getFullName())
+                    .role(user.getRole())
+                    .build();
+        } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("Email already registered");
         }
-
-        var user = User.builder()
-                .fullName(request.getFullName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
-                .authProvider(AuthProvider.LOCAL)
-                .build();
-        repository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        return AuthResponse.builder()
-                .id(user.getId())
-                .token(jwtToken)
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .role(user.getRole())
-                .build();
     }
 
     public AuthResponse login(LoginRequest request) {
-        var user = repository.findByEmail(request.getEmail())
+        User user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
         if (user.getAuthProvider() != AuthProvider.LOCAL) {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("Invalid email or password");
+        }
+        
         var jwtToken = jwtService.generateToken(user);
         return AuthResponse.builder()
                 .id(user.getId())
