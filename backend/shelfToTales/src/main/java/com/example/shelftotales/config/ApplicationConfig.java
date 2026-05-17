@@ -2,6 +2,7 @@ package com.example.shelftotales.config;
 
 import com.example.shelftotales.repository.UserRepository;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 
 @Configuration
+@EnableCaching
 public class ApplicationConfig {
 
     /**
