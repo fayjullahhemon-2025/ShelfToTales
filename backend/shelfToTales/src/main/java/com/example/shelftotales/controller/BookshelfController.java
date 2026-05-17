@@ -5,9 +5,12 @@ import com.example.shelftotales.service.BookshelfService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/bookshelves")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Bookshelves", description = "Authenticated user bookshelf management")
 public class BookshelfController {
     private final BookshelfService bookshelfService;
@@ -50,7 +54,10 @@ public class BookshelfController {
 
     @PostMapping("/reorder")
     @Operation(summary = "Reorder bookshelves by providing ordered shelf IDs")
-    public ResponseEntity<Void> reorder(@RequestBody List<Long> shelfIds) {
+    public ResponseEntity<Void> reorder(
+            @RequestBody @NotEmpty(message = "Shelf IDs list cannot be empty")
+            @Size(max = 100, message = "Cannot reorder more than 100 shelves at once")
+            List<Long> shelfIds) {
         bookshelfService.reorder(shelfIds);
         return ResponseEntity.ok().build();
     }

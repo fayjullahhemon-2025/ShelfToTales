@@ -7,13 +7,17 @@ import com.example.shelftotales.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Books", description = "Public book browsing endpoints")
 public class BookController {
     private final BookService bookService;
@@ -26,9 +30,11 @@ public class BookController {
             @Parameter(description = "Filter by category ID")
             @RequestParam(required = false) Long categoryId,
             @Parameter(description = "Page number (0-based)")
-            @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size")
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page must be >= 0") int page,
+            @Parameter(description = "Page size (max 100)")
+            @RequestParam(defaultValue = "20")
+            @Min(value = 1, message = "Size must be >= 1")
+            @Max(value = 100, message = "Size must be <= 100") int size,
             @Parameter(description = "Sort field: title, author, publishedDate")
             @RequestParam(defaultValue = "title") String sortBy,
             @Parameter(description = "Sort direction: asc or desc")
