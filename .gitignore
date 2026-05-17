@@ -1,6 +1,7 @@
 # Agent / IDE configs
 .claude/
 .codex/
+.kiro/
 .idea/
 graphify-out/
 CLAUDE.md
