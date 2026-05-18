@@ -18,6 +18,7 @@ AUDIT_REPORT.md
 AUDIT_SUMMARY.md
 QUICK_FIXES.md
 README_AUDIT.md
+**/BACKEND_AUDIT.md
 
 # CLI tools
 pacman-cli/
