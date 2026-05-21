@@ -3,38 +3,21 @@
 // Force fully-dynamic rendering — page reads localStorage/window at render time.
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { cartService } from '../lib/api';
+import { useCart } from '../hooks/useCart';
 import Swal from 'sweetalert2';
 
 //Components
 import PageTitle from '../components/layout/PageTitle';
 
 function ShopCart(){
-    const [cart, setCart] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    const fetchCart = async () => {
-        try {
-            const response = await cartService.getCart();
-            setCart(response.data);
-        } catch (error) {
-            console.error('Error fetching cart:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchCart();
-    }, []);
+    const { items, count, total, loading, refreshCart, updateQuantity, removeFromCart } = useCart();
 
     const handleUpdateQuantity = async (bookId, newQuantity) => {
         if (newQuantity < 1) return;
         try {
-            const response = await cartService.updateQuantity(bookId, newQuantity);
-            setCart(response.data);
+            await updateQuantity(bookId, newQuantity);
         } catch (error) {
             Swal.fire('Error', 'Failed to update quantity', 'error');
         }
@@ -42,8 +25,7 @@ function ShopCart(){
 
     const handleRemove = async (bookId) => {
         try {
-            const response = await cartService.removeFromCart(bookId);
-            setCart(response.data);
+            await removeFromCart(bookId);
             Swal.fire({ icon: 'success', title: 'Removed from cart', showConfirmButton: false, timer: 1500, toast: true, position: 'top-end' });
         } catch (error) {
             Swal.fire('Error', 'Failed to remove item', 'error');
@@ -60,7 +42,7 @@ function ShopCart(){
                     <div className="container">
                         <div className="row mb-5">
                             <div className="col-lg-12">
-                                {cart && cart.items && cart.items.length > 0 ? (
+                                {items && items.length > 0 ? (
                                     <div className="table-responsive">
                                         <table className="table check-tbl">
                                             <thead>
@@ -74,7 +56,7 @@ function ShopCart(){
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {cart.items.map((item, index)=>(
+                                                {items.map((item, index)=>(
                                                     <tr key={index}>
                                                         <td className="product-item-img"><img loading="lazy" decoding="async" src={item.coverUrl} alt="" style={{width: '50px'}} /></td>
                                                         <td className="product-item-name">{item.title}</td>
@@ -107,7 +89,7 @@ function ShopCart(){
                                 )}
                             </div>
                         </div>
-                        {cart && cart.items && cart.items.length > 0 && (
+                        {items && items.length > 0 && (
                             <div className="row">
                                 <div className="col-lg-6 offset-lg-6">
                                     <div className="widget">
@@ -116,11 +98,11 @@ function ShopCart(){
                                             <tbody>
                                                 <tr>
                                                     <td>Items</td>
-                                                    <td>{cart.totalItems}</td>
+                                                    <td>{count}</td>
                                                 </tr>
                                                 <tr>
                                                     <td>Total</td>
-                                                    <td>${cart.totalPrice?.toFixed(2)}</td>
+                                                    <td>${total?.toFixed(2)}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
