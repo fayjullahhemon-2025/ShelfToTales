@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { authService, userService } from '../lib/api';
+import { useAuth } from '../hooks/useAuth';
 import Swal from 'sweetalert2';
 
 // Styles & Images
@@ -18,6 +18,7 @@ const GOOGLE_CLIENT_ID =
   '908376284076-qp26p58bj59uatj3am37l9dk6sqm5bcb.apps.googleusercontent.com';
 
 function LoginInner(){
+    const { login, googleAuth } = useAuth();
     const [forgotPass, setForgotPass] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -46,31 +47,20 @@ function LoginInner(){
 
     const handleGoogleResponse = async (response) => {
         try {
-            console.log('Google token received, sending to backend...');
-            const res = await authService.googleAuth(response.credential);
-            localStorage.setItem('token', res.data.token);
-            const profileRes = await userService.getProfile();
-            localStorage.setItem('user', JSON.stringify(profileRes.data));
+            await googleAuth(response.credential);
             Swal.fire('Success', 'Logged in with Google', 'success');
             window.location.href = '/dashboard';
         } catch (error) {
-            console.error('Google auth error:', error);
-            console.error('Response data:', error.response?.data);
-            console.error('Status:', error.response?.status);
-            Swal.fire('Error', error.response?.data?.message || error.message || 'Google login failed', 'error');
+            Swal.fire('Error', error.response?.data?.message || 'Google login failed', 'error');
         }
     };
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await authService.login({ email, password });
-            localStorage.setItem('token', response.data.token);
-            // Fetch full profile — this is the canonical user data
-            const profileRes = await userService.getProfile();
-            localStorage.setItem('user', JSON.stringify(profileRes.data));
+            await login(email, password);
             Swal.fire('Success', 'Logged in successfully', 'success');
-            window.location.href = '/dashboard'; 
+            window.location.href = '/dashboard';
         } catch (error) {
             Swal.fire('Error', error.response?.data?.message || 'Login failed', 'error');
         }
