@@ -3,6 +3,7 @@
 'use client';
 
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api';
@@ -23,21 +24,35 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: clear session and redirect to /shop-login on 401,
-// except when the failing call is itself an auth endpoint or we are
-// already on the login page.
+// Response interceptor: centralized error handling.
+// - 401: clear session and redirect to login (unless already on login or auth endpoint)
+// - 403: toast "Access denied"
+// - 5xx: toast "Server error"
+// - Network error: toast "Connection lost"
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (typeof window !== 'undefined' && error.response?.status === 401) {
-      const isAuthEndpoint = error.config?.url?.includes('/auth/');
-      const isLoginPage = window.location.pathname === '/shop-login';
-      if (!isAuthEndpoint && !isLoginPage) {
-        window.localStorage.removeItem('token');
-        window.localStorage.removeItem('user');
-        window.location.href = '/shop-login';
-      }
+    if (typeof window === 'undefined') return Promise.reject(error);
+
+    const status = error.response?.status;
+    const isAuthEndpoint = error.config?.url?.includes('/auth/');
+    const isLoginPage = window.location.pathname === '/shop-login';
+
+    if (status === 401 && !isAuthEndpoint && !isLoginPage) {
+      window.localStorage.removeItem('token');
+      window.localStorage.removeItem('user');
+      window.location.href = '/shop-login';
+      return Promise.reject(error);
     }
+
+    if (status === 403) {
+      Swal.fire({ icon: 'error', title: 'Access denied', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
+    } else if (status >= 500) {
+      Swal.fire({ icon: 'error', title: 'Server error, please try again', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
+    } else if (!error.response) {
+      Swal.fire({ icon: 'warning', title: 'Connection lost', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
+    }
+
     return Promise.reject(error);
   }
 );
@@ -53,6 +68,8 @@ export const bookService = {
   getById: (id) => api.get(`/books/${id}`),
   getByCategory: (categoryId) => api.get('/books', { params: { categoryId } }),
   getMyBooks: () => api.get('/books'),
+  getSimilar: (id) => api.get(`/books/${id}/similar`),
+  getByMood: (mood) => api.get(`/books/mood/${mood}`),
 };
 
 export const categoryService = {
@@ -96,12 +113,28 @@ export const orderService = {
 };
 
 export const reviewService = {
-  getByBookId: () => Promise.resolve({ data: [] }),
-  addReview: () => Promise.resolve({ data: {} }),
+  getByBookId: (bookId) => api.get(`/books/${bookId}/reviews`),
+  addReview: (bookId, reviewData) => api.post(`/books/${bookId}/reviews`, reviewData),
 };
 
 export const dashboardService = {
   getDashboard: () => api.get('/dashboard'),
+};
+
+export const socialService = {
+  follow: (userId) => api.post(`/social/follow/${userId}`),
+  unfollow: (userId) => api.delete(`/social/follow/${userId}`),
+  getFollowers: (userId) => api.get(`/social/followers/${userId}`),
+  getFollowing: (userId) => api.get(`/social/following/${userId}`),
+  search: (query) => api.get('/social/search', { params: { q: query } }),
+  getFeed: () => api.get('/social/feed'),
+};
+
+export const readingRoomService = {
+  create: (data) => api.post('/rooms', data),
+  getAll: () => api.get('/rooms'),
+  getMessages: (roomId) => api.get(`/rooms/${roomId}/messages`),
+  postMessage: (roomId, content) => api.post(`/rooms/${roomId}/messages`, { content }),
 };
 
 export default api;
