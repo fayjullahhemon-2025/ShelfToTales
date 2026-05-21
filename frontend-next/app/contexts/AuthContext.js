@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import { createContext, useContext, useReducer, useEffect, useCallback, useMemo } from 'react';
 import { authService, userService } from '@/lib/api';
 
 // ---------------------------------------------------------------------------
@@ -96,31 +96,39 @@ export function AuthProvider({ children }) {
 
   // --- Actions -----------------------------------------------------------
 
-  const login = useCallback(async (email, password) => {
-    const { data } = await authService.login({ email, password });
+  /**
+   * Shared handler for auth API responses. Persists token and profile,
+   * rolling back the token if the profile fetch fails.
+   */
+  const handleAuthResponse = useCallback(async (data) => {
     const token = data.token ?? data.accessToken;
+
+    // Persist token first so the profile request carries the Authorization header.
     localStorage.setItem(STORAGE_KEY_TOKEN, token);
 
-    const profileRes = await userService.getProfile();
-    const user = profileRes.data;
-    localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
-
-    dispatch({ type: ACTIONS.LOGIN_SUCCESS, payload: { token, user } });
-    return user;
+    try {
+      const profileRes = await userService.getProfile();
+      const user = profileRes.data;
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+      dispatch({ type: ACTIONS.LOGIN_SUCCESS, payload: { token, user } });
+      return user;
+    } catch (err) {
+      // Profile fetch failed -- clean up the dangling token.
+      localStorage.removeItem(STORAGE_KEY_TOKEN);
+      localStorage.removeItem(STORAGE_KEY_USER);
+      throw err;
+    }
   }, []);
+
+  const login = useCallback(async (email, password) => {
+    const { data } = await authService.login({ email, password });
+    return handleAuthResponse(data);
+  }, [handleAuthResponse]);
 
   const googleAuth = useCallback(async (idToken) => {
     const { data } = await authService.googleAuth(idToken);
-    const token = data.token ?? data.accessToken;
-    localStorage.setItem(STORAGE_KEY_TOKEN, token);
-
-    const profileRes = await userService.getProfile();
-    const user = profileRes.data;
-    localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
-
-    dispatch({ type: ACTIONS.LOGIN_SUCCESS, payload: { token, user } });
-    return user;
-  }, []);
+    return handleAuthResponse(data);
+  }, [handleAuthResponse]);
 
   const logout = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY_TOKEN);
@@ -135,13 +143,16 @@ export function AuthProvider({ children }) {
 
   // --- Value -------------------------------------------------------------
 
-  const value = {
-    ...state,
-    login,
-    googleAuth,
-    logout,
-    updateProfile,
-  };
+  const value = useMemo(
+    () => ({
+      ...state,
+      login,
+      googleAuth,
+      logout,
+      updateProfile,
+    }),
+    [state, login, googleAuth, logout, updateProfile],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
