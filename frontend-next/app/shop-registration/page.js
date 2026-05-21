@@ -12,7 +12,9 @@ import Swal from 'sweetalert2';
 // Styles & Images
 import './AuthLayout.css';
 const loginImage = '/assets/images/login-signup.jpg';
-const GOOGLE_CLIENT_ID = '908376284076-qp26p58bj59uatj3am37l9dk6sqm5bcb.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  '908376284076-qp26p58bj59uatj3am37l9dk6sqm5bcb.apps.googleusercontent.com';
 
 function RegistrationInner(){
     const [fullName, setFullName] = useState('');
