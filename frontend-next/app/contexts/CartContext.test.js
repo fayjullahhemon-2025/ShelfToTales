@@ -134,4 +134,70 @@ describe('CartContext', () => {
     expect(screen.getByTestId('count').textContent).toBe('2');
     expect(screen.getByTestId('total').textContent).toBe('39.98');
   });
+
+  it('updateQuantity calls API and updates state', async () => {
+    const cartPayload = {
+      items: [{ bookId: 1, title: 'Dune', quantity: 5, price: 19.99 }],
+      count: 5,
+      total: 99.95,
+    };
+    cartService.updateQuantity.mockResolvedValue({ data: cartPayload });
+
+    renderWithProvider();
+
+    await act(async () => {
+      screen.getByTestId('update-btn').click();
+    });
+
+    expect(cartService.updateQuantity).toHaveBeenCalledWith(1, 5);
+    expect(screen.getByTestId('items').textContent).toBe(
+      JSON.stringify(cartPayload.items),
+    );
+    expect(screen.getByTestId('count').textContent).toBe('5');
+    expect(screen.getByTestId('total').textContent).toBe('99.95');
+  });
+
+  it('removeFromCart calls API and updates state', async () => {
+    const cartPayload = {
+      items: [],
+      count: 0,
+      total: 0,
+    };
+    cartService.removeFromCart.mockResolvedValue({ data: cartPayload });
+
+    renderWithProvider();
+
+    await act(async () => {
+      screen.getByTestId('remove-btn').click();
+    });
+
+    expect(cartService.removeFromCart).toHaveBeenCalledWith(1);
+    expect(screen.getByTestId('items').textContent).toBe('[]');
+    expect(screen.getByTestId('count').textContent).toBe('0');
+    expect(screen.getByTestId('total').textContent).toBe('0');
+  });
+
+  it('resets loading to false when API fails', async () => {
+    cartService.getCart.mockRejectedValue(new Error('Network error'));
+
+    renderWithProvider();
+
+    // Initially not loading
+    expect(screen.getByTestId('loading').textContent).toBe('false');
+
+    // Trigger an action that will fail; suppress unhandled rejection
+    await act(async () => {
+      try {
+        screen.getByTestId('refresh-btn').click();
+      } catch {
+        // click handler catches via .catch(() => {})
+      }
+    });
+
+    // Loading should be reset to false after the failure
+    expect(screen.getByTestId('loading').textContent).toBe('false');
+    // Cart should remain unchanged
+    expect(screen.getByTestId('items').textContent).toBe('[]');
+    expect(screen.getByTestId('count').textContent).toBe('0');
+  });
 });

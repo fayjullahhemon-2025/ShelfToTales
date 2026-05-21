@@ -52,29 +52,41 @@ const CartContext = createContext(null);
 export function CartProvider({ children }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
-  const refreshCart = useCallback(async () => {
+  /**
+   * Shared helper — sets loading, calls the API function, dispatches the
+   * result. If the API throws, loading is reset to false so the UI doesn't
+   * stay stuck.
+   */
+  const withCartAction = useCallback(async (apiFn, ...args) => {
     dispatch({ type: ACTIONS.SET_LOADING, payload: true });
-    const { data } = await cartService.getCart();
-    dispatch({ type: ACTIONS.SET_CART, payload: data });
+    try {
+      const { data } = await apiFn(...args);
+      dispatch({ type: ACTIONS.SET_CART, payload: data });
+    } catch (err) {
+      dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+      throw err;
+    }
   }, []);
 
-  const addToCart = useCallback(async (bookId, qty = 1) => {
-    dispatch({ type: ACTIONS.SET_LOADING, payload: true });
-    const { data } = await cartService.addToCart(bookId, qty);
-    dispatch({ type: ACTIONS.SET_CART, payload: data });
-  }, []);
+  const refreshCart = useCallback(
+    () => withCartAction(cartService.getCart),
+    [withCartAction],
+  );
 
-  const updateQuantity = useCallback(async (bookId, qty) => {
-    dispatch({ type: ACTIONS.SET_LOADING, payload: true });
-    const { data } = await cartService.updateQuantity(bookId, qty);
-    dispatch({ type: ACTIONS.SET_CART, payload: data });
-  }, []);
+  const addToCart = useCallback(
+    (bookId, qty = 1) => withCartAction(cartService.addToCart, bookId, qty),
+    [withCartAction],
+  );
 
-  const removeFromCart = useCallback(async (bookId) => {
-    dispatch({ type: ACTIONS.SET_LOADING, payload: true });
-    const { data } = await cartService.removeFromCart(bookId);
-    dispatch({ type: ACTIONS.SET_CART, payload: data });
-  }, []);
+  const updateQuantity = useCallback(
+    (bookId, qty) => withCartAction(cartService.updateQuantity, bookId, qty),
+    [withCartAction],
+  );
+
+  const removeFromCart = useCallback(
+    (bookId) => withCartAction(cartService.removeFromCart, bookId),
+    [withCartAction],
+  );
 
   // --- Value -------------------------------------------------------------
 
