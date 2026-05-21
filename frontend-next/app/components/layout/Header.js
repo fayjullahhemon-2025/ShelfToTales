@@ -3,17 +3,19 @@
 import React,{useEffect, useState} from 'react';
 import Link from 'next/link';
 import {Dropdown} from 'react-bootstrap';
-import { userService } from '../../lib/api';
+import { useAuth } from '../../hooks/useAuth';
+import { useCart } from '../../hooks/useCart';
 //images
 const logo = '/assets/images/logo.png';
 import Collapse from 'react-bootstrap/Collapse';
 import {MenuListArray2} from './MenuListArray2';
 
 function Header(){
+	const { user, isAuthenticated, logout } = useAuth();
+	const { count: cartCount } = useCart();
 	const [selectBtn, setSelectBtn] = useState('Category');
 	const [active, setActive] = useState(null);
 	const [headerFix, setheaderFix] = React.useState(false);
-	const [user, setUser] = useState(null);
 
 	const handleMenuActive = (title) => {
 		setActive(active === title ? null : title);
@@ -33,47 +35,6 @@ function Header(){
 	const showSidebar = () => setSidebarOpen(!sidebarOpen);
 	/*  Toggle btn End  */
 	
-	useEffect(() => {
-		const token = localStorage.getItem('token');
-		if (token) {
-			// Try to fetch fresh profile from backend
-			userService.getProfile()
-				.then(res => {
-					setUser(res.data);
-					localStorage.setItem('user', JSON.stringify(res.data));
-				})
-				.catch(() => {
-					// Fallback to cached user data
-					const storedUser = localStorage.getItem('user');
-					if (storedUser) setUser(JSON.parse(storedUser));
-				});
-		}
-	}, []);
-
-	// Re-fetch profile when updated from /my-profile
-	useEffect(() => {
-		const handleProfileUpdate = () => {
-			const token = localStorage.getItem('token');
-			if (token) {
-				userService.getProfile()
-					.then(res => {
-						setUser(res.data);
-						localStorage.setItem('user', JSON.stringify(res.data));
-					})
-					.catch(() => {});
-			}
-		};
-		window.addEventListener('profile-updated', handleProfileUpdate);
-		return () => window.removeEventListener('profile-updated', handleProfileUpdate);
-	}, []);
-
-	const handleLogout = () => {
-		localStorage.removeItem('token');
-		localStorage.removeItem('user');
-		setUser(null);
-		window.location.href = '/shop-login';
-	};
-
 	return(
 		
 		<header className="site-header mo-left header style-1">	
@@ -100,7 +61,7 @@ function Header(){
 										<span className="badge">Cart</span>
 									</Link>
 								</li>
-								{user ? (
+								{isAuthenticated ? (
 									<Dropdown as="li" className="nav-item dropdown profile-dropdown ms-4">
 										<Dropdown.Toggle as="div" className="nav-link i-false" style={{cursor: 'pointer'}}>
 											<img loading="lazy" decoding="async" src={user.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || 'User')}&background=9cd2ef&color=fff&size=80`} alt="/" style={{width:32,height:32,borderRadius:'50%',objectFit:'cover'}} />
@@ -159,7 +120,7 @@ function Header(){
 												</Link>
 											</div>
 											<div className="dropdown-footer">
-												<Dropdown.Item as="button" onClick={handleLogout} className="btn btn-primary w-100 btnhover btn-sm text-white">Log Out</Dropdown.Item>
+												<Dropdown.Item as="button" onClick={logout} className="btn btn-primary w-100 btnhover btn-sm text-white">Log Out</Dropdown.Item>
 											</div>
 										</Dropdown.Menu>
 									</Dropdown>
@@ -222,7 +183,7 @@ function Header(){
 						{/* <!-- EXTRA NAV --> */}
 						<div className="extra-nav">
 							<div className="extra-cell">
-								{user ? (
+								{isAuthenticated ? (
 									<Link href={"/reading-room"} className="btn btn-primary btnhover">Start Reading</Link>
 								) : (
 									<Link href={"/shop-registration"} className="btn btn-primary btnhover">Join Community</Link>
