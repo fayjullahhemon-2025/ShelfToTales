@@ -18,8 +18,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @EntityGraph(attributePaths = {"category"})
     @Query("SELECT b FROM Book b WHERE " +
-           "(:query IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-           "LOWER(b.author) LIKE LOWER(CONCAT('%', :query, '%'))) AND " +
+           "(:query IS NULL OR LOWER(CAST(b.title AS string)) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%')) OR " +
+           "LOWER(CAST(b.author AS string)) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%'))) AND " +
            "(:categoryId IS NULL OR b.category.id = :categoryId)")
     Page<Book> searchBooks(@Param("query") String query,
                            @Param("categoryId") Long categoryId,
