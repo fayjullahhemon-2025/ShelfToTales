@@ -5,6 +5,7 @@ import "swiper/css/navigation";
 import "swiper/css/effect-fade";
 import "./assets/css/style.css";
 import "./globals.css";
+import "./styles/shop-enhanced.css";
 
 import { AuthProvider } from "./contexts/AuthContext";
 import { AppProvider } from "./contexts/AppContext";
