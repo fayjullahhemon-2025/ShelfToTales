@@ -24,13 +24,13 @@ const ReadingDashboard = () => {
                 setDashboardData(dashRes.data);
 
                 const feedRes = await socialService.getFeed();
-                setFeed(feedRes.data);
+                setFeed(feedRes.data?.content || feedRes.data || []);
 
                 const currentUserStr = localStorage.getItem('user');
                 if (currentUserStr) {
                     const currentUser = JSON.parse(currentUserStr);
                     const followingRes = await socialService.getFollowing();
-                    setFollowing(followingRes.data);
+                    setFollowing(followingRes.data?.content || followingRes.data || []);
                 }
             } catch (err) {
                 console.error("Failed to load dashboard data", err);

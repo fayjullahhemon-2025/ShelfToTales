@@ -51,7 +51,7 @@ const ReadingRoom = () => {
         const loadRoomData = async () => {
             try {
                 const roomsRes = await readingRoomService.getAll();
-                const currentRoom = roomsRes.data.find(r => r.id === roomId);
+                const currentRoom = (roomsRes.data || []).find(r => r.id === roomId);
                 if (currentRoom) {
                     setRoom(currentRoom);
                 } else {
@@ -60,7 +60,7 @@ const ReadingRoom = () => {
                 }
 
                 const msgRes = await readingRoomService.getMessages(roomId);
-                setMessages(msgRes.data);
+                setMessages(msgRes.data || []);
             } catch (err) {
                 console.error("Failed to load room details", err);
                 router.push('/reader-network');

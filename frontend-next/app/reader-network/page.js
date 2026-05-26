@@ -26,7 +26,7 @@ const ReaderNetwork = () => {
     const fetchMoodBooks = async (mood) => {
         try {
             const res = await bookService.getByMood(mood);
-            setMoodBooks(res.data);
+            setMoodBooks(res.data || []);
         } catch (err) {
             console.error("Failed to load mood books", err);
         }
@@ -44,7 +44,7 @@ const ReaderNetwork = () => {
     const fetchRooms = async () => {
         try {
             const res = await readingRoomService.getAll();
-            setRooms(res.data);
+            setRooms(res.data || []);
         } catch (err) {
             console.error("Failed to load reading rooms", err);
         }
@@ -56,7 +56,7 @@ const ReaderNetwork = () => {
             if (currentUserStr) {
                 const currentUser = JSON.parse(currentUserStr);
                 const res = await socialService.getFollowing();
-                setFollowing(res.data);
+                setFollowing(res.data?.content || res.data || []);
             }
         } catch (err) {
             console.error("Failed to load following list", err);
@@ -71,7 +71,7 @@ const ReaderNetwork = () => {
         }
         try {
             const res = await socialService.search(query);
-            setSearchResults(res.data);
+            setSearchResults(res.data || []);
         } catch (err) {
             console.error("Search failed", err);
         }
