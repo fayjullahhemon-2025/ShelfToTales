@@ -32,6 +32,9 @@ public class JwtService {
         if (secretKey == null || secretKey.isBlank()) {
             throw new IllegalStateException("jwt.secret-key must be configured — set JWT_SECRET_KEY environment variable");
         }
+        if (secretKey.contains("dev-only")) {
+            log.warn("⚠️  Using dev-only JWT secret. Set JWT_SECRET_KEY env var for production!");
+        }
         this.signingKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         this.expirationMs = expirationMs;
     }
