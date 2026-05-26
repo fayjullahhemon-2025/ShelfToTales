@@ -1,4 +1,4 @@
-package com.example.shelftotales;
+package com.example.shelftotales.controller;
 import com.example.shelftotales.review.domain.*;
 import com.example.shelftotales.auth.domain.*;
 import com.example.shelftotales.auth.application.*;
@@ -35,14 +35,41 @@ import com.example.shelftotales.shared.util.*;
 import com.example.shelftotales.auth.presentation.*;
 import com.example.shelftotales.shared.dto.*;
 
+import com.example.shelftotales.bookshelf.application.DashboardResponse;
+import com.example.shelftotales.bookshelf.application.DashboardService;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
-class ShelfToTalesApplicationTests {
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(DashboardController.class)
+@AutoConfigureMockMvc(addFilters = false)
+class DashboardControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private DashboardService dashboardService;
 
     @Test
-    void contextLoads() {
-    }
+    void getDashboard_shouldReturn200() throws Exception {
+        DashboardResponse response = DashboardResponse.builder()
+            .fullName("Test User")
+            .email("test@example.com")
+            .build();
 
+        when(dashboardService.getDashboard()).thenReturn(response);
+
+        mockMvc.perform(get("/api/dashboard"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.fullName").value("Test User"))
+            .andExpect(jsonPath("$.email").value("test@example.com"));
+    }
 }
