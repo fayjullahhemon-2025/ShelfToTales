@@ -150,4 +150,83 @@ export const adminCategoryService = {
   delete: (id) => api.delete(`/admin/categories/${id}`),
 };
 
+export const adminUserService = {
+  getAll: (params) => api.get('/admin/users', { params }),
+  ban: (userId) => api.post(`/admin/users/${userId}/ban`),
+  unban: (userId) => api.post(`/admin/users/${userId}/unban`),
+  warn: (userId, data) => api.post(`/admin/users/${userId}/warn`, data),
+  getWarnings: (userId) => api.get(`/admin/users/${userId}/warnings`),
+  changeRole: (userId, role) => api.put(`/admin/users/${userId}/role`, { role }),
+  getDashboard: () => api.get('/admin/dashboard'),
+};
+
+export const adminOrderService = {
+  updateStatus: (id, status) => api.put(`/admin/orders/${id}/status`, { status }),
+};
+
+export const adminCouponService = {
+  create: (data) => api.post('/admin/coupons', data),
+};
+
+export const exchangeService = {
+  createListing: (data) => api.post('/exchange/listings', data),
+  getListings: (params) => api.get('/exchange/listings', { params }),
+  getMyListings: () => api.get('/exchange/listings/mine'),
+  updateListing: (id, data) => api.put(`/exchange/listings/${id}`, data),
+  deleteListing: (id) => api.delete(`/exchange/listings/${id}`),
+  sendRequest: (listingId, data) => api.post(`/exchange/listings/${listingId}/request`, data),
+  getIncoming: () => api.get('/exchange/requests/incoming'),
+  getOutgoing: () => api.get('/exchange/requests/outgoing'),
+  accept: (id) => api.put(`/exchange/requests/${id}/accept`),
+  reject: (id) => api.put(`/exchange/requests/${id}/reject`),
+  complete: (id) => api.put(`/exchange/requests/${id}/complete`),
+  cancel: (id) => api.put(`/exchange/requests/${id}/cancel`),
+  rate: (id, data) => api.post(`/exchange/requests/${id}/rate`, data),
+  getTrustProfile: (userId) => api.get(`/exchange/ratings/${userId}`),
+};
+
+export const gamificationService = {
+  getAchievements: () => api.get('/achievements'),
+  getMyAchievements: () => api.get('/achievements/mine'),
+  getChallenges: () => api.get('/challenges'),
+  getMyChallenges: () => api.get('/challenges/mine'),
+  joinChallenge: (id) => api.post(`/challenges/${id}/join`),
+  getStreak: () => api.get('/streak'),
+};
+
+export const notificationService = {
+  getAll: () => api.get('/notifications'),
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+  markRead: (id) => api.put(`/notifications/${id}/read`),
+  markAllRead: () => api.put('/notifications/read-all'),
+};
+
+export const friendService = {
+  sendRequest: (userId) => api.post(`/friends/request/${userId}`),
+  acceptRequest: (requestId) => api.put(`/friends/request/${requestId}/accept`),
+  rejectRequest: (requestId) => api.delete(`/friends/request/${requestId}`),
+  getFriends: () => api.get('/friends'),
+  getRequests: () => api.get('/friends/requests'),
+};
+
+export const aiService = {
+  chat: (message) => api.post('/chat', { message }),
+  clearHistory: () => api.delete('/chat'),
+  semanticSearch: (query, limit) => api.get('/search/semantic', { params: { q: query, limit } }),
+};
+
+export const addressService = {
+  getAll: () => api.get('/addresses'),
+  create: (data) => api.post('/addresses', data),
+  delete: (id) => api.delete(`/addresses/${id}`),
+};
+
+export const couponService = {
+  validate: (code, orderTotal) => api.post('/coupons/validate', { code, orderTotal }),
+};
+
+export const checkoutService = {
+  checkout: (data) => api.post('/checkout', data),
+};
+
 export default api;
