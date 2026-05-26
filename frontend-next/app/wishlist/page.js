@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { wishlistService, cartService } from '../lib/api';
 import Swal from 'sweetalert2';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 //Components
 import PageTitle from '../components/layout/PageTitle';
@@ -55,6 +56,7 @@ function Wishlist(){
         <>
             <div className="page-content">
                 <PageTitle  parentPage="Shop" childPage="Wishlist" />
+                <FadeIn>
                 <section className="content-inner-1">
                     <div className="container">
                         <div className="row">
@@ -103,6 +105,7 @@ function Wishlist(){
                         </div>
                     </div>
                 </section>
+                </FadeIn>
             </div>
         </>
     )

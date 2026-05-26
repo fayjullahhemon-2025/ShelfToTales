@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import CountUp from 'react-countup';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 const missionBlog = [
   { iconClass: 'flaticon-open-book-1', title: 'Best Bookstore' },
@@ -24,6 +25,7 @@ export default function AboutUsPage() {
   return (
     <div className="page-content bg-white">
       {/* Simple inline page header (PageTitle component not yet ported). */}
+                <FadeIn>
       <div className="dz-bnr-inr style-1 text-center" style={{ padding: '60px 0', background: '#f8f8f8' }}>
         <div className="container">
           <h1 className="title">About us</h1>
@@ -141,6 +143,7 @@ export default function AboutUsPage() {
           </div>
         </div>
       </section>
+                </FadeIn>
     </div>
   );
 }

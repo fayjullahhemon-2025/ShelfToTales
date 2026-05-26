@@ -12,6 +12,7 @@ import { CartProvider } from "./contexts/CartContext";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
+import PageAnimationWrapper from "./components/layout/PageAnimationWrapper";
 
 export const metadata = {
   title: "Shelf To Tales — Book Store",
@@ -35,7 +36,9 @@ export default function RootLayout({ children }) {
               <div className="App">
                 <div className="page-wraper">
                   <Header />
-                  {children}
+                  <PageAnimationWrapper>
+                    {children}
+                  </PageAnimationWrapper>
                   <Footer footerChange="style-1" />
                 </div>
                 <ScrollToTop />

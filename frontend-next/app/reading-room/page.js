@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 
 import React from 'react';
 import '../assets/css/reader-network.css';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 const ReadingRoom = () => {
     return (

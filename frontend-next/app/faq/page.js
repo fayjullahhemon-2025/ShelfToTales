@@ -10,6 +10,7 @@ import {Accordion} from 'react-bootstrap';
 import PageTitle from '../components/layout/PageTitle';
 //element
 import CounterSection from '../components/common/CounterSection';
+import { FadeIn } from '../components/common/AnimationUtils';
 //image
 const pic1 = '/assets/images/about/pic1.jpg';
 const pic2 = '/assets/images/about/pic2.jpg';
@@ -24,6 +25,7 @@ function Faq(){
         <>
             <div className="page-content">
                 <PageTitle  parentPage="Pages" childPage="FAQ's" />
+                <FadeIn>
                 <section className="main-faq-content content-inner">
                     <div className="container">
                         <div className="row">
@@ -113,6 +115,7 @@ function Faq(){
                         </div>
                     </div>
                 </section>
+                </FadeIn>
             </div>
         </>
     )    

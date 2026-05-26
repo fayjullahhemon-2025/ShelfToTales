@@ -7,6 +7,7 @@ import React from 'react';
 import Link from 'next/link';
 
 import PageTitle from '../components/layout/PageTitle';
+import { FadeIn } from '../components/common/AnimationUtils';
 //import BlogSidebar from '../components/common/BlogSidebar';
 const profile4 = '/assets/images/profile4.jpg';
 const profile3 = '/assets/images/profile3.jpg';
@@ -55,6 +56,7 @@ const BlogDetail = () =>{
     return(
         <>
             <PageTitle parentPage="Blog" childPage="Blog Details" />
+                <FadeIn>
             <section className="content-inner-1 bg-img-fix">
 				<div className="container">
 					<div className="row">
@@ -250,6 +252,7 @@ const BlogDetail = () =>{
                     </div>
                 </div>
             </section>    
+                </FadeIn>
 
         </>
     )

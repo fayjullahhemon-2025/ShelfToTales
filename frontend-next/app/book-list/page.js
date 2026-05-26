@@ -13,6 +13,7 @@ import ClientsSlider from '../components/features/Home/ClientsSlider';
 import CounterSection from '../components/common/CounterSection';
 import NewsLetter from '../components/features/NewsLetter';
 import PageTitle from '../components/layout/PageTitle';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 function BookListPage() {
     const [books, setBooks] = useState([]);
@@ -70,6 +71,7 @@ function BookListPage() {
     return (
         <div className="page-content bg-grey">
             <PageTitle parentPage="Pages" childPage="Book List" />
+                <FadeIn>
             
             <section className="content-inner-1 border-bottom">
                 <div className="container">
@@ -184,6 +186,7 @@ function BookListPage() {
                     </div>
                 </div>
             </section>
+                </FadeIn>
 
             <NewsLetter />
             

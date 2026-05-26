@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import PageTitle from '../../components/layout/PageTitle';
 import { orderService } from '../../lib/api';
+import { FadeIn } from '../../components/common/AnimationUtils';
 
 function OrderDetail() {
     const { id } = useParams();
@@ -37,6 +38,7 @@ function OrderDetail() {
     return (
         <div className="page-content bg-grey">
             <PageTitle parentPage="User" childPage={`Order #${id}`} />
+            <FadeIn>
             <div className="container py-5">
                 <div className="row">
                     <div className="col-lg-8">
@@ -135,6 +137,7 @@ function OrderDetail() {
                     </div>
                 </div>
             </div>
+            </FadeIn>
         </div>
     );
 }

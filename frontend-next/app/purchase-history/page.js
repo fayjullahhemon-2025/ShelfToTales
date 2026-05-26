@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PageTitle from '../components/layout/PageTitle';
 import { orderService } from '../lib/api';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 function PurchaseHistory() {
     const [orders, setOrders] = useState([]);
@@ -31,6 +32,7 @@ function PurchaseHistory() {
     return (
         <div className="page-content bg-grey">
             <PageTitle parentPage="User" childPage="Purchase History" />
+            <FadeIn>
             <div className="container py-5">
                 <div className="row mb-4">
                     <div className="col-lg-12">
@@ -86,6 +88,7 @@ function PurchaseHistory() {
                     </div>
                 )}
             </div>
+            </FadeIn>
         </div>
     );
 }

@@ -8,6 +8,7 @@ import Link from 'next/link';
 
 import PageTitle from '../components/layout/PageTitle';
 import BlogSidebar from '../components/common/BlogSidebar';
+import { FadeIn } from '../components/common/AnimationUtils';
 const blog1 = '/assets/images/blog/large/blog1.jpg';
 const blog2 = '/assets/images/blog/large/blog2.jpg';
 const blog4 = '/assets/images/blog/large/blog4.jpg';
@@ -15,6 +16,7 @@ const BlogLargeSidebar = () =>{
     return(
         <>
             <PageTitle parentPage="Blog" childPage="Blog Large Sidebar" />
+                <FadeIn>
             <section className="content-inner-1 bg-img-fix">
 				<div className="container">
 					<div className="row">
@@ -106,6 +108,7 @@ const BlogLargeSidebar = () =>{
                     </div>
                 </div>
             </section>    
+                </FadeIn>
 
         </>
     )

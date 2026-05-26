@@ -8,6 +8,7 @@ import Link from 'next/link';
 
 import PageTitle from '../components/layout/PageTitle';
 import NewsLetter from '../components/features/NewsLetter';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 const pricingCard = [
     {title:'Basic Plan',price:'99'},
@@ -20,6 +21,7 @@ function Pricing(){
         <>
             <div className="page-content">
                 <PageTitle childPage="Pricing Table" parentPage="Pages"  /> 
+                <FadeIn>
                 <section className="content-inner-1 bg-light">
                     <div className="container">
                         <div className="row pricingtable-wraper">
@@ -52,6 +54,7 @@ function Pricing(){
                         </div>
                     </div>
                 </section>          
+                </FadeIn>
                 <NewsLetter />
 
 

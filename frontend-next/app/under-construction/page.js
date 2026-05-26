@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 
 import React from 'react';
 import Link from 'next/link';
+import { FadeIn } from '../components/common/AnimationUtils';
 const ucimage = '/assets/images/background/uc.jpg';
 const logo = '/assets/images/logo.png';
 const UnderConstruction = ()=>{

@@ -12,6 +12,7 @@ import ClientsSlider from '../components/features/Home/ClientsSlider';
 //element
 import CounterSection from '../components/common/CounterSection';
 import NewsLetter from '../components/features/NewsLetter';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 //images
 const service1 = '/assets/images/services/service1.jpg';
@@ -34,6 +35,7 @@ function Services(){
         <>
             <div className="page-content">
                 <PageTitle  parentPage="Pages" childPage="Services" />
+                <FadeIn>
                 <section className="content-inner bg-white">
                     <div className="container">	
                         <div className="row">
@@ -63,6 +65,7 @@ function Services(){
                         </div>
                     </div>
                 </section>    
+                </FadeIn>
                 <div className="bg-white py-5">
 				    <div className="container">        
                         <ClientsSlider />      

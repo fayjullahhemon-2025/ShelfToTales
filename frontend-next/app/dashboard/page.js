@@ -10,8 +10,13 @@ import DashboardCurrentlyReading from '../components/dashboard/DashboardCurrentl
 import DashboardCategoryBreakdown from '../components/dashboard/DashboardCategoryBreakdown';
 import DashboardRecentActivity from '../components/dashboard/DashboardRecentActivity';
 import DashboardQuickActions from '../components/dashboard/DashboardQuickActions';
+import DashboardStreakWidget from '../components/dashboard/DashboardStreakWidget';
+import DashboardAchievements from '../components/dashboard/DashboardAchievements';
+import ProgressRing from '../components/dashboard/ProgressRing';
+import GradientStatCard from '../components/dashboard/GradientStatCard';
 import { useApi } from '../hooks/useApi';
 import { dashboardService } from '../lib/api';
+import { FadeIn, StaggerContainer, StaggerItem } from '../components/common/AnimationUtils';
 import './Dashboard.css';
 
 const TABS = [
@@ -140,6 +145,7 @@ function Dashboard() {
   return (
     <div className="page-content bg-grey">
       <PageTitle parentPage="User" childPage="Dashboard" />
+      <FadeIn>
       <div className="container py-4">
         <div className="dashboard-welcome mb-4">
           <div className="d-flex align-items-center gap-3">
@@ -161,6 +167,28 @@ function Dashboard() {
           ))}
         </div>
 
+        {/* Streak + Progress Ring Row */}
+        <div className="row g-3 mb-4">
+          <div className="col-md-3">
+            <DashboardStreakWidget />
+          </div>
+          <div className="col-md-3">
+            <div className="card border-0 shadow-sm h-100 d-flex align-items-center justify-content-center" style={{ borderRadius: 16 }}>
+              <div className="card-body text-center py-4">
+                <ProgressRing
+                  progress={data.totalBooksCompleted ? Math.min((data.totalBooksCompleted / 24) * 100, 100) : 0}
+                  size={100} color="#6f42c1"
+                  label="Annual Goal"
+                  sublabel={`${data.totalBooksCompleted || 0} / 24 books`}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="col-md-6">
+            <DashboardAchievements />
+          </div>
+        </div>
+
         <div className="card shadow-sm border-0">
           <div className="card-header bg-white border-bottom px-0">
             <ul className="nav nav-tabs dashboard-tabs border-0 px-3">
@@ -179,6 +207,7 @@ function Dashboard() {
           </div>
         </div>
       </div>
+      </FadeIn>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Dropdown } from 'react-bootstrap';
 import { bookService, wishlistService, cartService } from '../lib/api';
 import Swal from 'sweetalert2';
+import { FadeIn, StaggerContainer, StaggerItem } from '../components/common/AnimationUtils';
 
 //Component
 import NewsLetter from '../components/features/NewsLetter';
@@ -118,18 +119,18 @@ function BooksGridView() {
                             </div>
                         </div>
 
-                        <div className="row book-grid-row">
-                            {books.map((data) => (
-                                <div className="col-book style-2" key={data.id}>
+                        <StaggerContainer className="row book-grid-row">
+                            {books.map((data, i) => (
+                                <StaggerItem className="col-book style-2" key={data.id}>
                                     <BookGridCard
                                         book={data}
                                         onAddToWishlist={handleAddToWishlist}
                                         onAddToCart={handleAddToCart}
                                         wishlistInputIdPrefix="grid-wish"
                                     />
-                                </div>
+                                </StaggerItem>
                             ))}
-                        </div>
+                        </StaggerContainer>
                         </div>
                         </div>
                     </div>

@@ -7,12 +7,14 @@ import React from 'react';
 import Link from 'next/link';
 
 import PageTitle from '../components/layout/PageTitle';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 function PrivacyPolicy(){
     return(
         <>
             <div className="page-content">
                 <PageTitle childPage="Privacy Policy" parentPage="Pages" />
+                <FadeIn>
                 <section className="content-inner-1 shop-account">
                     <div className="container">
                         <div className="row">
@@ -49,6 +51,7 @@ function PrivacyPolicy(){
                         </div>
                     </div>
                 </section>
+                </FadeIn>
             
             </div>
         </>

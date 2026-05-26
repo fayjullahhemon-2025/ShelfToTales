@@ -8,6 +8,7 @@ import emailjs from '@emailjs/browser'
 import Link from 'next/link';
 
 import DonutChart2 from '../components/common/DonutChart2';
+import { FadeIn } from '../components/common/AnimationUtils';
 const bg2 = '/assets/images/background/bg2.jpg';
 const logowhite = '/assets/images/logo-white.png';
 function ComingSoon(){

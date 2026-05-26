@@ -14,6 +14,7 @@ import NewsLetter from '../components/features/NewsLetter';
 //element
 import CounterSection from '../components/common/CounterSection';
 import ShopSidebar from '../components/common/ShopSidebar';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 //Images
 const book16 = '/assets/images/books/grid/book16.jpg';
@@ -67,6 +68,7 @@ function BooksListViewSidebar(){
     return(
         <>
             <div className="page-content bg-grey">
+                <FadeIn>
                 <div className="content-inner-1 border-bottom">
                     <div className="container">
                         <div className="row ">  
@@ -245,7 +247,8 @@ function BooksListViewSidebar(){
                             <CounterSection />      
                         </div>   
                     </div>
-                </section>  
+                </section>
+                </FadeIn>
                 <NewsLetter />      
             </div>
         </>

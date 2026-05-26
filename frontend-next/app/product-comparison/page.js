@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PageTitle from '../components/layout/PageTitle';
 import { bookService } from '../lib/api';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 function ProductComparisonInner() {
     const [comparisonList, setComparisonList] = useState([]);
@@ -54,6 +55,7 @@ function ProductComparisonInner() {
     return (
         <div className="page-content bg-grey">
             <PageTitle parentPage="Shop" childPage="Product Comparison" />
+            <FadeIn>
             <div className="container py-5">
                 <div className="row mb-5">
                     <div className="col-lg-12 d-flex justify-content-between align-items-center">
@@ -145,6 +147,7 @@ function ProductComparisonInner() {
                     </div>
                 </div>
             </div>
+            </FadeIn>
         </div>
     );
 }

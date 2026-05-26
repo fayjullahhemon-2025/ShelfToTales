@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 import React from 'react';
 import Link from 'next/link';
 import PageTitle from '../components/layout/PageTitle';
+import { FadeIn } from '../components/common/AnimationUtils';
 const blog1 = '/assets/images/blog/large/blog1.jpg';
 const blog2 = '/assets/images/blog/large/blog2.jpg';
 const blog3 = '/assets/images/blog/large/blog3.jpg';
@@ -22,6 +23,7 @@ const BlogGrid = () =>{
         <>
             <div className="page-content">
                 <PageTitle  parentPage="Blog" childPage="Blog Grid" />      
+                <FadeIn>
                 <section className="content-inner-1 bg-img-fix">
                     <div className="container">
                         <div className="row">
@@ -59,6 +61,7 @@ const BlogGrid = () =>{
                         </nav>   
                     </div>    
                 </section>    
+                </FadeIn>
             </div>
         </>
     )

@@ -95,6 +95,7 @@ function MyProfileInner() {
     return (
         <div className="page-content bg-white">
             <div className="content-block">
+                <FadeIn>
                 <section className="content-inner bg-white">
                     <div className="container">
                         <div className="row">
@@ -202,12 +203,14 @@ function MyProfileInner() {
                         </div>
                     </div>
                 </section>
+                </FadeIn>
             </div>
         </div>
     );
 }
 
 import ClientOnly from '../components/ClientOnly';
+import { FadeIn } from '../components/common/AnimationUtils';
 export default function MyProfile() {
   return <ClientOnly><MyProfileInner /></ClientOnly>;
 }

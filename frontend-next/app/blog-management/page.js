@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import PageTitle from '../components/layout/PageTitle';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 function BlogManagement() {
     const [blogs, setBlogs] = useState([

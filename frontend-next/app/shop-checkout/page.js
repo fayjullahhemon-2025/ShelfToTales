@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 
 //Components 
 import PageTitle from '../components/layout/PageTitle';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 function ShopCheckout(){
     const [cart, setCart] = useState(null);

@@ -10,6 +10,7 @@ import { bookService } from '../lib/api';
 
 //Component
 import NewsLetter from '../components/features/NewsLetter';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 function ShopList(){
     const [books, setBooks] = useState([]);
@@ -31,6 +32,7 @@ function ShopList(){
     return(
         <>
             <div className="page-content bg-grey">
+                <FadeIn>
                 <section className="content-inner-1 border-bottom">
                     <div className="container">
                         <div className="d-flex justify-content-between align-items-center">
@@ -147,6 +149,7 @@ function ShopList(){
                         </div>
                     </div>
                 </section>
+                </FadeIn>
                 <NewsLetter />      
             </div>
         </>

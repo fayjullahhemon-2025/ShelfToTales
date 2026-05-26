@@ -124,8 +124,8 @@ export const dashboardService = {
 export const socialService = {
   follow: (userId) => api.post(`/social/follow/${userId}`),
   unfollow: (userId) => api.delete(`/social/follow/${userId}`),
-  getFollowers: (userId) => api.get(`/social/followers/${userId}`),
-  getFollowing: (userId) => api.get(`/social/following/${userId}`),
+  getFollowers: () => api.get('/social/followers'),
+  getFollowing: () => api.get('/social/following'),
   search: (query) => api.get('/social/search', { params: { q: query } }),
   getFeed: () => api.get('/social/feed'),
 };
@@ -135,6 +135,18 @@ export const readingRoomService = {
   getAll: () => api.get('/rooms'),
   getMessages: (roomId) => api.get(`/rooms/${roomId}/messages`),
   postMessage: (roomId, content) => api.post(`/rooms/${roomId}/messages`, { content }),
+};
+
+export const adminBookService = {
+  create: (data) => api.post('/admin/books', data),
+  update: (id, data) => api.put(`/admin/books/${id}`, data),
+  delete: (id) => api.delete(`/admin/books/${id}`),
+};
+
+export const adminCategoryService = {
+  create: (data) => api.post('/admin/categories', data),
+  update: (id, data) => api.put(`/admin/categories/${id}`, data),
+  delete: (id) => api.delete(`/admin/categories/${id}`),
 };
 
 export default api;

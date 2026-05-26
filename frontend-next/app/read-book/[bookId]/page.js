@@ -234,6 +234,7 @@ const FlipbookReaderInner = () => {
 };
 
 import ClientOnly from '../../components/ClientOnly';
+import { FadeIn } from '../../components/common/AnimationUtils';
 export default function FlipbookReader() {
   return <ClientOnly><FlipbookReaderInner /></ClientOnly>;
 }

@@ -10,6 +10,7 @@ import swal from "sweetalert2";
 import PageTitle from '../components/layout/PageTitle';
 import CounterSection from '../components/common/CounterSection';
 import NewsLetter from '../components/features/NewsLetter';
+import { FadeIn } from '../components/common/AnimationUtils';
 const bg2 = '/assets/images/background/bg2.jpg';
 const ContactUs = () =>{
     const form = useRef();
@@ -29,6 +30,7 @@ const ContactUs = () =>{
         <>
             <div className="page-content">
                 <PageTitle parentPage="Home" childPage="Contact" />    
+                <FadeIn>
                 <div className="content-inner-2 pt-0">
                     <div className="map-iframe">
                         <iframe title="ShelfToTales Location Map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d227748.3825624477!2d75.65046970649679!3d26.88544791796718!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x396c4adf4c57e281%3A0xce1c63a0cf22e09!2sJaipur%2C+Rajasthan!5e0!3m2!1sen!2sin!4v1500819483219" style={{border:'0', width:'100%', minHeight:'100%', marginBottom: '-8px'}} allowFullScreen></iframe>
@@ -106,6 +108,7 @@ const ContactUs = () =>{
                         </div>   
                     </div>
                 </section>  
+                </FadeIn>
                 <NewsLetter />
             </div>
         </>

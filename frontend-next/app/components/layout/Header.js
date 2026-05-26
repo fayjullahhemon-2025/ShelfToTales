@@ -118,6 +118,22 @@ function Header(){
 														<span className="ms-2">Blog Management</span>
 													</div>
 												</Link>
+												{user?.role === 'ADMIN' && (
+													<>
+														<Link href={"/admin/books"} className="dropdown-item d-flex justify-content-between align-items-center ai-icon">
+															<div>
+																<i className="fa-solid fa-book-medical ms-1"></i>
+																<span className="ms-2">Manage Books</span>
+															</div>
+														</Link>
+														<Link href={"/admin/categories"} className="dropdown-item d-flex justify-content-between align-items-center ai-icon">
+															<div>
+																<i className="fa-solid fa-tags ms-1"></i>
+																<span className="ms-2">Manage Categories</span>
+															</div>
+														</Link>
+													</>
+												)}
 											</div>
 											<div className="dropdown-footer">
 												<Dropdown.Item as="button" onClick={logout} className="btn btn-primary w-100 btnhover btn-sm text-white">Log Out</Dropdown.Item>

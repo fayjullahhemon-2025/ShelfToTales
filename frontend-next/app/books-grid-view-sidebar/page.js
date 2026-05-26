@@ -11,6 +11,7 @@ import NewsLetter from '../components/features/NewsLetter';
 import CounterSection from '../components/common/CounterSection';
 import ShopSidebar from '../components/common/ShopSidebar';
 import BookGridCard from '../components/common/BookGridCard';
+import { FadeIn } from '../components/common/AnimationUtils';
 
 const bookColors = [
     '#EAA451', '#1a1668', '#029e76', '#ff6b6b', '#00aeff',
@@ -80,6 +81,7 @@ function BooksGridViewSidebar() {
 
     return (
         <div className="page-content bg-grey">
+            <FadeIn>
             <div className="content-inner-1 border-bottom">
                 <div className="container">
                     <div className="row">
@@ -163,6 +165,7 @@ function BooksGridViewSidebar() {
                     </div>
                 </div>
             </section>
+            </FadeIn>
             <NewsLetter />
         </div>
     );

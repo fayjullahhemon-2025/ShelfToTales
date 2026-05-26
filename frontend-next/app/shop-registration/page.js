@@ -148,6 +148,7 @@ function RegistrationInner(){
     )
 }
 import ClientOnly from '../components/ClientOnly';
+import { FadeIn } from '../components/common/AnimationUtils';
 export default function Registration() {
   return <ClientOnly><RegistrationInner /></ClientOnly>;
 }
