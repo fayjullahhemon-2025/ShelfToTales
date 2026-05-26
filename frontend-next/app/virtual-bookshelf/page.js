@@ -393,14 +393,6 @@ function VirtualBookshelfInner() {
                                                                         </button>
                                                                     ))}
                                                                 </div>
-                                                                <label className="small text-white-50 mb-2 d-block">Shelf Ornaments</label>
-                                                                <div className="d-flex gap-2 flex-wrap mb-3">
-                                                                    {[{id:'plant',emoji:'🪴'},{id:'candle',emoji:'🕯️'},{id:'globe',emoji:'🌍'},{id:'clock',emoji:'🕰️'},{id:'cat',emoji:'🐱'},{id:'coffee',emoji:'☕'},{id:'frame',emoji:'🖼️'},{id:'lamp',emoji:'💡'}].map(o => (
-                                                                        <button key={o.id} onClick={() => setOrnaments(prev => prev.includes(o.id) ? prev.filter(x=>x!==o.id) : [...prev, o.id])} className={`btn btn-sm ${ornaments.includes(o.id)?'btn-warning':'btn-outline-secondary'}`} style={{fontSize:'1.2rem',width:40,height:40,padding:0,borderRadius:10}}>
-                                                                            {o.emoji}
-                                                                        </button>
-                                                                    ))}
-                                                                </div>
                                                                 <label className="small text-white-50 mb-2 d-block">Seasonal Theme</label>
                                                                 <div className="d-flex gap-2 flex-wrap">
                                                                     {[{id:'none',label:'None'},{id:'christmas',label:'🎄 Holiday'},{id:'halloween',label:'🎃 Spooky'},{id:'spring',label:'🌸 Spring'},{id:'cozyfall',label:'🍁 Autumn'}].map(s => (
