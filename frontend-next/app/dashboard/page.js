@@ -2,10 +2,10 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useApi } from '../hooks/useApi';
-import { dashboardService } from '../lib/api';
+import { dashboardService, gamificationService, notificationService } from '../lib/api';
 import './Dashboard.css';
 
 /* --- Mini Chart Components --- */
@@ -77,6 +77,15 @@ function WeekHeatmap({ activities }) {
 
 function Dashboard() {
   const { data, loading, error, refetch } = useApi(() => dashboardService.getDashboard());
+  const [achievements, setAchievements] = useState([]);
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
+
+  useEffect(() => {
+    if (data) {
+      gamificationService.getMyAchievements().then(r => setAchievements(r.data || [])).catch(() => {});
+      notificationService.getUnreadCount().then(r => setUnreadNotifs(r.data?.count || r.data || 0)).catch(() => {});
+    }
+  }, [data]);
 
   const weeklyData = useMemo(() => {
     if (!data) return [];

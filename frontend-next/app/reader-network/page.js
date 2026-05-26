@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { readingRoomService, socialService, bookService } from '../lib/api';
+import { readingRoomService, socialService, bookService, exchangeService, friendService } from '../lib/api';
 import '../assets/css/reader-network.css';
 import { FadeIn } from '../components/common/AnimationUtils';
 
