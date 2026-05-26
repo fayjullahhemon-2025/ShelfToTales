@@ -36,11 +36,19 @@ function VirtualBookshelfInner() {
     const [activeBookshelfId, setActiveBookshelfId] = useState(null);
     const [loadingShelves, setLoadingShelves] = useState(true);
 
+    // Decor state
+    const [wallpaper, setWallpaper] = useState(() => localStorage.getItem('vbookshelf_wallpaper') || 'none');
+    const [shelfColor, setShelfColor] = useState(() => localStorage.getItem('vbookshelf_shelfcolor') || '#8B4513');
+    const [bookSize, setBookSize] = useState(() => parseInt(localStorage.getItem('vbookshelf_booksize') || '100'));
+    const [lighting, setLighting] = useState(() => localStorage.getItem('vbookshelf_lighting') || 'none');
+    const [showLabels, setShowLabels] = useState(() => localStorage.getItem('vbookshelf_labels') !== 'false');
+
     const sidebarSections = [
         { id: 'info', title: 'Bookshelf info', icon: 'fa-solid fa-circle-info' },
         { id: 'manage', title: 'Manage flipbooks', icon: 'fa-solid fa-square-plus' },
         { id: 'position', title: 'Books position', icon: 'fa-solid fa-up-down-left-right' },
-        { id: 'design', title: 'Design', icon: 'fa-solid fa-palette' },
+        { id: 'design', title: 'Shelf Theme', icon: 'fa-solid fa-palette' },
+        { id: 'decor', title: 'Decor & Background', icon: 'fa-solid fa-wand-magic-sparkles' },
         { id: 'logo', title: 'Add logo', icon: 'fa-solid fa-image' },
         { id: 'menu', title: 'Menu', icon: 'fa-solid fa-bars' }
     ];
@@ -63,6 +71,11 @@ function VirtualBookshelfInner() {
     useEffect(() => { localStorage.setItem('vbookshelf_menu', JSON.stringify(menuVisibility)); }, [menuVisibility]);
     useEffect(() => { localStorage.setItem('vbookshelf_logo', logoUrl); }, [logoUrl]);
     useEffect(() => { if (activeShelf?.theme) localStorage.setItem('vbookshelf_theme', activeShelf.theme); }, [bookshelves, activeBookshelfId]);
+    useEffect(() => { localStorage.setItem('vbookshelf_wallpaper', wallpaper); }, [wallpaper]);
+    useEffect(() => { localStorage.setItem('vbookshelf_shelfcolor', shelfColor); }, [shelfColor]);
+    useEffect(() => { localStorage.setItem('vbookshelf_booksize', bookSize.toString()); }, [bookSize]);
+    useEffect(() => { localStorage.setItem('vbookshelf_lighting', lighting); }, [lighting]);
+    useEffect(() => { localStorage.setItem('vbookshelf_labels', showLabels.toString()); }, [showLabels]);
 
     // Load books and shelves on mount
     useEffect(() => {
@@ -248,8 +261,8 @@ function VirtualBookshelfInner() {
                     <div key={si} className="shelf-group mt-5">
                         <div className="book-row">{visibleBooks.slice(1 + si * 4, 1 + (si + 1) * 4).map(b => (
                             <div key={b.id} className="book-with-header">
-                                <div className="book-top-info px-2 py-1 mb-2 small fw-bold" style={{maxWidth: '90px', fontSize: '0.7rem', color: '#333', textAlign: 'center', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{b.title}</div>
-                                <div className="bookshelf-book" onClick={() => handleReadBook(b)}><img loading="lazy" decoding="async" src={b.imageUrl} alt="" /></div>
+                                {showLabels && <div className="book-top-info px-2 py-1 mb-2 small fw-bold" style={{maxWidth: '90px', fontSize: '0.7rem', color: '#333', textAlign: 'center', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{b.title}</div>}
+                                <div className="bookshelf-book" style={{transform: `scale(${bookSize/100})`}} onClick={() => handleReadBook(b)}><img loading="lazy" decoding="async" src={b.imageUrl} alt="" /></div>
                             </div>
                         ))}</div>
                         <div className={`shelf ${activeShelf.theme}`}></div>
@@ -260,7 +273,7 @@ function VirtualBookshelfInner() {
     };
 
     return (
-        <div className={`bookshelf-container theme-${activeShelf.theme}`}>
+        <div className={`bookshelf-container theme-${activeShelf.theme} wallpaper-${wallpaper} lighting-${lighting}`} style={{'--shelf-color': shelfColor, '--book-scale': bookSize/100}}>
             <div className="bookshelf-sidebar">
                 <div className="sidebar-header-new">
                     <h5 className="text-white fw-bold mb-3">BOOKSHELVES</h5>
@@ -320,7 +333,46 @@ function VirtualBookshelfInner() {
                                                             </div>
                                                         )}
                                                         {section.id === 'logo' && <button className="btn btn-sm btn-primary w-100 rounded-pill" onClick={() => logoInputRef.current.click()}>Upload Logo</button>}
-                                                        {section.id === 'design' && <div className="theme-thumbs-grid">{['glass', 'wood', 'carbon'].map(t => <div key={t} className={`theme-thumb ${activeShelf.theme === t ? 'active' : ''}`} onClick={() => updateActiveShelf({theme: t})}><div className={`${t}-preview`}></div></div>)}</div>}
+                                                        {section.id === 'design' && (
+                                                            <div>
+                                                                <label className="small text-white-50 mb-2 d-block">Shelf Style</label>
+                                                                <div className="theme-thumbs-grid">{['glass', 'wood', 'carbon', 'marble', 'dark'].map(t => <div key={t} className={`theme-thumb ${activeShelf.theme === t ? 'active' : ''}`} onClick={() => updateActiveShelf({theme: t})}><div className={`${t}-preview`}></div><small className="text-white-50 d-block text-center mt-1" style={{fontSize:'0.6rem',textTransform:'capitalize'}}>{t}</small></div>)}</div>
+                                                                <label className="small text-white-50 mb-2 mt-3 d-block">Shelf Color</label>
+                                                                <div className="d-flex gap-2 flex-wrap">
+                                                                    {['#8B4513','#2c1810','#d4a574','#1a1a2e','#4a5568','#c0392b','#2d3436'].map(c => (
+                                                                        <div key={c} onClick={() => setShelfColor(c)} className="cursor-pointer" style={{width:28,height:28,borderRadius:8,background:c,border:shelfColor===c?'2px solid #eaa451':'2px solid transparent',transition:'all 0.2s'}}/>
+                                                                    ))}
+                                                                </div>
+                                                                <label className="small text-white-50 mb-2 mt-3 d-block">Book Size</label>
+                                                                <input type="range" className="form-range" min="70" max="140" value={bookSize} onChange={e => setBookSize(parseInt(e.target.value))}/>
+                                                                <div className="d-flex justify-content-between"><small className="text-white-50">Small</small><small className="text-white-50">Large</small></div>
+                                                                <div className="form-check form-switch mt-3">
+                                                                    <input className="form-check-input" type="checkbox" checked={showLabels} onChange={() => setShowLabels(!showLabels)}/>
+                                                                    <label className="form-check-label text-white small">Show book titles</label>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {section.id === 'decor' && (
+                                                            <div>
+                                                                <label className="small text-white-50 mb-2 d-block">Wallpaper</label>
+                                                                <div className="d-flex gap-2 flex-wrap mb-3">
+                                                                    {[{id:'none',label:'None',bg:'#1a1a2e'},{id:'cozy',label:'Cozy',bg:'linear-gradient(135deg,#3d2914,#1a0f07)'},{id:'library',label:'Library',bg:'linear-gradient(135deg,#1a1a2e,#2d2b55)'},{id:'nature',label:'Nature',bg:'linear-gradient(135deg,#1b4332,#081c15)'},{id:'sunset',label:'Sunset',bg:'linear-gradient(135deg,#5c2018,#1a0505)'},{id:'ocean',label:'Ocean',bg:'linear-gradient(135deg,#0a2647,#051937)'}].map(w => (
+                                                                        <div key={w.id} onClick={() => setWallpaper(w.id)} className="cursor-pointer text-center" style={{width:44}}>
+                                                                            <div style={{width:40,height:40,borderRadius:10,background:w.bg,border:wallpaper===w.id?'2px solid #eaa451':'2px solid rgba(255,255,255,0.1)',transition:'all 0.2s'}}/>
+                                                                            <small className="text-white-50 d-block mt-1" style={{fontSize:'0.55rem'}}>{w.label}</small>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                                <label className="small text-white-50 mb-2 d-block">Lighting Effect</label>
+                                                                <div className="d-flex gap-2 flex-wrap">
+                                                                    {[{id:'none',label:'Off',icon:'fa-circle-xmark'},{id:'warm',label:'Warm',icon:'fa-sun'},{id:'spotlight',label:'Spot',icon:'fa-lightbulb'},{id:'ambient',label:'Ambient',icon:'fa-moon'}].map(l => (
+                                                                        <button key={l.id} onClick={() => setLighting(l.id)} className={`btn btn-sm ${lighting===l.id?'btn-warning':'btn-outline-secondary'} rounded-pill px-3`} style={{fontSize:'0.75rem'}}>
+                                                                            <i className={`fa-solid ${l.icon} me-1`}/>{l.label}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                         {section.id === 'menu' && (
                                                             <div className="menu-visibility-list">
                                                                 {Object.keys(menuVisibility).map(key => (
