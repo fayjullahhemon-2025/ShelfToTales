@@ -108,15 +108,17 @@ export function AuthProvider({ children }) {
 
     try {
       const profileRes = await userService.getProfile();
-      const user = profileRes.data;
+      // Merge login response (has role) with profile response (has full details)
+      const user = { ...profileRes.data, role: data.role || profileRes.data.role };
       localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
       dispatch({ type: ACTIONS.LOGIN_SUCCESS, payload: { token, user } });
       return user;
     } catch (err) {
-      // Profile fetch failed -- clean up the dangling token.
-      localStorage.removeItem(STORAGE_KEY_TOKEN);
-      localStorage.removeItem(STORAGE_KEY_USER);
-      throw err;
+      // Profile fetch failed — use login response data as fallback (still has token)
+      const fallbackUser = { id: data.id, email: data.email, fullName: data.fullName, role: data.role, profileImageUrl: data.profileImageUrl };
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(fallbackUser));
+      dispatch({ type: ACTIONS.LOGIN_SUCCESS, payload: { token, user: fallbackUser } });
+      return fallbackUser;
     }
   }, []);
 
