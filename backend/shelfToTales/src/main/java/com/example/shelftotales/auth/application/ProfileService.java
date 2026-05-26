@@ -19,13 +19,13 @@ public class ProfileService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "profiles", key = "T(com.example.shelftotales.util.AuthUtils).getCurrentUserEmail()")
+    @Cacheable(value = "profiles", key = "T(com.example.shelftotales.shared.util.AuthUtils).getCurrentUserEmail()")
     public ProfileResponse getProfile() {
         return toResponse(AuthUtils.getCurrentUser(userRepository));
     }
 
     @Transactional
-    @CacheEvict(value = "profiles", key = "T(com.example.shelftotales.util.AuthUtils).getCurrentUserEmail()")
+    @CacheEvict(value = "profiles", key = "T(com.example.shelftotales.shared.util.AuthUtils).getCurrentUserEmail()")
     public ProfileResponse updateProfile(ProfileRequest request) {
         User user = AuthUtils.getCurrentUser(userRepository);
         if (request.getFullName() != null) {
