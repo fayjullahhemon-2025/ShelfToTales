@@ -16,11 +16,15 @@ import java.util.Optional;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    @EntityGraph(attributePaths = {"category"})
-    @Query("SELECT b FROM Book b WHERE " +
-           "(:query IS NULL OR LOWER(CAST(b.title AS string)) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%')) OR " +
-           "LOWER(CAST(b.author AS string)) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%'))) AND " +
-           "(:categoryId IS NULL OR b.category.id = :categoryId)")
+    @Query(value = "SELECT b.* FROM books b LEFT JOIN categories c ON c.id = b.category_id " +
+           "WHERE (CAST(:query AS TEXT) IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%')) OR " +
+           "LOWER(b.author) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%'))) AND " +
+           "(CAST(:categoryId AS BIGINT) IS NULL OR b.category_id = CAST(:categoryId AS BIGINT))",
+           countQuery = "SELECT COUNT(*) FROM books b WHERE " +
+           "(CAST(:query AS TEXT) IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%')) OR " +
+           "LOWER(b.author) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%'))) AND " +
+           "(CAST(:categoryId AS BIGINT) IS NULL OR b.category_id = CAST(:categoryId AS BIGINT))",
+           nativeQuery = true)
     Page<Book> searchBooks(@Param("query") String query,
                            @Param("categoryId") Long categoryId,
                            Pageable pageable);
