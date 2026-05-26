@@ -18,22 +18,23 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OpenAIChatProvider implements ChatProvider {
 
-    private static final String API_URL = "https://api.openai.com/v1/chat/completions";
-
     @Value("${ai.chat.provider:none}")
     private String provider;
 
     @Value("${ai.chat.api-key:}")
     private String apiKey;
 
-    @Value("${ai.chat.model:gpt-4o-mini}")
+    @Value("${ai.chat.model:meta-llama/llama-3.1-8b-instruct:free}")
     private String model;
+
+    @Value("${ai.chat.base-url:https://openrouter.ai/api/v1/chat/completions}")
+    private String baseUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public boolean isAvailable() {
-        return "openai".equals(provider) && apiKey != null && !apiKey.isBlank();
+        return ("openai".equals(provider) || "openrouter".equals(provider)) && apiKey != null && !apiKey.isBlank();
     }
 
     @Override
@@ -56,7 +57,7 @@ public class OpenAIChatProvider implements ChatProvider {
             headers.setBearerAuth(apiKey);
 
             ResponseEntity<Map> response = restTemplate.exchange(
-                    API_URL, HttpMethod.POST, new HttpEntity<>(body, headers), Map.class);
+                    baseUrl, HttpMethod.POST, new HttpEntity<>(body, headers), Map.class);
 
             Map responseBody = response.getBody();
             if (responseBody != null) {
