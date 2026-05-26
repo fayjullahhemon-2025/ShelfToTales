@@ -479,3 +479,208 @@
 .dash-animate:nth-child(2) { animation-delay: 0.1s; }
 .dash-animate:nth-child(3) { animation-delay: 0.15s; }
 .dash-animate:nth-child(4) { animation-delay: 0.2s; }
+
+/* Analytics Row */
+.dash-analytics-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+@media (max-width: 992px) { .dash-analytics-row { grid-template-columns: 1fr; } }
+
+/* Mini Bar Chart */
+.mini-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 120px;
+  padding-top: 1rem;
+}
+.mini-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+.mini-bar {
+  width: 100%;
+  max-width: 28px;
+  background: linear-gradient(180deg, #eaa451, #e58c23);
+  border-radius: 6px 6px 2px 2px;
+  min-height: 4px;
+  transition: height 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.mini-bar-col:hover .mini-bar {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(234,164,81,0.3);
+}
+.mini-bar-label {
+  font-size: 0.65rem;
+  color: #8b8b9e;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+/* Donut Chart */
+.donut-wrap {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 1rem;
+}
+.donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.donut-seg {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: stroke-dasharray 1s ease;
+}
+.donut-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  text-align: center;
+}
+.donut-center span {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  display: block;
+  line-height: 1;
+}
+.donut-center small {
+  font-size: 0.65rem;
+  color: #8b8b9e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.donut-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.donut-legend span {
+  font-size: 0.7rem;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.donut-legend i { font-style: normal; font-size: 0.9rem; }
+
+/* Week Heatmap */
+.week-heatmap {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.heat-cell {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #eaa451;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+.heat-cell:hover { transform: scale(1.15); }
+.heat-cell span {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fff;
+}
+.week-summary {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+.week-summary div strong {
+  display: block;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: #1a1a2e;
+}
+.week-summary div span {
+  font-size: 0.7rem;
+  color: #8b8b9e;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Reading item enhancements */
+.dash-reading-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1a1a2e;
+  margin: 0 0 2px;
+}
+.dash-reading-author {
+  font-size: 0.78rem;
+  color: #8b8b9e;
+  margin: 0;
+}
+.dash-reading-pct {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #eaa451;
+  align-self: center;
+}
+
+/* Empty state */
+.dash-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #8b8b9e;
+}
+.dash-empty i { font-size: 2.5rem; opacity: 0.2; margin-bottom: 10px; display: block; }
+.dash-empty p { margin: 0 0 12px; font-size: 0.9rem; }
+
+/* Goal card */
+.dash-goal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: #1a1a2e;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.dash-goal-sub {
+  color: #8b8b9e;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Admin header */
+.dash-admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.dash-admin-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  margin: 0;
+}
+.dash-admin-header p {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.8rem;
+  margin: 4px 0 0;
+}
+
+/* Skeleton */
+.skeleton-card { min-height: 100px; }
+.skel-block { width: 44px; height: 44px; border-radius: 14px; background: #f0ede8; }
+.skel-line { width: 60%; height: 20px; border-radius: 8px; background: #f0ede8; margin-top: 16px; }
