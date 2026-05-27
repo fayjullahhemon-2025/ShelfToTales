@@ -156,6 +156,24 @@ function Header(){
 																<span className="ms-2">Manage Categories</span>
 															</div>
 														</Link>
+														<Link href={"/admin/users"} className="dropdown-item d-flex justify-content-between align-items-center ai-icon">
+															<div>
+																<i className="fa-solid fa-users-gear ms-1"></i>
+																<span className="ms-2">Manage Users</span>
+															</div>
+														</Link>
+														<Link href={"/admin/orders"} className="dropdown-item d-flex justify-content-between align-items-center ai-icon">
+															<div>
+																<i className="fa-solid fa-boxes-stacked ms-1"></i>
+																<span className="ms-2">Manage Orders</span>
+															</div>
+														</Link>
+														<Link href={"/admin/dashboard"} className="dropdown-item d-flex justify-content-between align-items-center ai-icon">
+															<div>
+																<i className="fa-solid fa-chart-pie ms-1"></i>
+																<span className="ms-2">Admin Dashboard</span>
+															</div>
+														</Link>
 													</>
 												)}
 											</div>
