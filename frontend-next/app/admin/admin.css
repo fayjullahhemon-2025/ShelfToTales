@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+.adm-layout { display: flex; min-height: 100vh; font-family: 'DM Sans', sans-serif; }
+
+.adm-sidebar { width: 240px; background: #1a1a2e; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+.adm-sidebar-header { padding: 1.5rem; display: flex; align-items: center; gap: 10px; color: #eaa451; font-weight: 700; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.adm-sidebar-header i { font-size: 1.2rem; }
+
+.adm-nav { flex: 1; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 4px; }
+.adm-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 10px; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: all 0.2s; }
+.adm-nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.adm-nav-item.active { color: #fff; background: rgba(234,164,81,0.15); }
+.adm-nav-item.active i { color: #eaa451; }
+.adm-nav-item i { width: 18px; text-align: center; font-size: 0.9rem; }
+
+.adm-sidebar-footer { padding: 1rem 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); }
+
+.adm-main { flex: 1; background: #f9f7f4; min-height: 100vh; overflow-y: auto; }
+
+@media (max-width: 768px) {
+  .adm-sidebar { width: 60px; }
+  .adm-sidebar-header span, .adm-nav-item span, .adm-sidebar-footer span { display: none; }
+  .adm-sidebar-header { justify-content: center; }
+  .adm-nav-item { justify-content: center; padding: 12px; }
+}
