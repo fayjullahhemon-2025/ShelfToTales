@@ -1,157 +1,78 @@
 'use client';
 
-import React,{useState} from 'react';
+import React from 'react';
 import Link from 'next/link';
-import Collapse from 'react-bootstrap/Collapse';
-//images
+import './Footer.css';
 
+function Footer() {
+  const year = new Date().getFullYear();
 
-function heartToggle(){
- 	var  heartBlaste = document.querySelector('.heart');
- 	if(heartBlaste){
-		heartBlaste.classList.toggle("heart-blast");			
- 	}	
+  return (
+    <footer className="stt-footer">
+      <div className="stt-footer-main">
+        <div className="container">
+          <div className="stt-footer-grid">
+            {/* Brand */}
+            <div className="stt-footer-brand">
+              <h3 className="stt-footer-logo">Shelf<span>To</span>Tales</h3>
+              <p className="stt-footer-desc">Your digital home for reading, discovering, and sharing books with a community of passionate readers.</p>
+              <div className="stt-footer-social">
+                <a href="#" aria-label="Facebook"><i className="fa-brands fa-facebook-f"/></a>
+                <a href="#" aria-label="Twitter"><i className="fa-brands fa-x-twitter"/></a>
+                <a href="#" aria-label="Instagram"><i className="fa-brands fa-instagram"/></a>
+                <a href="#" aria-label="GitHub"><i className="fa-brands fa-github"/></a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="stt-footer-col">
+              <h5>Explore</h5>
+              <ul>
+                <li><Link href="/books-grid-view-sidebar">Browse Books</Link></li>
+                <li><Link href="/books-grid-view">Book Grid</Link></li>
+                <li><Link href="/reading-room">Reading Rooms</Link></li>
+                <li><Link href="/challenges">Challenges</Link></li>
+                <li><Link href="/blog-grid">Blog</Link></li>
+              </ul>
+            </div>
+
+            {/* Account */}
+            <div className="stt-footer-col">
+              <h5>Account</h5>
+              <ul>
+                <li><Link href="/dashboard">Dashboard</Link></li>
+                <li><Link href="/my-profile">My Profile</Link></li>
+                <li><Link href="/wishlist">Wishlist</Link></li>
+                <li><Link href="/purchase-history">Orders</Link></li>
+                <li><Link href="/virtual-bookshelf">My Bookshelf</Link></li>
+              </ul>
+            </div>
+
+            {/* Info */}
+            <div className="stt-footer-col">
+              <h5>Info</h5>
+              <ul>
+                <li><Link href="/about-us">About Us</Link></li>
+                <li><Link href="/contact-us">Contact</Link></li>
+                <li><Link href="/privacy-policy">Privacy Policy</Link></li>
+                <li><Link href="/faq">FAQ</Link></li>
+                <li><Link href="/help-desk">Help Center</Link></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="stt-footer-bottom">
+        <div className="container">
+          <div className="stt-footer-bottom-inner">
+            <p>© {year} ShelfToTales. Built with ❤️ for readers everywhere.</p>
+            <p className="stt-footer-tech">Spring Boot · Next.js · PostgreSQL · Redis</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }
 
-const accordList = [
-	{name:'Architecture'},{name:'Art'},{name:'Action'},{name:'Biography'},
-	{name:'Body, Mind & Spirit'},{name:'Business & Economics'},
-	{name:'Children Fiction'},{name:'Children Non-Fiction'},
-	{name:'Comics & Graphics'},{name:'Cooking'},
-	{name:'Crafts & Hobbies'},{name:'Design'},
-	{name:'Drama'},{name:'Education'},
-	{name:'Family & Relationships'},{name:'Fiction'},
-	{name:'Foreign Language'},{name:'Games'},
-	{name:'Gardening'},{name:'Health & Fitness'},
-	{name:'History'},{name:'House & Home'},
-	{name:'Humor'},{name:'Literary Collections'},
-	{name:'Mathematics'},{name:'Medical'},
-	{name:'Nature'},{name:'Performing Arts'},
-	{name:'Pets'},{name:'Show others'}
-];
-
-function Footer({footerChange, logoImage}){
-	//const [open, setOpen] = useState(false);
-	const  d = new Date();
-	const [accordBtn, setAccordBtn] = useState();
-	return(
-		<>
-			<footer className={`site-footer ${footerChange}`}>				
-				<div className="footer-category">
-					<div className="container">
-						<div className="category-toggle">
-							<Link href={"#"} className={`toggle-btn ${accordBtn ? 'active' : ''}`}
-								onClick={() => setAccordBtn(!accordBtn)}
-							>Books categories</Link>
-							<div className="toggle-items row">
-								<Collapse in={accordBtn} className="footer-col-book">
-									<ul>
-										{accordList.map((data, ind)=>(
-											<li key={ind}><Link href={"/books-grid-view"}>{data.name}</Link></li>
-										))}
-									</ul>
-								</Collapse>
-							</div>
-						</div>
-					</div>
-				</div>				
-				<div className="footer-top">
-					<div className="container">
-						<div className="row">
-							<div className="col-xl-3 col-lg-12 wow fadeInUp" data-wow-delay="0.1s">
-								<div className="widget widget_about">
-									<div className="footer-logo logo-white">
-										<Link href={"/"}><img loading="lazy" decoding="async" src={logoImage} alt="" /></Link> 
-									</div>
-									<p className="text">Shelf To Tales is a Book Store Ecommerce Website Template by DexignZone lorem ipsum dolor sit</p>
-									<div className="dz-social-icon style-1">
-										<ul>
-											<li><a href="https://www.facebook.com/dexignzone" target="_blank" rel="noreferrer"><i className="fa-brands fa-facebook-f"></i></a></li>
-											<li><a href="https://www.youtube.com/channel/UCGL8V6uxNNMRrk3oZfVct1g" target="_blank" rel="noreferrer"><i className="fa-brands fa-youtube"></i></a></li>
-											<li><a href="https://www.linkedin.com/showcase/3686700/admin/" target="_blank" rel="noreferrer"><i className="fa-brands fa-linkedin"></i></a></li>
-											<li><a href="https://www.instagram.com/website_templates__/" target="_blank" rel="noreferrer"><i className="fa-brands fa-instagram"></i></a></li>
-										</ul>
-									</div>
-								</div>
-							</div>
-							<div className="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-4 wow fadeInUp" data-wow-delay="0.2s">
-								<div className="widget widget_services">
-									<h5 className="footer-title">Our Links</h5>
-									<ul>
-										<li><Link href={"/about-us"}>About us</Link></li>
-										<li><Link href={"/contact-us"}>Contact us</Link></li>
-										<li><Link href={"/privacy-policy"}>Privacy Policy</Link></li>
-										<li><Link href={"/pricing"}>Pricing Table</Link></li>
-										<li><Link href={"/faq"}>FAQ</Link></li>
-									</ul>
-								</div>
-							</div>
-							<div className="col-xl-2 col-lg-3 col-sm-4 col-4 wow fadeInUp" data-wow-delay="0.3s">
-								<div className="widget widget_services">
-									<h5 className="footer-title">Shelf To Tales ?</h5>
-									<ul>
-										<li><Link href={"/"}>Shelf To Tales</Link></li>
-										<li><Link href={"/books-detail"}>Book Details</Link></li>
-										<li><Link href={"/blog-detail"}>Blog Details</Link></li>
-										<li><Link href={"/books-grid-view"}>Shop</Link></li>
-									</ul>   
-								</div>
-							</div>
-							<div className="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-4 wow fadeInUp" data-wow-delay="0.4s">
-								<div className="widget widget_services">
-									<h5 className="footer-title">Resources</h5>
-									<ul>
-										<li><Link href={"/services"}>Download</Link></li>
-										<li><Link href={"/help-desk"}>Help Center</Link></li>
-										<li><Link href={"/shop-cart"}>Shop Cart</Link></li>
-										<li><Link href={"/shop-login"}>Login</Link></li>
-										<li><Link href={"/about-us"}>Partner</Link></li>
-									</ul>
-								</div>
-							</div>
-							<div className="col-xl-3 col-lg-3 col-md-12 col-sm-12 wow fadeInUp" data-wow-delay="0.5s">
-								<div className="widget widget_getintuch">
-									<h5 className="footer-title">Get in Touch With Us</h5>
-									<ul>
-										<li>
-											<i className="flaticon-placeholder"></i>
-											<span>832  Thompson Drive, San Fransisco CA 94107,US</span>
-										</li>
-										<li>
-											<i className="flaticon-phone"></i>
-											<span>+123 345123 556<br/>
-											+123 345123 556</span>
-										</li>
-										<li>
-											<i className="flaticon-email"></i> 
-											<span>support@Shelf To Tales.id<br/>
-											info@Shelf To Tales.id</span>
-										</li>
-									</ul>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div className="footer-bottom">
-					<div className="container">
-						<div className="row fb-inner">
-							<div className="col-lg-6 col-md-12 text-start"> 
-								<p className="copyright-text">Shelf To Tales Book Store Ecommerce Website - © {d.getFullYear()} All Rights Reserved</p>
-							</div>
-							<div className="col-lg-6 col-md-12 text-end"> 
-								<p>Made with <span className="heart"
-									onClick={heartToggle}
-								></span> by 
-								<a href="https://dexignzone.com/" target="_blank" rel="noreferrer"> DexignZone</a></p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</footer>			
-		</>
-	)
-}
 export default Footer;
-
-
