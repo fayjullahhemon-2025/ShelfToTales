@@ -11,6 +11,7 @@ const navItems = [
   { href: '/admin/categories', icon: 'fa-tags', label: 'Categories' },
   { href: '/admin/users', icon: 'fa-users-gear', label: 'Users' },
   { href: '/admin/orders', icon: 'fa-boxes-stacked', label: 'Orders' },
+  { href: '/admin/coupons', icon: 'fa-ticket', label: 'Coupons' },
 ];
 
 export default function AdminLayout({ children }) {

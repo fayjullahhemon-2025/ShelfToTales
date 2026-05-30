@@ -142,6 +142,12 @@ function Header(){
 														<span className="ms-2">Challenges</span>
 													</div>
 												</Link>
+												<Link href={"/ai-chat"} className="dropdown-item d-flex justify-content-between align-items-center ai-icon">
+													<div>
+														<i className="fa-solid fa-robot ms-1"></i>
+														<span className="ms-2">AI Recommendations</span>
+													</div>
+												</Link>
 												{user?.role === 'ADMIN' && (
 													<>
 														<Link href={"/admin/books"} className="dropdown-item d-flex justify-content-between align-items-center ai-icon">
