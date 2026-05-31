@@ -32,9 +32,13 @@ public class ChatService {
     private final UserRepository userRepository;
 
     private final Map<Long, List<ChatMessage>> sessions = new ConcurrentHashMap<>();
+    private final Map<Long, Long> sessionLastAccess = new ConcurrentHashMap<>();
+    private static final long SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
     public ChatResponse chat(String userMessage) {
+        evictStaleSessions();
         User currentUser = AuthUtils.getCurrentUser(userRepository);
+        sessionLastAccess.put(currentUser.getId(), System.currentTimeMillis());
         List<ChatMessage> history = sessions.computeIfAbsent(currentUser.getId(), k -> new ArrayList<>());
         history.add(ChatMessage.user(userMessage));
         if (history.size() > MAX_HISTORY) history.subList(0, history.size() - MAX_HISTORY).clear();
@@ -60,5 +64,17 @@ public class ChatService {
     public void clearSession() {
         User currentUser = AuthUtils.getCurrentUser(userRepository);
         sessions.remove(currentUser.getId());
+        sessionLastAccess.remove(currentUser.getId());
+    }
+
+    private void evictStaleSessions() {
+        long now = System.currentTimeMillis();
+        sessionLastAccess.entrySet().removeIf(entry -> {
+            if (now - entry.getValue() > SESSION_TTL_MS) {
+                sessions.remove(entry.getKey());
+                return true;
+            }
+            return false;
+        });
     }
 }
