@@ -1,0 +1,344 @@
+.donate-page {
+  min-height: 100vh;
+  background: #f9f7f4;
+  font-family: var(--font-body), sans-serif;
+  padding: 3rem 1rem;
+}
+
+.donate-container {
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.donate-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  border: 1px solid #e8e5e0;
+}
+
+.donate-title {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.donate-subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.donate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.donate-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.donate-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.donate-input,
+.donate-textarea,
+.donate-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e8e5e0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: var(--font-body), sans-serif;
+  background: #faf8f5;
+  transition: all 0.2s ease;
+  color: #1a1a2e;
+}
+
+.donate-input:focus-visible,
+.donate-textarea:focus-visible,
+.donate-select:focus-visible {
+  outline: none;
+  border-color: #eaa451;
+  box-shadow: 0 0 0 3px rgba(234, 164, 81, 0.15);
+  background: #fff;
+}
+
+.donate-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Toggle Switch Styling */
+.donate-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+  padding: 12px 16px;
+  background: #f1ede9;
+  border-radius: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.donate-toggle-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.donate-toggle-switch {
+  width: 44px;
+  height: 24px;
+  background-color: #c9c5c0;
+  border-radius: 12px;
+  position: relative;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.donate-toggle-switch::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #fff;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.donate-toggle-input:checked + .donate-toggle-switch {
+  background-color: #eaa451;
+}
+
+.donate-toggle-input:checked + .donate-toggle-switch::before {
+  transform: translateX(20px);
+}
+
+.donate-toggle-text {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #1a1a2e;
+}
+
+/* Autocomplete/Search Results */
+.donate-search-wrapper {
+  position: relative;
+}
+
+.donate-search-spinner {
+  position: absolute;
+  right: 14px;
+  top: 38px;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(234, 164, 81, 0.2);
+  border-top-color: #eaa451;
+  border-radius: 50%;
+  animation: donate-spin 0.6s linear infinite;
+}
+
+@keyframes donate-spin {
+  to { transform: rotate(360deg); }
+}
+
+.donate-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e8e5e0;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  margin-top: 4px;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 10;
+  list-style: none;
+  padding: 6px 0;
+}
+
+.donate-dropdown-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.15s ease;
+}
+
+.donate-dropdown-item:hover {
+  background: #faf8f5;
+}
+
+.donate-dropdown-img {
+  width: 35px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #eee;
+}
+
+.donate-dropdown-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.donate-dropdown-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.donate-dropdown-author {
+  font-size: 0.78rem;
+  color: #666;
+}
+
+.donate-dropdown-no-results {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.88rem;
+  color: #888;
+}
+
+/* Selected Book Card */
+.donate-selected-book {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #fefcf9;
+  border: 1px solid #f3ebe1;
+  border-radius: 16px;
+  position: relative;
+}
+
+.donate-selected-cover {
+  width: 60px;
+  height: 85px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.donate-selected-details {
+  flex-grow: 1;
+}
+
+.donate-selected-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.donate-selected-author {
+  font-size: 0.85rem;
+  color: #eaa451;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.donate-clear-btn {
+  background: none;
+  border: none;
+  color: #ff5e5e;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.donate-clear-btn:hover {
+  background: rgba(255, 94, 94, 0.08);
+}
+
+/* Buttons */
+.donate-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.donate-submit-btn {
+  flex-grow: 1;
+  background: linear-gradient(135deg, #eaa451, #e58c23);
+  color: #fff;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.donate-submit-btn:hover:not(:disabled) {
+  box-shadow: 0 8px 24px rgba(234, 164, 81, 0.3);
+  transform: translateY(-2px);
+}
+
+.donate-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.donate-cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border-radius: 14px;
+  border: 1px solid #e8e5e0;
+  background: #fff;
+  color: #666;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.donate-cancel-btn:hover {
+  background: #faf8f5;
+  color: #1a1a2e;
+  border-color: #d1cdc7;
+}
+
+.donate-btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: donate-spin 0.6s linear infinite;
+}

@@ -70,6 +70,7 @@ export const bookService = {
   getMyBooks: () => api.get('/books'),
   getSimilar: (id) => api.get(`/books/${id}/similar`),
   getByMood: (mood) => api.get(`/books/mood/${mood}`),
+  search: (query) => api.get('/books', { params: { q: query } }),
 };
 
 export const categoryService = {
@@ -252,4 +253,16 @@ export const blogService = {
   like: (id) => api.post(`/blogs/${id}/like`),
 };
 
+export const donationService = {
+  create: (data) => api.post('/donations', data),
+  getAvailable: (params = {}) => api.get('/donations', { params }),
+  getById: (id) => api.get(`/donations/${id}`),
+  request: (id, reason) => api.post(`/donations/${id}/request`, { reason }),
+  getRequests: (id) => api.get(`/donations/${id}/requests`),
+  approveRequest: (requestId) => api.post(`/donations/requests/${requestId}/approve`),
+  getMyListings: () => api.get('/donations/my-listings'),
+  getMyRequests: () => api.get('/donations/my-requests'),
+};
+
 export default api;
+
