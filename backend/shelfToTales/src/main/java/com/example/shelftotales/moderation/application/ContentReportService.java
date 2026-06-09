@@ -8,6 +8,8 @@ import com.example.shelftotales.exchange.domain.ExchangeListing;
 import com.example.shelftotales.exchange.infrastructure.ExchangeListingRepository;
 import com.example.shelftotales.review.domain.Review;
 import com.example.shelftotales.review.infrastructure.ReviewRepository;
+import com.example.shelftotales.review.domain.ReviewComment;
+import com.example.shelftotales.review.infrastructure.ReviewCommentRepository;
 import com.example.shelftotales.moderation.domain.ContentReport;
 import com.example.shelftotales.moderation.infrastructure.ContentReportRepository;
 import com.example.shelftotales.shared.exception.ResourceNotFoundException;
@@ -28,6 +30,7 @@ public class ContentReportService {
     private final ReviewRepository reviewRepository;
     private final BlogPostRepository blogPostRepository;
     private final ExchangeListingRepository exchangeListingRepository;
+    private final ReviewCommentRepository reviewCommentRepository;
 
     @Transactional
     public ReportResponseDto createReport(ReportRequestDto dto) {
@@ -81,6 +84,9 @@ public class ContentReportService {
                 case "EXCHANGE_LISTING":
                     exchangeListingRepository.deleteById(report.getTargetId());
                     break;
+                case "REVIEW_COMMENT":
+                    reviewCommentRepository.deleteById(report.getTargetId());
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown target type: " + report.getTargetType());
             }
@@ -127,6 +133,14 @@ public class ContentReportService {
                     ExchangeListing listing = exchangeListingRepository.findById(r.getTargetId()).orElse(null);
                     if (listing != null) {
                         preview = "Exchange Listing (Type: " + listing.getType() + ") for '" + listing.getBook().getTitle() + "': \"" + listing.getDescription() + "\"";
+                    }
+                    break;
+                case "REVIEW_COMMENT":
+                    ReviewComment rc = reviewCommentRepository.findById(r.getTargetId()).orElse(null);
+                    if (rc != null) {
+                        preview = "Comment by " + rc.getUser().getFullName() + " replying to " +
+                                (rc.getParentComment() != null ? "Comment ID " + rc.getParentComment().getId() : "Review ID " + rc.getReview().getId()) +
+                                ": \"" + rc.getContent() + "\"";
                     }
                     break;
             }
