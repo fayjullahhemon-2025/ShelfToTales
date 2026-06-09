@@ -109,9 +109,9 @@ class BookServiceTest {
         Pageable pageable = PageRequest.of(0, 20);
         Page<Book> bookPage = new PageImpl<>(List.of(testBook), pageable, 1);
 
-        when(bookRepository.searchBooks(any(), any(), any(), any(), anyBoolean(), any(Pageable.class))).thenReturn(bookPage);
+        when(bookRepository.searchBooks(any(), any(), any(), any(), anyBoolean(), any(), any(Pageable.class))).thenReturn(bookPage);
 
-        PagedResponse<BookResponse> response = bookService.getBooks(null, null, null, null, false, 0, 20, "title", "asc");
+        PagedResponse<BookResponse> response = bookService.getBooks(null, null, null, null, false, null, 0, 20, "title", "asc");
 
         assertNotNull(response);
         assertEquals(1, response.getContent().size());
@@ -125,13 +125,13 @@ class BookServiceTest {
         Pageable pageable = PageRequest.of(0, 20);
         Page<Book> bookPage = new PageImpl<>(List.of(testBook), pageable, 1);
 
-        when(bookRepository.searchBooks(any(), any(), any(), any(), anyBoolean(), any(Pageable.class))).thenReturn(bookPage);
+        when(bookRepository.searchBooks(any(), any(), any(), any(), anyBoolean(), any(), any(Pageable.class))).thenReturn(bookPage);
 
-        PagedResponse<BookResponse> response = bookService.getBooks("Test", null, null, null, false, 0, 20, "title", "asc");
+        PagedResponse<BookResponse> response = bookService.getBooks("Test", null, null, null, false, null, 0, 20, "title", "asc");
 
         assertNotNull(response);
         assertEquals(1, response.getContent().size());
-        verify(bookRepository).searchBooks(any(), any(), any(), any(), anyBoolean(), any(Pageable.class));
+        verify(bookRepository).searchBooks(any(), any(), any(), any(), anyBoolean(), any(), any(Pageable.class));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.example.shelftotales.shared.config;
 
 import com.example.shelftotales.shared.dto.ErrorResponse;
+import com.example.shelftotales.admin.application.SecurityMonitoringService;
 import com.example.shelftotales.shared.security.JwtAuthenticationFilter;
 import com.example.shelftotales.shared.security.JwtService;
 import com.example.shelftotales.shared.security.RateLimitingFilter;
@@ -38,6 +39,7 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final TokenBlacklist tokenBlacklist;
     private final RateLimitingFilter rateLimitingFilter;
+    private final SecurityMonitoringService securityMonitoringService;
     private final ObjectMapper objectMapper;
 
     @Value("${app.cors.allowed-origins:http://localhost:3000}")
@@ -69,6 +71,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
                         .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/api/admin/reports/**").hasAnyRole("ADMIN", "MODERATOR")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -97,7 +100,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtService, userDetailsService, tokenBlacklist);
+        return new JwtAuthenticationFilter(jwtService, userDetailsService, tokenBlacklist, securityMonitoringService);
     }
 
     @Bean

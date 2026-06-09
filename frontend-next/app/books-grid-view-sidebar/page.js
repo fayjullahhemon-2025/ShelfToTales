@@ -20,6 +20,7 @@ function BooksGridViewSidebar() {
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [minRating, setMinRating] = useState('');
   const [loading, setLoading] = useState(true);
   const size = 9;
 
@@ -38,11 +39,12 @@ function BooksGridViewSidebar() {
       minPrice: priceMin || undefined,
       maxPrice: priceMax || undefined,
       inStockOnly: inStockOnly || undefined,
+      minRating: minRating || undefined,
     })
       .then(res => { setBooks(res.data.content || []); setTotalPages(res.data.totalPages || 0); setTotalElements(res.data.totalElements || 0); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [page, search, activeCategory, sortBy, priceMin, priceMax, inStockOnly]);
+  }, [page, search, activeCategory, sortBy, priceMin, priceMax, inStockOnly, minRating]);
 
   const handleAddToWishlist = useCallback(async (bookId) => {
     try { await wishlistService.addToWishlist(bookId); Swal.fire({ icon:'success', title:'Added to wishlist', showConfirmButton:false, timer:1200, toast:true, position:'top-end' }); }
@@ -110,6 +112,21 @@ function BooksGridViewSidebar() {
               <input className="form-check-input" type="checkbox" checked={inStockOnly} onChange={() => { setInStockOnly(!inStockOnly); setPage(0); }} id="stockFilter"/>
               <label className="form-check-label small" htmlFor="stockFilter" style={{ color: '#666' }}>In stock only</label>
             </div>
+          </div>
+
+          <div className="bgs-sidebar-section">
+            <h4 className="bgs-sidebar-title">Rating</h4>
+            <select
+              className="form-select form-select-sm"
+              value={minRating}
+              onChange={e => { setMinRating(e.target.value); setPage(0); }}
+              style={{ borderRadius: 8, fontSize: '0.8rem' }}
+            >
+              <option value="">Any rating</option>
+              <option value="4">4 stars & up</option>
+              <option value="3">3 stars & up</option>
+              <option value="2">2 stars & up</option>
+            </select>
           </div>
 
           <div className="bgs-sidebar-section bgs-sidebar-promo">

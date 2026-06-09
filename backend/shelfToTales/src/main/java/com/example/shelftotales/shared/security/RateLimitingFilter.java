@@ -1,5 +1,8 @@
 package com.example.shelftotales.shared.security;
 
+import com.example.shelftotales.admin.application.SecurityMonitoringService;
+import com.example.shelftotales.admin.domain.SecurityEventSeverity;
+import com.example.shelftotales.admin.domain.SecurityEventType;
 import com.example.shelftotales.shared.dto.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bucket4j.Bandwidth;
@@ -42,9 +45,11 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private final Map<String, BucketEntry> buckets = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper;
+    private final SecurityMonitoringService securityMonitoringService;
 
-    public RateLimitingFilter(ObjectMapper objectMapper) {
+    public RateLimitingFilter(ObjectMapper objectMapper, SecurityMonitoringService securityMonitoringService) {
         this.objectMapper = objectMapper;
+        this.securityMonitoringService = securityMonitoringService;
     }
 
     @Override
@@ -75,6 +80,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             return;
         }
 
+        recordRateLimitEvent(request);
+
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setHeader("Retry-After", String.valueOf(WINDOW.toSeconds()));
@@ -85,6 +92,20 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                 "Rate limit exceeded. Try again in " + WINDOW.toSeconds() + " seconds."
         );
         response.getWriter().write(objectMapper.writeValueAsString(err));
+    }
+
+    private void recordRateLimitEvent(HttpServletRequest request) {
+        try {
+            securityMonitoringService.record(
+                    SecurityEventType.RATE_LIMIT_EXCEEDED,
+                    SecurityEventSeverity.HIGH,
+                    request,
+                    null,
+                    "Rate limit exceeded for " + clientKey(request)
+            );
+        } catch (RuntimeException ignored) {
+            // Monitoring must never block request handling.
+        }
     }
 
     private void evictStaleEntries() {

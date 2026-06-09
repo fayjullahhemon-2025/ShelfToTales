@@ -1,5 +1,8 @@
 package com.example.shelftotales.shared.security;
 
+import com.example.shelftotales.admin.application.SecurityMonitoringService;
+import com.example.shelftotales.admin.domain.SecurityEventSeverity;
+import com.example.shelftotales.admin.domain.SecurityEventType;
 import com.example.shelftotales.shared.util.TokenBlacklist;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
     private final TokenBlacklist tokenBlacklist;
+    private final SecurityMonitoringService securityMonitoringService;
 
     @Override
     protected void doFilterInternal(
@@ -46,6 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         if (tokenBlacklist.isBlacklisted(jwt)) {
             logger.debug("Token is blacklisted");
+            recordSecurityEvent(SecurityEventType.BLACKLISTED_TOKEN_USED, SecurityEventSeverity.HIGH, request, null, "Blacklisted JWT used");
             filterChain.doFilter(request, response);
             return;
         }
@@ -67,8 +72,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 // Log the error but continue the filter chain
                 logger.debug("JWT authentication failed: " + e.getMessage());
+                recordSecurityEvent(SecurityEventType.JWT_AUTHENTICATION_FAILED, SecurityEventSeverity.MEDIUM, request, userEmail, e.getMessage());
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private void recordSecurityEvent(SecurityEventType type, SecurityEventSeverity severity, HttpServletRequest request, String principal, String message) {
+        try {
+            securityMonitoringService.record(type, severity, request, principal, message);
+        } catch (RuntimeException ignored) {
+            // Monitoring must never block authentication flow.
+        }
     }
 }

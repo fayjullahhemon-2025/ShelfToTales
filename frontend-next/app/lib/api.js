@@ -177,6 +177,11 @@ export const adminCouponService = {
   create: (data) => api.post('/admin/coupons', data),
 };
 
+export const adminSecurityService = {
+  getSummary: () => api.get('/admin/security/summary'),
+  getEvents: (limit = 50) => api.get('/admin/security/events', { params: { limit } }),
+};
+
 export const exchangeService = {
   createListing: (data) => api.post('/exchange/listings', data),
   getListings: (params) => api.get('/exchange/listings', { params }),
@@ -291,4 +296,3 @@ export const quoteService = {
 };
 
 export default api;
-

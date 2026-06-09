@@ -137,6 +137,11 @@ export default function AdminDashboardPage() {
               <div className="text-muted small">Reading Challenges</div>
             </div>
           </div>
+          <div className="text-end">
+            <a href="/admin/security" className="btn btn-sm btn-dark rounded-pill px-3">
+              <i className="fa-solid fa-shield-halved me-1" /> Security Monitor
+            </a>
+          </div>
         </div>
       </div>
     </div>
