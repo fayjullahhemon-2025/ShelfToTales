@@ -13,11 +13,12 @@ import { FadeIn } from '../../components/common/AnimationUtils';
 
 //Component
 import NewsLetter from '../../components/features/NewsLetter';
+import ReportButton from '../../components/features/ReportButton';
 
 //Images
 const profile2 = '/assets/images/profile2.jpg';
 
-function CommentBlog({title, comment, date, rating, avatar, isSpoiler}){
+function CommentBlog({id, title, comment, date, rating, avatar, isSpoiler}){
     const [reveal, setReveal] = useState(false);
     const isBlurred = isSpoiler && !reveal;
 
@@ -27,8 +28,9 @@ function CommentBlog({title, comment, date, rating, avatar, isSpoiler}){
                 <div className="comment-author vcard">
                     <img loading="lazy" decoding="async" src={avatar || profile2} alt="" className="avatar"/>
                     <cite className="fn">{title}</cite> <span className="says">says:</span>
-                    <div className="comment-meta">
+                    <div className="comment-meta" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Link href={"#"}>{new Date(date).toLocaleDateString()}</Link>
+                        {id && <ReportButton targetType="REVIEW" targetId={id} />}
                     </div>
                 </div>
                 <div className="comment-content dlab-page-text" style={{ position: 'relative' }}>
@@ -287,7 +289,7 @@ function ShopDetail(){
                                                             <ol className="comment-list">
                                                                 {reviews.filter(r => !hideSpoilers || !r.isSpoiler).map((rev, index) => (
                                                                     <li key={index} className="comment even thread-even depth-1">
-                                                                        <CommentBlog title={rev.user?.username || 'User'} comment={rev.comment} date={rev.createdAt} rating={rev.rating} avatar={rev.user?.profileImageUrl} isSpoiler={rev.isSpoiler} />
+                                                                        <CommentBlog id={rev.id} title={rev.user?.username || 'User'} comment={rev.comment} date={rev.createdAt} rating={rev.rating} avatar={rev.user?.profileImageUrl} isSpoiler={rev.isSpoiler} />
                                                                     </li>
                                                                 ))}
                                                             </ol>

@@ -264,5 +264,12 @@ export const donationService = {
   getMyRequests: () => api.get('/donations/my-requests'),
 };
 
+export const reportService = {
+  create: (data) => api.post('/reports', data),
+  getPending: () => api.get('/admin/reports'),
+  dismiss: (id) => api.post(`/admin/reports/${id}/dismiss`),
+  action: (id) => api.post(`/admin/reports/${id}/action`),
+};
+
 export default api;
 

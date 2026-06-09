@@ -10,6 +10,9 @@ AGENTS.md
 .opencode/
 .serena/
 .mcp.json
+.agents/
+.commandcode/
+skills-lock.json
 
 # Audit docs
 ARCHITECTURE_AUDIT.md
