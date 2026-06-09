@@ -29,7 +29,7 @@ public class BookController {
     @GetMapping
     @Operation(summary = "Browse books with pagination, search, and category filter")
     public PagedResponse<BookResponse> getBooks(
-            @Parameter(description = "Search by title or author")
+            @Parameter(description = "Search by title, author, or ISBN")
             @RequestParam(required = false) String q,
             @Parameter(description = "Filter by category ID")
             @RequestParam(required = false) Long categoryId,

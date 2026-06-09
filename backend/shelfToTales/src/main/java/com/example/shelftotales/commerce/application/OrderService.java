@@ -92,6 +92,14 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public OrderResponse getOrderById(Long orderId) {
+        User user = AuthUtils.getCurrentUser(userRepository);
+        Order order = orderRepository.findByIdAndUserIdWithItems(orderId, user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+        return mapToOrderResponse(order);
+    }
+
     private OrderResponse mapToOrderResponse(Order order) {
         List<OrderItemResponse> itemResponses = order.getItems().stream()
                 .map(item -> OrderItemResponse.builder()

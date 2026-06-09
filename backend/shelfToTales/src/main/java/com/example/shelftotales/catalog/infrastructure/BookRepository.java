@@ -18,11 +18,13 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query(value = "SELECT b.* FROM books b LEFT JOIN categories c ON c.id = b.category_id " +
            "WHERE (CAST(:query AS TEXT) IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%')) OR " +
-           "LOWER(b.author) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%'))) AND " +
+           "LOWER(b.author) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%')) OR " +
+           "LOWER(COALESCE(b.isbn, '')) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%'))) AND " +
            "(CAST(:categoryId AS BIGINT) IS NULL OR b.category_id = CAST(:categoryId AS BIGINT))",
            countQuery = "SELECT COUNT(*) FROM books b WHERE " +
            "(CAST(:query AS TEXT) IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%')) OR " +
-           "LOWER(b.author) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%'))) AND " +
+           "LOWER(b.author) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%')) OR " +
+           "LOWER(COALESCE(b.isbn, '')) LIKE LOWER(CONCAT('%', CAST(:query AS TEXT), '%'))) AND " +
            "(CAST(:categoryId AS BIGINT) IS NULL OR b.category_id = CAST(:categoryId AS BIGINT))",
            nativeQuery = true)
     Page<Book> searchBooks(@Param("query") String query,

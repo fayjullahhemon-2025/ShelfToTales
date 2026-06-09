@@ -32,7 +32,12 @@ export default function AdminUsersPage() {
   };
 
   const handleRoleChange = async (userId, currentRole) => {
-    const newRole = currentRole === 'ADMIN' ? 'USER' : 'ADMIN';
+    const nextRoleMap = {
+      USER: 'MODERATOR',
+      MODERATOR: 'ADMIN',
+      ADMIN: 'USER',
+    };
+    const newRole = nextRoleMap[currentRole] || 'USER';
     const r = await Swal.fire({ title: `Change role to ${newRole}?`, icon: 'question', showCancelButton: true });
     if (r.isConfirmed) { await adminUserService.changeRole(userId, newRole); fetchUsers(); }
   };
@@ -68,7 +73,7 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="text-muted small">{u.email}</td>
-                    <td><span className={`badge ${u.role==='ADMIN'?'bg-dark':'bg-secondary'} rounded-pill`}>{u.role}</span></td>
+                    <td><span className={`badge ${u.role==='ADMIN'?'bg-dark':u.role==='MODERATOR'?'bg-primary':'bg-secondary'} rounded-pill`}>{u.role}</span></td>
                     <td><span className={`badge ${u.banned?'bg-danger':'bg-success'} rounded-pill`}>{u.banned ? 'Banned' : 'Active'}</span></td>
                     <td className="text-muted small">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
                     <td className="text-end pe-4">

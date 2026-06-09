@@ -118,6 +118,7 @@ export const orderService = {
   checkout: (orderData) => api.post('/orders', orderData),
   getUserOrders: () => api.get('/orders'),
   getHistory: () => api.get('/orders/history'),
+  getById: (id) => api.get(`/orders/${id}`),
 };
 
 export const reviewService = {
@@ -290,5 +291,4 @@ export const quoteService = {
 };
 
 export default api;
-
 

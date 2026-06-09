@@ -20,7 +20,7 @@ function BooksGridView() {
     const [accordBtn, setAccordBtn] = useState();
     const [selectBtn, setSelectBtn] = useState('Newest');
     const [showQuickView, setShowQuickView] = useState(false);
-    const [selectedBook] = useState(null);
+    const [selectedBook, setSelectedBook] = useState(null);
 
     useEffect(() => {
         const fetchBooks = async () => {
@@ -55,6 +55,11 @@ function BooksGridView() {
                 Swal.fire('Error', error.response?.data?.message || 'Failed to add to cart', 'error');
             }
         }
+    }, []);
+
+    const handleQuickView = useCallback((book) => {
+        setSelectedBook(book);
+        setShowQuickView(true);
     }, []);
 
     return (
@@ -131,6 +136,7 @@ function BooksGridView() {
                                         book={data}
                                         onAddToWishlist={handleAddToWishlist}
                                         onAddToCart={handleAddToCart}
+                                        onQuickView={handleQuickView}
                                         wishlistInputIdPrefix="grid-wish"
                                     />
                                 </StaggerItem>

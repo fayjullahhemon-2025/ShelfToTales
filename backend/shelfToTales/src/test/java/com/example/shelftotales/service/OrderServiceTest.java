@@ -212,4 +212,29 @@ class OrderServiceTest {
             assertEquals(1000L, history.get(0).getId());
         }
     }
+
+    @Test
+    void getOrderById_returnsMatchingOrderForCurrentUser() {
+        try (MockedStatic<AuthUtils> auth = mockStatic(AuthUtils.class)) {
+            auth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(testUser);
+
+            Order order = Order.builder()
+                    .id(1000L)
+                    .user(testUser)
+                    .orderDate(LocalDateTime.now())
+                    .status(OrderStatus.CONFIRMED)
+                    .totalAmount(BigDecimal.valueOf(30.00))
+                    .items(new ArrayList<>())
+                    .build();
+
+            when(orderRepository.findByIdAndUserIdWithItems(1000L, 1L)).thenReturn(Optional.of(order));
+
+            OrderResponse response = orderService.getOrderById(1000L);
+
+            assertNotNull(response);
+            assertEquals(1000L, response.getId());
+            assertEquals(OrderStatus.CONFIRMED, response.getStatus());
+            verify(orderRepository).findByIdAndUserIdWithItems(1000L, 1L);
+        }
+    }
 }

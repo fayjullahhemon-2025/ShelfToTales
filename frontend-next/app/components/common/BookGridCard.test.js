@@ -55,6 +55,21 @@ describe('BookGridCard', () => {
     expect(onAddToCart).toHaveBeenCalledWith(42);
   });
 
+  test('Quick View click invokes the handler with the book object', () => {
+    const onQuickView = vi.fn();
+    render(
+      <BookGridCard
+        book={sampleBook}
+        onAddToWishlist={vi.fn()}
+        onAddToCart={vi.fn()}
+        onQuickView={onQuickView}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /quick view/i }));
+    expect(onQuickView).toHaveBeenCalledTimes(1);
+    expect(onQuickView).toHaveBeenCalledWith(sampleBook);
+  });
+
   test('Wishlist toggle invokes the handler with the book id', () => {
     const onAddToWishlist = vi.fn();
     render(

@@ -18,11 +18,8 @@ function OrderDetail() {
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                // In a real app, we'd fetch specific order. 
-                // For this prototype, we'll find it from the history or fetch all.
-                const response = await orderService.getHistory();
-                const foundOrder = response.data.find(o => o.id === parseInt(id));
-                setOrder(foundOrder);
+                const response = await orderService.getById(id);
+                setOrder(response.data);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching order details:', error);
@@ -143,5 +140,4 @@ function OrderDetail() {
 }
 
 export default OrderDetail;
-
 

@@ -61,7 +61,7 @@ function BooksGridViewSidebar() {
           <p className="bgs-hero-sub">Explore our curated collection of {totalElements} titles</p>
           <form onSubmit={e => { e.preventDefault(); setPage(0); }} className="bgs-search-form">
             <i className="fa-solid fa-search"/>
-            <input type="text" placeholder="Search by title or author..." value={search} onChange={e => setSearch(e.target.value)}/>
+            <input type="text" placeholder="Search by title, author, or ISBN..." value={search} onChange={e => setSearch(e.target.value)}/>
             {search && <button type="button" className="bgs-search-clear" onClick={() => setSearch('')}><i className="fa-solid fa-xmark"/></button>}
           </form>
         </div>

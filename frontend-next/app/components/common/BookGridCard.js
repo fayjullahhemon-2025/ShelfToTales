@@ -15,6 +15,7 @@ function BookGridCardImpl({
   book,
   onAddToWishlist,
   onAddToCart,
+  onQuickView,
   categoryAsLink = false,
   categoryHrefBuilder,
   showAuthor = false,
@@ -87,6 +88,15 @@ function BookGridCardImpl({
             <span className="price-num">${book.discountPrice || book.price || '9.99'}</span>
             {book.discountPrice && <del>${book.price}</del>}
           </div>
+          {onQuickView && (
+            <button
+              type="button"
+              onClick={() => onQuickView(book)}
+              className="btn btn-outline-secondary box-btn btnhover btnhover2 me-2"
+            >
+              Quick View
+            </button>
+          )}
           <button
             type="button"
             onClick={handleCartClick}
