@@ -7,6 +7,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { bookService, bookshelfService } from '../lib/api';
 import './VirtualBookshelf.css';
 import Swal from 'sweetalert2';
+import { useLofi } from '../contexts/LofiContext';
 const logoImage = '/assets/images/logo.png';
 // Professional Demo Books (fallback if API fails)
 const FALLBACK_IMG = 'https://picsum.photos/seed';
@@ -24,6 +25,26 @@ function VirtualBookshelfInner() {
     const ukey = (k) => `${k}_${uid}`;
 
     const [view, setView] = useState('library');
+
+    const {
+        isPlaying,
+        currentTime,
+        duration,
+        volume,
+        currentTrack,
+        nextTrack,
+        prevTrack,
+        togglePlay,
+        setVolume,
+        seek
+    } = useLofi();
+
+    const formatTime = (timeInSeconds) => {
+        if (isNaN(timeInSeconds) || timeInSeconds === null) return "00:00";
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = Math.floor(timeInSeconds % 60);
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
     const [books, setBooks] = useState([]);
     const [originalBooks, setOriginalBooks] = useState([]);
     const [currentBook, setCurrentBook] = useState(null);
@@ -485,24 +506,43 @@ function VirtualBookshelfInner() {
                         {/* Bottom Controls */}
                         <div className="reader-bottom-controls" style={{ position: 'sticky', bottom: 0, zIndex: 100, background: '#f8f9fa', borderTop: '1px solid #dee2e6' }}>
                             <div className="d-flex align-items-center gap-3">
-                                <div className="bg-warning rounded-circle p-2 text-white">
-                                    <i className="fa-solid fa-music"></i>
-                                </div>
+                                {currentTrack?.coverUrl ? (
+                                    <img 
+                                        src={currentTrack.coverUrl} 
+                                        alt="" 
+                                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} 
+                                    />
+                                ) : (
+                                    <div className="bg-warning rounded-circle p-2 text-white d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
+                                        <i className="fa-solid fa-music"></i>
+                                    </div>
+                                )}
                                 <div>
-                                    <span className="small text-muted text-uppercase fw-bold" style={{ fontSize: '0.6rem' }}>Lofi Study Session</span>
-                                    <h6 className="mb-0 fw-bold" style={{ color: '#000000' }}>Coffee Shop Ambience - 2:45</h6>
+                                    <span className="small text-muted text-uppercase fw-bold" style={{ fontSize: '0.6rem' }}>
+                                        {isPlaying ? 'Playing Lofi Session' : 'Lofi Session Paused'}
+                                    </span>
+                                    <h6 className="mb-0 fw-bold" style={{ color: '#000000' }}>
+                                        {currentTrack?.title || "Autumn Rainfall"} - {formatTime(currentTime)} / {formatTime(duration)}
+                                    </h6>
                                 </div>
                             </div>
                             <div className="d-flex align-items-center gap-4 text-dark fs-5">
-                                <i className="fa-solid fa-backward-step cursor-pointer"></i>
-                                <i className="fa-solid fa-pause cursor-pointer fs-3"></i>
-                                <i className="fa-solid fa-forward-step cursor-pointer"></i>
+                                <i className="fa-solid fa-backward-step cursor-pointer" onClick={prevTrack}></i>
+                                <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} cursor-pointer fs-3`} onClick={togglePlay}></i>
+                                <i className="fa-solid fa-forward-step cursor-pointer" onClick={nextTrack}></i>
                             </div>
                             <div className="d-flex align-items-center gap-3">
                                 <i className="fa-solid fa-volume-high text-muted"></i>
-                                <div className="progress" style={{ width: '100px', height: '4px' }}>
-                                    <div className="progress-bar bg-dark" style={{ width: '60%' }}></div>
-                                </div>
+                                <input 
+                                    type="range" 
+                                    className="form-range" 
+                                    style={{ width: '100px', height: '4px', cursor: 'pointer' }}
+                                    min="0"
+                                    max="1"
+                                    step="0.01"
+                                    value={volume}
+                                    onChange={(e) => setVolume(parseFloat(e.target.value))}
+                                />
                             </div>
                         </div>
                     </div>

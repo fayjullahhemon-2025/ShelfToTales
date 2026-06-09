@@ -12,6 +12,7 @@ import { Playfair_Display, DM_Sans } from "next/font/google";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AppProvider } from "./contexts/AppContext";
 import { CartProvider } from "./contexts/CartContext";
+import { LofiProvider } from "./contexts/LofiContext";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
@@ -49,16 +50,18 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <AppProvider>
             <CartProvider>
-              <div className="App">
-                <div className="page-wraper">
-                  <Header />
-                  <PageAnimationWrapper>
-                    {children}
-                  </PageAnimationWrapper>
-                  <Footer footerChange="style-1" />
+              <LofiProvider>
+                <div className="App">
+                  <div className="page-wraper">
+                    <Header />
+                    <PageAnimationWrapper>
+                      {children}
+                    </PageAnimationWrapper>
+                    <Footer footerChange="style-1" />
+                  </div>
+                  <ScrollToTop />
                 </div>
-                <ScrollToTop />
-              </div>
+              </LofiProvider>
             </CartProvider>
           </AppProvider>
         </AuthProvider>

@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { dashboardService, socialService } from '../lib/api';
 import '../assets/css/reader-network.css';
 import { FadeIn } from '../components/common/AnimationUtils';
+import { useLofi } from '../contexts/LofiContext';
 
 const ReadingDashboard = () => {
     const router = useRouter();
@@ -16,6 +17,30 @@ const ReadingDashboard = () => {
     const [feed, setFeed] = useState([]);
     const [following, setFollowing] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const {
+        isPlaying,
+        currentTime,
+        duration,
+        volume,
+        currentTrack,
+        ambientStates,
+        ambientSounds,
+        nextTrack,
+        prevTrack,
+        togglePlay,
+        setVolume,
+        seek,
+        toggleAmbient,
+        setAmbientVolume
+    } = useLofi();
+
+    const formatTime = (timeInSeconds) => {
+        if (isNaN(timeInSeconds) || timeInSeconds === null) return "00:00";
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = Math.floor(timeInSeconds % 60);
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
 
     useEffect(() => {
         const loadDashboardData = async () => {
@@ -53,9 +78,13 @@ const ReadingDashboard = () => {
             {/* Sidebar */}
             <div className="dashboard-sidebar">
                 <div className="mb-5 text-center">
-                    <div className="bg-light p-3 rounded-4 mb-3 d-inline-block">
-                        <span className="text-danger small fw-bold">● Lofi Session</span>
-                        <p className="mb-0 style-lofi small fw-bold">Study Ambient Mix</p>
+                    <div className="bg-light p-3 rounded-4 mb-3 d-inline-block w-100 text-truncate">
+                        <span className={`${isPlaying ? 'text-success' : 'text-danger'} small fw-bold`}>
+                            {isPlaying ? '● Lofi Session Live' : '● Session Paused'}
+                        </span>
+                        <p className="mb-0 style-lofi small fw-bold text-truncate mt-1" style={{ maxWidth: '100%' }}>
+                            {currentTrack?.title || "Study Ambient Mix"}
+                        </p>
                     </div>
                     <button className="rn-btn-join w-100 btn-sm mt-2" onClick={() => router.push('/reader-network')}>
                         Join Reading Room
@@ -259,41 +288,86 @@ const ReadingDashboard = () => {
 
                 {/* Music Player Bar */}
                 <div className="rn-music-player mt-4">
-                    <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=300" alt="" className="music-cover" />
+                    <img 
+                        loading="lazy" 
+                        decoding="async" 
+                        src={currentTrack?.coverUrl || "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=300"} 
+                        alt="" 
+                        className="music-cover" 
+                        style={{ borderRadius: '50%', width: '60px', height: '60px', objectFit: 'cover' }}
+                    />
                     <div className="flex-grow-1">
                         <span className="small text-muted fw-bold">NOW PLAYING</span>
-                        <h2 className="fw-bold my-1">Autumn Rainfall</h2>
-                        <p className="text-muted mb-4">By Lofi Girl & Study Beats</p>
+                        <h2 className="fw-bold my-1" style={{ fontSize: '1.2rem' }}>{currentTrack?.title || "Autumn Rainfall"}</h2>
+                        <p className="text-muted mb-3" style={{ fontSize: '0.9rem' }}>By {currentTrack?.artist || "Lofi Girl & Study Beats"}</p>
 
                         <div className="d-flex align-items-center gap-3">
-                            <i className="fa-solid fa-backward-step cursor-pointer"></i>
-                            <div className="bg-primary p-2 rounded-circle text-white d-flex align-items-center justify-content-center" style={{ width: '45px', height: '45px' }}>
-                                <i className="fa-solid fa-pause"></i>
+                            <i className="fa-solid fa-backward-step cursor-pointer" onClick={prevTrack}></i>
+                            <div 
+                                className="bg-primary p-2 rounded-circle text-white d-flex align-items-center justify-content-center cursor-pointer" 
+                                style={{ width: '40px', height: '40px' }}
+                                onClick={togglePlay}
+                            >
+                                <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i>
                             </div>
-                            <i className="fa-solid fa-forward-step cursor-pointer"></i>
-                            <div className="progress flex-grow-1 mx-3" style={{ height: '6px' }}>
-                                <div className="progress-bar bg-primary" style={{ width: '40%' }}></div>
+                            <i className="fa-solid fa-forward-step cursor-pointer" onClick={nextTrack}></i>
+                            <input 
+                                type="range" 
+                                className="form-range flex-grow-1 mx-3" 
+                                style={{ height: '6px', cursor: 'pointer' }}
+                                min="0"
+                                max={duration || 100}
+                                value={currentTime}
+                                onChange={(e) => seek(parseFloat(e.target.value))}
+                            />
+                            <span className="small text-muted" style={{ minWidth: '85px', textAlign: 'right' }}>
+                                {formatTime(currentTime)} / {formatTime(duration)}
+                            </span>
+                            <div className="d-flex align-items-center gap-2 ms-2">
+                                <i className="fa-solid fa-volume-high text-muted" style={{ fontSize: '0.8rem' }}></i>
+                                <input 
+                                    type="range" 
+                                    className="form-range" 
+                                    style={{ width: '50px', height: '4px', cursor: 'pointer' }}
+                                    min="0"
+                                    max="1"
+                                    step="0.01"
+                                    value={volume}
+                                    onChange={(e) => setVolume(parseFloat(e.target.value))}
+                                />
                             </div>
-                            <span className="small text-muted">14:20 / 35:00</span>
                         </div>
                     </div>
-                    <div className="d-flex flex-wrap gap-2 justify-content-center" style={{ width: '180px' }}>
-                        <div className="p-2 border rounded-3 text-center" style={{ width: '80px' }}>
-                            <i className="fa-solid fa-cloud-showers-heavy d-block mb-1"></i>
-                            <span style={{ fontSize: '0.65rem' }}>Rain</span>
-                        </div>
-                        <div className="p-2 border rounded-3 text-center" style={{ width: '80px' }}>
-                            <i className="fa-solid fa-mug-hot d-block mb-1"></i>
-                            <span style={{ fontSize: '0.65rem' }}>Cafe</span>
-                        </div>
-                        <div className="p-2 border rounded-3 text-center" style={{ width: '80px' }}>
-                            <i className="fa-solid fa-fire d-block mb-1"></i>
-                            <span style={{ fontSize: '0.65rem' }}>Fire</span>
-                        </div>
-                        <div className="p-2 border rounded-3 text-center" style={{ width: '80px' }}>
-                            <i className="fa-solid fa-leaf d-block mb-1"></i>
-                            <span style={{ fontSize: '0.65rem' }}>Nature</span>
-                        </div>
+                    <div className="d-flex flex-wrap gap-2 justify-content-center align-items-center" style={{ width: '180px' }}>
+                        {ambientSounds.map((sound) => {
+                            const state = ambientStates[sound.id];
+                            const isActive = state?.active;
+                            return (
+                                <div 
+                                    key={sound.id} 
+                                    className={`p-2 border rounded-3 text-center cursor-pointer position-relative d-flex flex-column justify-content-center align-items-center ${isActive ? 'border-primary bg-primary bg-opacity-10 text-primary' : 'bg-white text-muted'}`} 
+                                    style={{ width: '80px', minHeight: '72px', transition: 'all 0.2s', border: '1px solid #dee2e6' }}
+                                    onClick={() => toggleAmbient(sound.id)}
+                                >
+                                    <i className={`fa-solid ${sound.icon} d-block mb-1`} style={{ fontSize: '1rem' }}></i>
+                                    <span style={{ fontSize: '0.65rem', fontWeight: 'bold' }}>{sound.name}</span>
+                                    {isActive && (
+                                        <div className="mt-1 w-100" onClick={(e) => e.stopPropagation()}>
+                                            <input 
+                                                type="range" 
+                                                className="form-range" 
+                                                style={{ height: '3px', padding: 0, margin: 0, cursor: 'pointer' }}
+                                                min="0"
+                                                max="1"
+                                                step="0.05"
+                                                value={state.volume}
+                                                onChange={(e) => setAmbientVolume(sound.id, parseFloat(e.target.value))}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
