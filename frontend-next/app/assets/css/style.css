@@ -14,7 +14,6 @@
     7. Pages
     
 */
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import url("../icons/fontawesome/css/all.min.css");
 @import url("../icons/flaticon/font/flaticon.css");
 @import url("../icons/themify/themify-icons.css");
@@ -34,10 +33,10 @@
   --rgba-primary-7: rgba(234, 164, 81, 0.7);
   --rgba-primary-8: rgba(234, 164, 81, 0.8);
   --rgba-primary-9: rgba(234, 164, 81, 0.9);
-  --font-family-base: Open Sans, sans-serif;
+  --font-family-base: var(--font-body, 'DM Sans', sans-serif);
   --grey: #f7f7f7;
   --border-radius-base: 6px;
-  --font-family-title: Poppins, sans-serif;
+  --font-family-title: var(--font-heading, 'Playfair Display', serif);
   --title: #1a1668;
   --headings-font-weight:600;
   --headings-font-weight2:400;

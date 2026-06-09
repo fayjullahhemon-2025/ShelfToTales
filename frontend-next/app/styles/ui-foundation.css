@@ -1,0 +1,111 @@
+/* ============================================
+   ShelfToTales — Design Tokens
+   Single source of truth for all colors, radii, shadows
+   ============================================ */
+
+:root {
+  /* ── Brand Colors ── */
+  --stt-accent: #EAA451;
+  --stt-accent-600: #e58c23;
+  --stt-accent-light: #f0c27f;
+  --stt-navy: #1a1668;
+  --stt-navy-deep: #0f0c3d;
+  --stt-navy-mid: #1a1a2e;
+  --stt-navy-light: #2d2b55;
+
+  /* ── Semantic Colors ── */
+  --stt-success: #029e76;
+  --stt-info: #00aeff;
+  --stt-danger: #FF1E6F;
+  --stt-warning: #fea500;
+
+  /* ── Surface Colors ── */
+  --stt-bg: #ffffff;
+  --stt-bg-warm: #f9f7f4;
+  --stt-bg-muted: #f5f3f0;
+  --stt-surface-bg: #fff;
+  --stt-surface-border: 1px solid var(--stt-border);
+
+  /* ── Text Colors ── */
+  --stt-text: #1a1a2e;
+  --stt-text-secondary: #555555;
+  --stt-muted: #6b7280;
+  --stt-text-light: rgba(255, 255, 255, 0.7);
+  --stt-text-muted: rgba(255, 255, 255, 0.45);
+
+  /* ── Borders & Dividers ── */
+  --stt-border: rgba(0, 0, 0, 0.04);
+  --stt-border-strong: rgba(0, 0, 0, 0.08);
+  --stt-divider: rgba(255, 255, 255, 0.08);
+
+  /* ── Radii ── */
+  --stt-radius-xs: 6px;
+  --stt-radius-sm: 8px;
+  --stt-radius-md: 12px;
+  --stt-radius-lg: 16px;
+  --stt-radius-xl: 20px;
+  --stt-radius-pill: 50px;
+
+  /* ── Shadows ── */
+  --stt-shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --stt-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.04);
+  --stt-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --stt-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --stt-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.1);
+  --stt-shadow-glow: 0 4px 20px rgba(234, 164, 81, 0.3);
+  --stt-shadow-glow-lg: 0 8px 30px rgba(234, 164, 81, 0.45);
+
+  /* ── Transitions ── */
+  --stt-transition-fast: 0.15s ease;
+  --stt-transition-base: 0.25s ease;
+  --stt-transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --stt-transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Z-Index Scale ── */
+  --stt-z-dropdown: 100;
+  --stt-z-sticky: 200;
+  --stt-z-overlay: 300;
+  --stt-z-modal: 400;
+  --stt-z-toast: 500;
+}
+
+/* ── Utility Classes ── */
+.stt-text-muted { color: var(--stt-muted); }
+.stt-text-accent { color: var(--stt-accent); }
+
+.stt-surface {
+  background: var(--stt-surface-bg);
+  color: inherit;
+  border-radius: var(--stt-radius-md);
+  border: var(--stt-surface-border);
+  padding: 12px;
+  box-shadow: none;
+}
+
+.stt-surface--raised {
+  box-shadow: var(--stt-shadow-md);
+  border-color: var(--stt-border-strong);
+}
+
+/* ── Focus Ring ── */
+.stt-focus-ring:focus-visible {
+  outline: 2px solid var(--stt-accent);
+  outline-offset: 2px;
+}
+
+/* ── Gradient Text ── */
+.stt-gradient-text {
+  background: linear-gradient(135deg, #EAA451 0%, #f0c27f 50%, #EAA451 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+}
+
+/* ── Glass Effect ── */
+.stt-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}

@@ -49,7 +49,11 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/auth/");
+        String uri = request.getRequestURI();
+        return !(uri.startsWith("/api/auth/") ||
+                 uri.startsWith("/api/checkout") ||
+                 uri.startsWith("/api/orders") ||
+                 uri.startsWith("/api/exchange/"));
     }
 
     @Override
@@ -91,7 +95,21 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private static String clientKey(HttpServletRequest request) {
         // Only trust X-Forwarded-For from known proxies; fall back to remoteAddr
-        return request.getRemoteAddr();
+        String ip = request.getRemoteAddr();
+        String uri = request.getRequestURI();
+        String category;
+        if (uri.startsWith("/api/auth/")) {
+            category = "auth";
+        } else if (uri.startsWith("/api/checkout")) {
+            category = "checkout";
+        } else if (uri.startsWith("/api/orders")) {
+            category = "orders";
+        } else if (uri.startsWith("/api/exchange/")) {
+            category = "exchange";
+        } else {
+            category = "other";
+        }
+        return ip + ":" + category;
     }
 
     private static Bucket newBucket() {

@@ -31,6 +31,7 @@ public class DiscoverFeedService {
     private final UserProfileVectorRepository profileVectorRepository;
     private final UserRepository userRepository;
     private final AIService aiService;
+    private final EmbeddingService embeddingService;
 
     @Transactional(readOnly = true)
     public DiscoverFeedResponse getDiscoverFeed() {
@@ -52,13 +53,16 @@ public class DiscoverFeedService {
         }
 
         double[] userVec = aiService.stringToVector(profileOpt.get().getVectorData());
-        List<BookEmbedding> embeddings = bookEmbeddingRepository.findAll();
+        List<Long> matchedIds = embeddingService.getSimilarBookIds(userVec, 5);
+        if (matchedIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<BookEmbedding> embeddings = bookEmbeddingRepository.findAllById(matchedIds);
 
         return embeddings.stream()
                 .map(emb -> Map.entry(emb.getBook(),
                         aiService.calculateSimilarity(userVec, aiService.stringToVector(emb.getVectorData()))))
                 .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
-                .limit(5)
                 .map(e -> DiscoverFeedResponse.RecommendedBook.builder()
                         .bookId(e.getKey().getId()).title(e.getKey().getTitle())
                         .author(e.getKey().getAuthor()).coverUrl(e.getKey().getCoverUrl())

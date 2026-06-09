@@ -82,8 +82,12 @@ function RegistrationInner(){
     return(
         <div className="auth-split-container">
             <div className="auth-form-side">
+                <Link href="/" className="auth-back-link">
+                    <i className="fa-solid fa-arrow-left"></i> Back to Home
+                </Link>
+                <div className="auth-brand">Shelf<span>To</span>Tales</div>
                 <h1 className="auth-heading">Ready to start your<br />success story?</h1>
-                <p className="auth-subheading">Signup to our website and start leafing<br />through your favorite literature today!</p>
+                <p className="auth-subheading">Signup to our website and start leafing through your favorite literature today!</p>
                 
                 <div id="google-signup-btn" className="auth-google-btn"></div>
 

@@ -69,11 +69,15 @@ function LoginInner(){
     return(
         <div className="auth-split-container">
             <div className="auth-form-side">
+                <Link href="/" className="auth-back-link">
+                    <i className="fa-solid fa-arrow-left"></i> Back to Home
+                </Link>
+                <div className="auth-brand">Shelf<span>To</span>Tales</div>
+                <h1 className="auth-heading">Welcome Back!</h1>
+                <p className="auth-subheading">Sign in to continue leafing through your favorite literature today.</p>
+                
                 {!forgotPass ? (
                     <>
-                        <h1 className="auth-heading">Welcome Back!</h1>
-                        <p className="auth-subheading">Sign in to continue leafing through<br />your favorite literature today.</p>
-                        
                         <div id="google-signin-btn" className="auth-google-btn"></div>
 
                         <div className="auth-divider"><span>or</span></div>

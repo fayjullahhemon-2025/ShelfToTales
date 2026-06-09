@@ -194,6 +194,13 @@ export const gamificationService = {
   getStreak: () => api.get('/streak'),
 };
 
+export const goalService = {
+  getActiveGoal: () => api.get('/goals/active'),
+  saveGoal: (targetCount, targetYear = new Date().getFullYear()) =>
+    api.post('/goals', { targetYear, targetCount }),
+};
+
+
 export const notificationService = {
   getAll: () => api.get('/notifications'),
   getUnreadCount: () => api.get('/notifications/unread-count'),
@@ -233,6 +240,16 @@ export const uploadService = {
   image: (file) => { const fd = new FormData(); fd.append('file', file); return api.post('/upload/image', fd); },
   cover: (file) => { const fd = new FormData(); fd.append('file', file); return api.post('/upload/cover', fd); },
   pdf: (file) => { const fd = new FormData(); fd.append('file', file); return api.post('/upload/pdf', fd); },
+};
+
+export const blogService = {
+  getAll: () => api.get('/blogs'),
+  getMy: () => api.get('/blogs/my'),
+  getById: (id) => api.get(`/blogs/${id}`),
+  create: (data) => api.post('/blogs', data),
+  update: (id, data) => api.put(`/blogs/${id}`, data),
+  delete: (id) => api.delete(`/blogs/${id}`),
+  like: (id) => api.post(`/blogs/${id}/like`),
 };
 
 export default api;

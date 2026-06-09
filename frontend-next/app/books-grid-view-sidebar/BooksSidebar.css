@@ -1,12 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
-
-.bgs-page { font-family: 'Outfit', sans-serif; background: #f9f7f4; min-height: 100vh; }
+.bgs-page { font-family: var(--font-body); background: #f9f7f4; min-height: 100vh; }
 
 /* Hero */
 .bgs-hero { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 3.5rem 2rem 3rem; position: relative; overflow: hidden; }
 .bgs-hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(234,164,81,0.15) 0%, transparent 70%); }
 .bgs-hero-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
-.bgs-hero-title { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 700; color: #fff; margin: 0; }
+.bgs-hero-title { font-family: var(--font-heading); font-size: 2.8rem; font-weight: 700; color: #fff; margin: 0; }
 .bgs-hero-sub { color: rgba(255,255,255,0.5); font-size: 1rem; margin: 0.5rem 0 1.5rem; font-weight: 300; }
 .bgs-search-form { display: flex; align-items: center; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 0 1.2rem; max-width: 480px; backdrop-filter: blur(10px); transition: all 0.3s; }
 .bgs-search-form:focus-within { background: rgba(255,255,255,0.12); border-color: rgba(234,164,81,0.5); box-shadow: 0 0 20px rgba(234,164,81,0.1); }
@@ -22,7 +20,7 @@
 /* Sidebar */
 .bgs-sidebar { position: sticky; top: 100px; align-self: start; }
 .bgs-sidebar-section { background: #fff; border-radius: 18px; padding: 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.03); }
-.bgs-sidebar-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 700; color: #1a1a2e; margin: 0 0 1rem; }
+.bgs-sidebar-title { font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700; color: #1a1a2e; margin: 0 0 1rem; }
 .bgs-cat-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border: none; background: none; border-radius: 10px; font-size: 0.88rem; font-weight: 500; color: #555; cursor: pointer; transition: all 0.2s; text-align: left; }
 .bgs-cat-btn:hover { background: #f5f3f0; color: #1a1a2e; }
 .bgs-cat-btn.active { background: linear-gradient(135deg, #eaa451, #e58c23); color: #fff; font-weight: 600; }
@@ -35,7 +33,7 @@
 
 /* Promo */
 .bgs-sidebar-promo { background: linear-gradient(145deg, #1a1a2e, #2d2b55); color: #fff; position: relative; overflow: hidden; }
-.bgs-sidebar-promo h5 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; margin: 0.5rem 0 0.3rem; }
+.bgs-sidebar-promo h5 { font-family: var(--font-heading); font-size: 1.1rem; margin: 0.5rem 0 0.3rem; }
 .bgs-sidebar-promo p { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin: 0 0 0.8rem; }
 .bgs-promo-badge { background: #eaa451; color: #fff; font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
 .bgs-promo-link { color: #eaa451; font-size: 0.85rem; font-weight: 600; text-decoration: none; }

@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
-
 /* === Enhanced Book Grid === */
 .book-grid-row .col-book {
   margin-bottom: 2rem;
@@ -56,7 +54,7 @@
 
 .book-grid-row .dz-content h5,
 .book-grid-row .dz-content .title {
-  font-family: 'DM Sans', sans-serif !important;
+  font-family: var(--font-body) !important;
   font-weight: 700 !important;
   font-size: 0.95rem !important;
   color: #1a1a2e;
@@ -65,7 +63,7 @@
 
 .book-grid-row .dz-content .price,
 .book-grid-row .dz-content .book-price {
-  font-family: 'Playfair Display', serif !important;
+  font-family: var(--font-heading) !important;
   font-weight: 700;
   color: #eaa451 !important;
   font-size: 1.1rem;
@@ -104,7 +102,7 @@
 
 .check-tbl thead th {
   color: #fff !important;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -146,7 +144,7 @@
 }
 
 .check-tbl .product-item-name a {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 700;
   color: #1a1a2e;
   text-decoration: none;
@@ -158,7 +156,7 @@
 }
 
 .check-tbl .product-item-price {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   color: #1a1a2e;
   font-size: 1.05rem;
@@ -202,7 +200,7 @@
 }
 
 .shop-account .widget-title {
-  font-family: 'Playfair Display', serif !important;
+  font-family: var(--font-heading) !important;
   font-size: 1.4rem;
   font-weight: 700;
   color: #1a1a2e;
@@ -219,11 +217,11 @@
   padding: 14px 0 !important;
   border: none !important;
   border-bottom: 1px solid rgba(0,0,0,0.04) !important;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
 }
 
 .shop-account .table-bordered tr:last-child td {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.2rem;
   color: #1a1a2e;
@@ -277,12 +275,12 @@
   border: none;
   background: transparent;
   font-weight: 700;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
 }
 
 /* Empty states */
 .page-content .text-center h5 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   color: #1a1a2e;
 }
 
@@ -301,7 +299,7 @@
 
 /* Page title enhancement */
 .page-content h4.title {
-  font-family: 'Playfair Display', serif !important;
+  font-family: var(--font-heading) !important;
   font-size: 1.8rem !important;
   font-weight: 700;
   color: #1a1a2e;

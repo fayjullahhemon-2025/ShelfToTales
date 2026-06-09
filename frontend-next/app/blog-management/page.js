@@ -5,13 +5,7 @@ export const dynamic = 'force-dynamic';
 import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/layout/PageTitle';
 import Swal from 'sweetalert2';
-import { socialService } from '../lib/api';
-
-const DEFAULT_BLOGS = [
-  { id: 1, title: 'The Future of Reading', content: 'Digital reading is transforming how we consume literature. From e-readers to audiobooks, the landscape is evolving rapidly. What does this mean for traditional bookstores and libraries?', date: '2026-04-15', status: 'Published', views: 450, author: 'You', likes: 12 },
-  { id: 2, title: 'Top 10 Classic Must-Reads', content: 'Every reader should experience these timeless classics at least once. From Dostoevsky to Austen, these books shaped modern literature and continue to resonate with readers worldwide.', date: '2026-04-20', status: 'Draft', views: 0, author: 'You', likes: 0 },
-  { id: 3, title: 'How to Build a Personal Library', content: 'Building a personal library is more than collecting books — it\'s curating a reflection of your intellectual journey. Start with books that changed your perspective, then expand into new territories.', date: '2026-05-01', status: 'Published', views: 1200, author: 'You', likes: 34 },
-];
+import { socialService, blogService } from '../lib/api';
 
 function BlogManagement() {
   const [blogs, setBlogs] = useState([]);
@@ -22,26 +16,16 @@ function BlogManagement() {
   const [feedPosts, setFeedPosts] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
 
-  // User-scoped storage key
-  const getStorageKey = () => {
-    try { const u = JSON.parse(localStorage.getItem('user') || '{}'); return `shelftotales_blogs_${u.id || 'guest'}`; }
-    catch { return 'shelftotales_blogs_guest'; }
+  const loadMyBlogs = () => {
+    blogService.getMy()
+      .then(res => setBlogs(res.data || []))
+      .catch(() => setBlogs([]));
   };
 
-  // Load from localStorage on mount
+  // Load blogs on mount
   useEffect(() => {
-    const saved = localStorage.getItem(getStorageKey());
-    if (saved) {
-      try { setBlogs(JSON.parse(saved)); } catch { setBlogs(DEFAULT_BLOGS); }
-    } else {
-      setBlogs(DEFAULT_BLOGS);
-    }
+    loadMyBlogs();
   }, []);
-
-  // Persist to localStorage
-  useEffect(() => {
-    if (blogs.length > 0) localStorage.setItem(getStorageKey(), JSON.stringify(blogs));
-  }, [blogs]);
 
   // Fetch community feed
   useEffect(() => {
@@ -68,15 +52,29 @@ function BlogManagement() {
       return;
     }
     if (editId) {
-      setBlogs(blogs.map(b => b.id === editId ? { ...b, title, content, date: new Date().toISOString().split('T')[0] } : b));
-      setEditId(null);
-      Swal.fire({ icon: 'success', title: 'Updated!', timer: 1500, showConfirmButton: false });
+      const existingBlog = blogs.find(b => b.id === editId);
+      const currentStatus = existingBlog ? existingBlog.status : 'PUBLISHED';
+      blogService.update(editId, { title, content, status: currentStatus })
+        .then(() => {
+          loadMyBlogs();
+          setEditId(null);
+          Swal.fire({ icon: 'success', title: 'Updated!', timer: 1500, showConfirmButton: false });
+          setTitle(''); setContent(''); setTab('my');
+        })
+        .catch(err => {
+          Swal.fire('Error', err.response?.data?.message || 'Failed to update blog', 'error');
+        });
     } else {
-      const newBlog = { id: Date.now(), title, content, date: new Date().toISOString().split('T')[0], status: 'Published', views: 0, author: 'You', likes: 0 };
-      setBlogs([newBlog, ...blogs]);
-      Swal.fire({ icon: 'success', title: 'Published!', timer: 1500, showConfirmButton: false });
+      blogService.create({ title, content, status: 'PUBLISHED' })
+        .then(() => {
+          loadMyBlogs();
+          Swal.fire({ icon: 'success', title: 'Published!', timer: 1500, showConfirmButton: false });
+          setTitle(''); setContent(''); setTab('my');
+        })
+        .catch(err => {
+          Swal.fire('Error', err.response?.data?.message || 'Failed to publish blog', 'error');
+        });
     }
-    setTitle(''); setContent(''); setTab('my');
   };
 
   const handleEdit = (blog) => {
@@ -85,16 +83,35 @@ function BlogManagement() {
 
   const handleDelete = (id) => {
     Swal.fire({ title: 'Delete this post?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Delete' }).then(r => {
-      if (r.isConfirmed) { setBlogs(blogs.filter(b => b.id !== id)); Swal.fire({ icon: 'success', title: 'Deleted', timer: 1200, showConfirmButton: false }); }
+      if (r.isConfirmed) {
+        blogService.delete(id)
+          .then(() => {
+            loadMyBlogs();
+            Swal.fire({ icon: 'success', title: 'Deleted', timer: 1200, showConfirmButton: false });
+          })
+          .catch(err => {
+            Swal.fire('Error', err.response?.data?.message || 'Failed to delete blog', 'error');
+          });
+      }
     });
   };
 
-  const toggleStatus = (id) => {
-    setBlogs(blogs.map(b => b.id === id ? { ...b, status: b.status === 'Published' ? 'Draft' : 'Published' } : b));
+  const toggleStatus = (blog) => {
+    const isPublished = blog.status === 'PUBLISHED' || blog.status === 'Published';
+    const newStatus = isPublished ? 'DRAFT' : 'PUBLISHED';
+    blogService.update(blog.id, { title: blog.title, content: blog.content, status: newStatus })
+      .then(() => {
+        loadMyBlogs();
+        Swal.fire({ icon: 'success', title: 'Status updated!', timer: 1200, showConfirmButton: false });
+      })
+      .catch(err => {
+        Swal.fire('Error', err.response?.data?.message || 'Failed to update status', 'error');
+      });
   };
 
-  const totalViews = blogs.reduce((s, b) => s + b.views, 0);
-  const published = blogs.filter(b => b.status === 'Published').length;
+  const totalViews = blogs.reduce((s, b) => s + (b.viewsCount ?? 0), 0);
+  const published = blogs.filter(b => b.status === 'PUBLISHED' || b.status === 'Published').length;
+  const totalLikes = blogs.reduce((s, b) => s + (b.likesCount ?? 0), 0);
 
   return (
     <div className="page-content bg-grey">
@@ -121,7 +138,7 @@ function BlogManagement() {
             <div className="row g-3 mb-4">
               <div className="col-md-4"><div className="card border-0 shadow-sm"><div className="card-body d-flex align-items-center gap-3"><div className="rounded-circle d-flex align-items-center justify-content-center" style={{width:48,height:48,background:'rgba(234,164,81,0.1)'}}><i className="fa-solid fa-eye" style={{color:'#eaa451'}}/></div><div><h4 className="mb-0 fw-bold">{totalViews.toLocaleString()}</h4><small className="text-muted">Total Views</small></div></div></div></div>
               <div className="col-md-4"><div className="card border-0 shadow-sm"><div className="card-body d-flex align-items-center gap-3"><div className="rounded-circle d-flex align-items-center justify-content-center" style={{width:48,height:48,background:'rgba(16,185,129,0.1)'}}><i className="fa-solid fa-check" style={{color:'#10b981'}}/></div><div><h4 className="mb-0 fw-bold">{published}</h4><small className="text-muted">Published</small></div></div></div></div>
-              <div className="col-md-4"><div className="card border-0 shadow-sm"><div className="card-body d-flex align-items-center gap-3"><div className="rounded-circle d-flex align-items-center justify-content-center" style={{width:48,height:48,background:'rgba(139,92,246,0.1)'}}><i className="fa-solid fa-heart" style={{color:'#8b5cf6'}}/></div><div><h4 className="mb-0 fw-bold">{blogs.reduce((s,b)=>s+b.likes,0)}</h4><small className="text-muted">Total Likes</small></div></div></div></div>
+              <div className="col-md-4"><div className="card border-0 shadow-sm"><div className="card-body d-flex align-items-center gap-3"><div className="rounded-circle d-flex align-items-center justify-content-center" style={{width:48,height:48,background:'rgba(139,92,246,0.1)'}}><i className="fa-solid fa-heart" style={{color:'#8b5cf6'}}/></div><div><h4 className="mb-0 fw-bold">{totalLikes}</h4><small className="text-muted">Total Likes</small></div></div></div></div>
             </div>
 
             {/* Blog List */}
@@ -129,31 +146,37 @@ function BlogManagement() {
               <div className="text-center py-5"><i className="fa-solid fa-pen-nib fa-3x text-muted opacity-25 mb-3"/><p className="text-muted">No posts yet. Create your first blog!</p></div>
             ) : (
               <div className="row g-3">
-                {blogs.map(blog => (
-                  <div key={blog.id} className="col-md-6 col-lg-4">
-                    <div className="card border-0 shadow-sm h-100" style={{borderRadius:16}}>
-                      <div className="card-body d-flex flex-column">
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                          <span className={`badge ${blog.status==='Published'?'bg-success':'bg-secondary'}`}>{blog.status}</span>
-                          <small className="text-muted">{blog.date}</small>
-                        </div>
-                        <h6 className="fw-bold mb-2">{blog.title}</h6>
-                        <p className="text-muted small flex-grow-1" style={{display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{blog.content}</p>
-                        <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
-                          <div className="d-flex gap-3 text-muted small">
-                            <span><i className="fa-solid fa-eye me-1"/>{blog.views}</span>
-                            <span><i className="fa-solid fa-heart me-1"/>{blog.likes}</span>
+                {blogs.map(blog => {
+                  const isPublished = blog.status === 'PUBLISHED' || blog.status === 'Published';
+                  const displayDate = blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : '';
+                  return (
+                    <div key={blog.id} className="col-md-6 col-lg-4">
+                      <div className="card border-0 shadow-sm h-100" style={{borderRadius:16}}>
+                        <div className="card-body d-flex flex-column">
+                          <div className="d-flex justify-content-between align-items-start mb-2">
+                            <span className={`badge ${isPublished ? 'bg-success' : 'bg-secondary'}`}>
+                              {isPublished ? 'Published' : 'Draft'}
+                            </span>
+                            <small className="text-muted">{displayDate}</small>
                           </div>
-                          <div className="d-flex gap-1">
-                            <button className="btn btn-sm btn-outline-secondary" onClick={() => toggleStatus(blog.id)} title={blog.status==='Published'?'Unpublish':'Publish'}><i className={`fa-solid ${blog.status==='Published'?'fa-eye-slash':'fa-eye'}`}/></button>
-                            <button className="btn btn-sm btn-outline-primary" onClick={() => handleEdit(blog)}><i className="fa-solid fa-pen"/></button>
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(blog.id)}><i className="fa-solid fa-trash"/></button>
+                          <h6 className="fw-bold mb-2">{blog.title}</h6>
+                          <p className="text-muted small flex-grow-1" style={{display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{blog.content}</p>
+                          <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                            <div className="d-flex gap-3 text-muted small">
+                              <span><i className="fa-solid fa-eye me-1"/>{blog.viewsCount ?? 0}</span>
+                              <span><i className="fa-solid fa-heart me-1"/>{blog.likesCount ?? 0}</span>
+                            </div>
+                            <div className="d-flex gap-1">
+                              <button className="btn btn-sm btn-outline-secondary" onClick={() => toggleStatus(blog)} title={isPublished ? 'Unpublish' : 'Publish'}><i className={`fa-solid ${isPublished ? 'fa-eye-slash' : 'fa-eye'}`}/></button>
+                              <button className="btn btn-sm btn-outline-primary" onClick={() => handleEdit(blog)}><i className="fa-solid fa-pen"/></button>
+                              <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(blog.id)}><i className="fa-solid fa-trash"/></button>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </>

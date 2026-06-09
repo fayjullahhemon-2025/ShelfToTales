@@ -77,6 +77,9 @@ class BookServiceTest {
     @Mock
     private AIService aiService;
 
+    @Mock
+    private EmbeddingService embeddingService;
+
     @InjectMocks
     private BookService bookService;
 

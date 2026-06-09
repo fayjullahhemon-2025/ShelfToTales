@@ -11,8 +11,10 @@ import com.example.shelftotales.catalog.domain.Book;
 import com.example.shelftotales.catalog.domain.BookEmbedding;
 import com.example.shelftotales.catalog.infrastructure.BookEmbeddingRepository;
 import com.example.shelftotales.catalog.infrastructure.BookRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,9 +36,51 @@ public class EmbeddingService {
     private final BookEmbeddingRepository embeddingRepository;
     private final BookRepository bookRepository;
     private final AIService aiService;
+    private final JdbcTemplate jdbcTemplate;
+
+    private boolean isPgVectorAvailable = false;
 
     public boolean isModelAvailable() {
         return ortSession != null && tokenizer != null;
+    }
+
+    @PostConstruct
+    public void init() {
+        try {
+            Boolean hasVector = jdbcTemplate.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'vector')", 
+                Boolean.class
+            );
+            this.isPgVectorAvailable = Boolean.TRUE.equals(hasVector);
+        } catch (Exception e) {
+            this.isPgVectorAvailable = false;
+        }
+    }
+
+    public boolean isPgVectorAvailable() {
+        return isPgVectorAvailable;
+    }
+
+    public List<Long> getSimilarBookIdsExcluding(double[] vector, Long excludeBookId, int limit) {
+        if (vector == null || vector.length == 0) return Collections.emptyList();
+        String vectorStr = aiService.vectorToString(vector);
+        if (isPgVectorAvailable) {
+            String pgvectorStr = "[" + vectorStr + "]";
+            return embeddingRepository.findSimilarBookIdsExcludingPgVector(excludeBookId, pgvectorStr, limit);
+        } else {
+            return embeddingRepository.findSimilarBookIdsExcludingFallback(excludeBookId, vectorStr, limit);
+        }
+    }
+
+    public List<Long> getSimilarBookIds(double[] vector, int limit) {
+        if (vector == null || vector.length == 0) return Collections.emptyList();
+        String vectorStr = aiService.vectorToString(vector);
+        if (isPgVectorAvailable) {
+            String pgvectorStr = "[" + vectorStr + "]";
+            return embeddingRepository.findSimilarBookIdsPgVector(pgvectorStr, limit);
+        } else {
+            return embeddingRepository.findSimilarBookIdsFallback(vectorStr, limit);
+        }
     }
 
     public double[] generateEmbedding(String text) {
@@ -84,13 +128,21 @@ public class EmbeddingService {
     @Transactional(readOnly = true)
     public List<Map.Entry<Book, Double>> searchSimilar(String query, int limit, Long excludeUserId) {
         double[] queryVec = generateEmbedding(query);
-        List<BookEmbedding> allEmbeddings = embeddingRepository.findAll();
+        List<Long> similarIds = getSimilarBookIds(queryVec, limit);
+        if (similarIds.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-        return allEmbeddings.stream()
+        List<BookEmbedding> embeddings = embeddingRepository.findAllById(similarIds);
+        Map<Long, BookEmbedding> embeddingMap = embeddings.stream()
+                .collect(Collectors.toMap(BookEmbedding::getBookId, e -> e));
+
+        return similarIds.stream()
+                .map(embeddingMap::get)
+                .filter(Objects::nonNull)
                 .map(emb -> Map.entry(emb.getBook(),
                         aiService.calculateSimilarity(queryVec, aiService.stringToVector(emb.getVectorData()))))
                 .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
-                .limit(limit)
                 .collect(Collectors.toList());
     }
 
@@ -101,7 +153,16 @@ public class EmbeddingService {
         BookEmbedding embedding = embeddingRepository.findById(book.getId())
                 .orElse(BookEmbedding.builder().book(book).build());
         embedding.setVectorData(aiService.vectorToString(vector));
-        embeddingRepository.save(embedding);
+        embeddingRepository.saveAndFlush(embedding);
+
+        if (isPgVectorAvailable) {
+            String pgvectorStr = "[" + aiService.vectorToString(vector) + "]";
+            jdbcTemplate.update(
+                "UPDATE book_embeddings SET embedding = CAST(? AS vector) WHERE book_id = ?",
+                pgvectorStr,
+                book.getId()
+            );
+        }
     }
 
     @Transactional

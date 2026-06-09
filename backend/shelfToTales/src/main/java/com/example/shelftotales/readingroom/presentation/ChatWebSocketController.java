@@ -21,13 +21,13 @@ public class ChatWebSocketController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat/{roomId}")
-    public void handleChatMessage(@DestinationVariable Long roomId, Map<String, String> payload) {
-        String content = payload.get("content");
-        String senderEmail = payload.get("senderEmail");
-
-        if (senderEmail == null || senderEmail.isBlank()) {
-            throw new IllegalArgumentException("Sender email is required in WebSocket payload");
+    public void handleChatMessage(@DestinationVariable Long roomId, Map<String, String> payload, java.security.Principal principal) {
+        if (principal == null || principal.getName() == null || principal.getName().isBlank()) {
+            throw new IllegalArgumentException("User principal is required");
         }
+
+        String content = payload.get("content");
+        String senderEmail = principal.getName();
 
         User sender = userRepository.findByEmail(senderEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Sender not found with email: " + senderEmail));

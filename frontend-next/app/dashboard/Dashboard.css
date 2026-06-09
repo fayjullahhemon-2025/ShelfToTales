@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
+/* Fonts loaded via next/font in layout.js */
 
 .dashboard-page {
   min-height: 100vh;
   background: #faf8f5;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   position: relative;
   overflow-x: hidden;
 }
@@ -52,7 +52,7 @@
 }
 
 .dash-greeting {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 2.2rem;
   font-weight: 700;
   color: #1a1a2e;
@@ -147,7 +147,7 @@
 }
 
 .dash-stat-value {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.8rem;
   font-weight: 800;
   color: #1a1a2e;
@@ -190,7 +190,7 @@
 }
 
 .dash-card-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.3rem;
   font-weight: 700;
   color: #1a1a2e;
@@ -278,7 +278,7 @@
 }
 
 .dash-streak-number {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 3rem;
   font-weight: 800;
   line-height: 1;
@@ -407,7 +407,7 @@
 }
 
 .dash-goal-text .number {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.6rem;
   font-weight: 800;
   color: #1a1a2e;
@@ -450,7 +450,7 @@
 }
 
 .dash-admin-stat .value {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.8rem;
   font-weight: 800;
   color: #eaa451;
@@ -549,7 +549,7 @@
   text-align: center;
 }
 .donut-center span {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.4rem;
   font-weight: 800;
   color: #1a1a2e;
@@ -607,7 +607,7 @@
 }
 .week-summary div strong {
   display: block;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.3rem;
   color: #1a1a2e;
 }
@@ -631,7 +631,7 @@
   margin: 0;
 }
 .dash-reading-pct {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 0.9rem;
   font-weight: 700;
   color: #eaa451;
@@ -649,7 +649,7 @@
 
 /* Goal card */
 .dash-goal-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.1rem;
   color: #1a1a2e;
   margin-bottom: 1rem;
@@ -670,7 +670,7 @@
   margin-bottom: 0.5rem;
 }
 .dash-admin-header h3 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.4rem;
   margin: 0;
 }

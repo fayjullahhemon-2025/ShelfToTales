@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic';
 import React, { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useApi } from '../hooks/useApi';
-import { dashboardService, gamificationService, notificationService } from '../lib/api';
+import { dashboardService, gamificationService, notificationService, goalService } from '../lib/api';
+import Swal from 'sweetalert2';
 import './Dashboard.css';
 
 /* --- Mini Chart Components --- */
@@ -79,13 +80,59 @@ function Dashboard() {
   const { data, loading, error, refetch } = useApi(() => dashboardService.getDashboard());
   const [achievements, setAchievements] = useState([]);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [annualGoal, setAnnualGoal] = useState(24);
 
   useEffect(() => {
     if (data) {
       gamificationService.getMyAchievements().then(r => setAchievements(r.data || [])).catch(() => {});
       notificationService.getUnreadCount().then(r => setUnreadNotifs(r.data?.count || r.data || 0)).catch(() => {});
+      goalService.getActiveGoal().then(r => {
+        if (r.data && r.data.targetCount) {
+          setAnnualGoal(r.data.targetCount);
+        }
+      }).catch(() => {});
     }
   }, [data]);
+
+  const handleEditGoal = async () => {
+    const { value: newGoal } = await Swal.fire({
+      title: 'Update Annual Reading Goal',
+      input: 'number',
+      inputLabel: 'How many books do you want to read this year?',
+      inputValue: annualGoal,
+      showCancelButton: true,
+      inputValidator: (value) => {
+        if (!value || parseInt(value, 10) <= 0) {
+          return 'Please enter a number greater than 0';
+        }
+      }
+    });
+
+    if (newGoal) {
+      try {
+        const targetCount = parseInt(newGoal, 10);
+        await goalService.saveGoal(targetCount);
+        setAnnualGoal(targetCount);
+        Swal.fire({
+          icon: 'success',
+          title: 'Goal updated successfully',
+          toast: true,
+          position: 'top-end',
+          timer: 3000,
+          showConfirmButton: false
+        });
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed to update goal',
+          toast: true,
+          position: 'top-end',
+          timer: 3000,
+          showConfirmButton: false
+        });
+      }
+    }
+  };
 
   const weeklyData = useMemo(() => {
     if (!data) return [];
@@ -253,9 +300,20 @@ function Dashboard() {
             </div>
 
             <div className="dash-goal-card dash-animate" style={{marginTop:'1.5rem'}}>
-              <h4 className="dash-goal-title">Annual Goal</h4>
-              <GoalRing completed={data.totalBooksCompleted||0} goal={24}/>
-              <p className="dash-goal-sub">{Math.max(24-(data.totalBooksCompleted||0),0)} books remaining</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h4 className="dash-goal-title" style={{ margin: 0 }}>Annual Goal</h4>
+                <button 
+                  onClick={handleEditGoal} 
+                  style={{ background: 'none', border: 'none', color: '#eaa451', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}
+                  title="Edit Goal"
+                >
+                  <i className="fa-solid fa-pen-to-square" />
+                </button>
+              </div>
+              <div onClick={handleEditGoal} style={{ cursor: 'pointer' }} title="Click to edit goal">
+                <GoalRing completed={data.totalBooksCompleted||0} goal={annualGoal}/>
+              </div>
+              <p className="dash-goal-sub">{Math.max(annualGoal-(data.totalBooksCompleted||0),0)} books remaining</p>
             </div>
 
             <div className="dash-card dash-animate" style={{marginTop:'1.5rem'}}>

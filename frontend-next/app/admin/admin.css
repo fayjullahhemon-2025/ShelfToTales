@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+/* Fonts loaded via next/font in layout.js */
 
-.adm-layout { display: flex; min-height: 100vh; font-family: 'DM Sans', sans-serif; }
+.adm-layout { display: flex; min-height: 100vh; font-family: var(--font-body); }
 
 .adm-sidebar { width: 240px; background: #1a1a2e; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
 .adm-sidebar-header { padding: 1.5rem; display: flex; align-items: center; gap: 10px; color: #eaa451; font-weight: 700; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); }

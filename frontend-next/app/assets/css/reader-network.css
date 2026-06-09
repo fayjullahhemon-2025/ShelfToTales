@@ -10,7 +10,7 @@
 .reader-network-page {
     background-color: var(--rn-bg-light);
     color: var(--rn-secondary);
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-body);
 }
 
 /* Hero Section */

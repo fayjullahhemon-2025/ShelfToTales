@@ -2,19 +2,27 @@
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
-import { dashboardService, gamificationService } from '../lib/api';
+import { dashboardService, gamificationService, goalService } from '../lib/api';
 import PageTitle from '../components/layout/PageTitle';
 
 export default function ReadingStats() {
   const [data, setData] = useState(null);
   const [streak, setStreak] = useState(null);
+  const [annualGoal, setAnnualGoal] = useState(24);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       dashboardService.getDashboard().catch(() => ({ data: {} })),
       gamificationService.getStreak().catch(() => ({ data: {} })),
-    ]).then(([d, s]) => { setData(d.data); setStreak(s.data); }).finally(() => setLoading(false));
+      goalService.getActiveGoal().catch(() => ({ data: {} })),
+    ]).then(([d, s, g]) => {
+      setData(d.data);
+      setStreak(s.data);
+      if (g.data && g.data.targetCount) {
+        setAnnualGoal(g.data.targetCount);
+      }
+    }).finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="page-content bg-grey"><PageTitle parentPage="Reading" childPage="Statistics"/><div className="container py-5 text-center"><div className="spinner-border text-secondary"/></div></div>;
@@ -31,7 +39,7 @@ export default function ReadingStats() {
   ];
 
   const categories = data?.booksByCategory || [];
-  const goalPct = Math.min(((data?.totalBooksCompleted || 0) / 24) * 100, 100);
+  const goalPct = Math.min(((data?.totalBooksCompleted || 0) / annualGoal) * 100, 100);
 
   return (
     <div className="page-content" style={{ background: '#0f0f1a', minHeight: '100vh' }}>
@@ -73,12 +81,12 @@ export default function ReadingStats() {
                   </svg>
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                     <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.4rem', fontWeight: 700, color: '#fff' }}>{data?.totalBooksCompleted || 0}</span>
-                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)' }}>of 24</span>
+                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)' }}>of {annualGoal}</span>
                   </div>
                 </div>
                 <div>
                   <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', margin: 0 }}>{Math.round(goalPct)}% complete</p>
-                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', margin: '4px 0 0' }}>{Math.max(24 - (data?.totalBooksCompleted || 0), 0)} books remaining this year</p>
+                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', margin: '4px 0 0' }}>{Math.max(annualGoal - (data?.totalBooksCompleted || 0), 0)} books remaining this year</p>
                 </div>
               </div>
             </div>

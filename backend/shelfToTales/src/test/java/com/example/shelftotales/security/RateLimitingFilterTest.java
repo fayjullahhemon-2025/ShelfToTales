@@ -142,4 +142,102 @@ class RateLimitingFilterTest {
 
         assertEquals(200, res.getStatus());
     }
+
+    @Test
+    void checkoutEndpoint_allows10ThenBlocks() throws ServletException, IOException {
+        String ip = "10.0.0.3";
+
+        for (int i = 0; i < 10; i++) {
+            MockHttpServletRequest req = new MockHttpServletRequest("POST", "/api/checkout");
+            req.setRemoteAddr(ip);
+            MockHttpServletResponse res = new MockHttpServletResponse();
+            filter.doFilter(req, res, chain);
+            assertEquals(200, res.getStatus());
+        }
+
+        MockHttpServletRequest blocked = new MockHttpServletRequest("POST", "/api/checkout");
+        blocked.setRemoteAddr(ip);
+        MockHttpServletResponse blockedRes = new MockHttpServletResponse();
+        filter.doFilter(blocked, blockedRes, chain);
+
+        assertEquals(429, blockedRes.getStatus());
+    }
+
+    @Test
+    void ordersEndpoint_allows10ThenBlocks() throws ServletException, IOException {
+        String ip = "10.0.0.4";
+
+        for (int i = 0; i < 10; i++) {
+            MockHttpServletRequest req = new MockHttpServletRequest("GET", "/api/orders");
+            req.setRemoteAddr(ip);
+            MockHttpServletResponse res = new MockHttpServletResponse();
+            filter.doFilter(req, res, chain);
+            assertEquals(200, res.getStatus());
+        }
+
+        MockHttpServletRequest blocked = new MockHttpServletRequest("GET", "/api/orders");
+        blocked.setRemoteAddr(ip);
+        MockHttpServletResponse blockedRes = new MockHttpServletResponse();
+        filter.doFilter(blocked, blockedRes, chain);
+
+        assertEquals(429, blockedRes.getStatus());
+    }
+
+    @Test
+    void exchangeEndpoint_allows10ThenBlocks() throws ServletException, IOException {
+        String ip = "10.0.0.5";
+
+        for (int i = 0; i < 10; i++) {
+            MockHttpServletRequest req = new MockHttpServletRequest("GET", "/api/exchange/listings");
+            req.setRemoteAddr(ip);
+            MockHttpServletResponse res = new MockHttpServletResponse();
+            filter.doFilter(req, res, chain);
+            assertEquals(200, res.getStatus());
+        }
+
+        MockHttpServletRequest blocked = new MockHttpServletRequest("GET", "/api/exchange/listings");
+        blocked.setRemoteAddr(ip);
+        MockHttpServletResponse blockedRes = new MockHttpServletResponse();
+        filter.doFilter(blocked, blockedRes, chain);
+
+        assertEquals(429, blockedRes.getStatus());
+    }
+
+    @Test
+    void routeSegmentation_avoidsCrossEndpointRateLimitExhaustion() throws ServletException, IOException {
+        String ip = "10.0.0.6";
+
+        // Exhaust rate limit for auth
+        for (int i = 0; i < 10; i++) {
+            MockHttpServletRequest authReq = new MockHttpServletRequest("POST", "/api/auth/login");
+            authReq.setRemoteAddr(ip);
+            filter.doFilter(authReq, new MockHttpServletResponse(), chain);
+        }
+
+        // Verify auth is now blocked
+        MockHttpServletRequest authBlocked = new MockHttpServletRequest("POST", "/api/auth/login");
+        authBlocked.setRemoteAddr(ip);
+        MockHttpServletResponse authRes = new MockHttpServletResponse();
+        filter.doFilter(authBlocked, authRes, chain);
+        assertEquals(429, authRes.getStatus());
+
+        // Verify checkout, orders, exchange, and other endpoints from the same IP are NOT blocked
+        MockHttpServletRequest checkoutReq = new MockHttpServletRequest("POST", "/api/checkout");
+        checkoutReq.setRemoteAddr(ip);
+        MockHttpServletResponse checkoutRes = new MockHttpServletResponse();
+        filter.doFilter(checkoutReq, checkoutRes, chain);
+        assertEquals(200, checkoutRes.getStatus());
+
+        MockHttpServletRequest ordersReq = new MockHttpServletRequest("GET", "/api/orders");
+        ordersReq.setRemoteAddr(ip);
+        MockHttpServletResponse ordersRes = new MockHttpServletResponse();
+        filter.doFilter(ordersReq, ordersRes, chain);
+        assertEquals(200, ordersRes.getStatus());
+
+        MockHttpServletRequest exchangeReq = new MockHttpServletRequest("GET", "/api/exchange/listings");
+        exchangeReq.setRemoteAddr(ip);
+        MockHttpServletResponse exchangeRes = new MockHttpServletResponse();
+        filter.doFilter(exchangeReq, exchangeRes, chain);
+        assertEquals(200, exchangeRes.getStatus());
+    }
 }

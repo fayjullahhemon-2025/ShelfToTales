@@ -13,6 +13,7 @@ import com.example.shelftotales.catalog.domain.Category;
 import com.example.shelftotales.catalog.domain.BookEmbedding;
 import com.example.shelftotales.catalog.infrastructure.BookRepository;
 import com.example.shelftotales.ai.application.AIService;
+import com.example.shelftotales.ai.application.EmbeddingService;
 import com.example.shelftotales.catalog.infrastructure.CategoryRepository;
 import com.example.shelftotales.catalog.infrastructure.BookEmbeddingRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class BookService {
     private final CategoryRepository categoryRepository;
     private final BookEmbeddingRepository bookEmbeddingRepository;
     private final AIService aiService;
+    private final EmbeddingService embeddingService;
 
     @Cacheable(value = "books", key = "#query + ':' + #categoryId + ':' + #page + ':' + #size + ':' + #sortBy + ':' + #sortDir")
     public PagedResponse<BookResponse> getBooks(String query, Long categoryId, int page, int size, String sortBy, String sortDir) {
@@ -177,16 +179,18 @@ public class BookService {
         }
 
         double[] targetVec = aiService.stringToVector(targetEmbedding.getVectorData());
+        java.util.List<Long> similarIds = embeddingService.getSimilarBookIdsExcluding(targetVec, bookId, limit);
+        if (similarIds.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
 
-        // Only compare against books that already have embeddings (pre-computed)
-        java.util.List<BookEmbedding> allEmbeddings = bookEmbeddingRepository.findAllExcluding(bookId);
+        java.util.Map<Long, Book> bookMap = bookRepository.findAllById(similarIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Book::getId, java.util.function.Function.identity()));
 
-        return allEmbeddings.stream()
-                .map(emb -> new java.util.AbstractMap.SimpleEntry<>(
-                        emb, aiService.calculateSimilarity(targetVec, aiService.stringToVector(emb.getVectorData()))))
-                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
-                .limit(limit)
-                .map(entry -> toResponse(entry.getKey().getBook()))
+        return similarIds.stream()
+                .map(bookMap::get)
+                .filter(java.util.Objects::nonNull)
+                .map(this::toResponse)
                 .collect(java.util.stream.Collectors.toList());
     }
 }

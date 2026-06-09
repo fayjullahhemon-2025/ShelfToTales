@@ -19,4 +19,24 @@ public interface BookEmbeddingRepository extends JpaRepository<BookEmbedding, Lo
     @EntityGraph(attributePaths = {"book", "book.category"})
     @Query("SELECT e FROM BookEmbedding e WHERE e.bookId <> :excludeBookId")
     List<BookEmbedding> findAllExcluding(@Param("excludeBookId") Long excludeBookId);
+
+    @Query(value = "SELECT book_id FROM book_embeddings WHERE book_id <> :excludeBookId AND embedding IS NOT NULL " +
+                   "ORDER BY embedding <=> CAST(:vectorStr AS vector) LIMIT :limit", nativeQuery = true)
+    List<Long> findSimilarBookIdsExcludingPgVector(@Param("excludeBookId") Long excludeBookId, 
+                                                   @Param("vectorStr") String vectorStr, 
+                                                   @Param("limit") int limit);
+
+    @Query(value = "SELECT book_id FROM book_embeddings WHERE book_id <> :excludeBookId " +
+                   "ORDER BY cosine_similarity(vector_data, :vectorStr) DESC LIMIT :limit", nativeQuery = true)
+    List<Long> findSimilarBookIdsExcludingFallback(@Param("excludeBookId") Long excludeBookId, 
+                                                   @Param("vectorStr") String vectorStr, 
+                                                   @Param("limit") int limit);
+
+    @Query(value = "SELECT book_id FROM book_embeddings WHERE embedding IS NOT NULL " +
+                   "ORDER BY embedding <=> CAST(:vectorStr AS vector) LIMIT :limit", nativeQuery = true)
+    List<Long> findSimilarBookIdsPgVector(@Param("vectorStr") String vectorStr, @Param("limit") int limit);
+
+    @Query(value = "SELECT book_id FROM book_embeddings " +
+                   "ORDER BY cosine_similarity(vector_data, :vectorStr) DESC LIMIT :limit", nativeQuery = true)
+    List<Long> findSimilarBookIdsFallback(@Param("vectorStr") String vectorStr, @Param("limit") int limit);
 }

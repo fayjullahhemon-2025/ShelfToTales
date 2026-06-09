@@ -64,7 +64,7 @@ function Header(){
 								{isAuthenticated ? (
 									<Dropdown as="li" className="nav-item dropdown profile-dropdown ms-4">
 										<Dropdown.Toggle as="div" className="nav-link i-false" style={{cursor: 'pointer'}}>
-											<img loading="lazy" decoding="async" src={user.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || 'User')}&background=9cd2ef&color=fff&size=80`} alt="/" style={{width:32,height:32,borderRadius:'50%',objectFit:'cover'}} />
+											<img loading="lazy" decoding="async" src={user.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || 'User')}&background=EAA451&color=fff&size=80`} alt="/" style={{width:32,height:32,borderRadius:'50%',objectFit:'cover',border:'2px solid rgba(234,164,81,0.3)'}} />
 											<div className="profile-info">
 												<h6 className="title">{user.fullName || user.email}</h6>
 												<span>{user.email}</span>
@@ -294,10 +294,10 @@ function Header(){
 							</ul>
 							<div className="dz-social-icon">
 								<ul>
-									<li><a className="fab fa-facebook-f" target="_blank" rel="noreferrer" href="https://www.facebook.com/dexignzone" aria-label="Facebook"></a></li>
-									<li><a className="fab fa-twitter" target="_blank" rel="noreferrer" href="https://twitter.com/dexignzones" aria-label="Twitter"></a></li>
-									<li><a className="fab fa-linkedin-in" target="_blank" rel="noreferrer" href="https://www.linkedin.com/showcase/3686700/admin/" aria-label="LinkedIn"></a></li>
-									<li><a className="fab fa-instagram" target="_blank" rel="noreferrer" href="https://www.instagram.com/website_templates__/" aria-label="Instagram"></a></li>
+									<li><a className="fab fa-facebook-f" target="_blank" rel="noreferrer" href="#" aria-label="Facebook"></a></li>
+									<li><a className="fab fa-twitter" target="_blank" rel="noreferrer" href="#" aria-label="Twitter"></a></li>
+									<li><a className="fab fa-instagram" target="_blank" rel="noreferrer" href="#" aria-label="Instagram"></a></li>
+									<li><a className="fab fa-github" target="_blank" rel="noreferrer" href="#" aria-label="GitHub"></a></li>
 								</ul>
 							</div>
 						</div>
