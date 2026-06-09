@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Swal from 'sweetalert2';
-import { reportService } from '@/app/lib/api';
+import { reportService } from '@/lib/api';
 
 /**
  * Reusable button to report flagged content (Review, Blog, Listing).
