@@ -23,7 +23,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -55,6 +61,51 @@ public class PlatformAnalyticsService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         stats.put("totalRevenue", revenue);
 
+        List<Order> orders = orderRepository.findAll();
+        List<User> users = userRepository.findAll();
+        stats.put("weeklyOrders", buildWeeklySeries(orders));
+        stats.put("monthlyUsers", buildMonthlySeries(users));
+
         return stats;
+    }
+
+    private Map<String, Object> buildWeeklySeries(List<Order> orders) {
+        Map<String, Object> series = new LinkedHashMap<>();
+        List<String> labels = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH);
+        LocalDate today = LocalDate.now();
+
+        for (int offset = 6; offset >= 0; offset--) {
+            LocalDate day = today.minusDays(offset);
+            labels.add(day.format(formatter));
+            data.add((int) orders.stream()
+                    .filter(order -> order.getOrderDate() != null && order.getOrderDate().toLocalDate().equals(day))
+                    .count());
+        }
+
+        series.put("labels", labels);
+        series.put("data", data);
+        return series;
+    }
+
+    private Map<String, Object> buildMonthlySeries(List<User> users) {
+        Map<String, Object> series = new LinkedHashMap<>();
+        List<String> labels = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH);
+        YearMonth currentMonth = YearMonth.now();
+
+        for (int offset = 5; offset >= 0; offset--) {
+            YearMonth month = currentMonth.minusMonths(offset);
+            labels.add(month.format(formatter));
+            data.add((int) users.stream()
+                    .filter(user -> user.getCreatedAt() != null && YearMonth.from(user.getCreatedAt()).equals(month))
+                    .count());
+        }
+
+        series.put("labels", labels);
+        series.put("data", data);
+        return series;
     }
 }
