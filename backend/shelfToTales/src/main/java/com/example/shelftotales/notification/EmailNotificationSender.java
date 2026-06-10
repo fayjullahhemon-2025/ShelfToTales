@@ -14,8 +14,7 @@ public class EmailNotificationSender implements NotificationSender {
 
     @Override
     public void send(Notification notification) {
-        log.info("EMAIL → [{}] Subject: '{}' Body: '{}'",
-                notification.getRecipient(), notification.getSubject(), notification.getMessage());
-        // TODO: integrate with actual SMTP/SES when ready
+        log.warn("Email notification sent to {}: {} (email channel not configured)",
+                notification.getRecipient(), notification.getSubject());
     }
 }

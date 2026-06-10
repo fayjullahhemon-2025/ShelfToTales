@@ -14,7 +14,7 @@ public class PushNotificationSender implements NotificationSender {
 
     @Override
     public void send(Notification notification) {
-        log.info("PUSH → [{}] '{}'", notification.getRecipient(), notification.getMessage());
-        // TODO: integrate with FCM/APNs when ready
+        log.warn("Push notification sent to {}: {} (push channel not configured)",
+                notification.getRecipient(), notification.getSubject());
     }
 }
