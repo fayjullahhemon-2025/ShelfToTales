@@ -7,6 +7,8 @@ import com.example.shelftotales.event.ReviewPostedEvent;
 import com.example.shelftotales.social.domain.ActivityFeedItem;
 import com.example.shelftotales.social.infrastructure.ActivityFeedItemRepository;
 import com.example.shelftotales.auth.infrastructure.UserRepository;
+import com.example.shelftotales.review.domain.Review;
+import com.example.shelftotales.review.infrastructure.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -18,6 +20,7 @@ public class FeedItemObserver {
 
     private final ActivityFeedItemRepository feedRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onBookCompleted(BookCompletedEvent event) {
@@ -33,12 +36,24 @@ public class FeedItemObserver {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onReviewPosted(ReviewPostedEvent event) {
+        Review review = reviewRepository.findById(event.getReviewId()).orElse(null);
+        String escapedBookTitle = event.getBookTitle() != null ? event.getBookTitle().replace("\"", "\\\"") : "";
+        String comment = "";
+        int rating = 0;
+        boolean isSpoiler = false;
+        
+        if (review != null) {
+            comment = review.getComment() != null ? review.getComment().replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "") : "";
+            rating = review.getRating();
+            isSpoiler = review.isSpoiler();
+        }
+
         feedRepository.save(ActivityFeedItem.builder()
                 .user(userRepository.getReferenceById(event.getActorId()))
                 .activityType("POSTED_REVIEW")
                 .referenceId(event.getReviewId())
                 .referenceType("REVIEW")
-                .metadata("{\"bookTitle\":\"" + event.getBookTitle() + "\"}")
+                .metadata("{\"bookTitle\":\"" + escapedBookTitle + "\",\"reviewComment\":\"" + comment + "\",\"rating\":" + rating + ",\"isSpoiler\":" + isSpoiler + "}")
                 .visibility("PUBLIC")
                 .build());
     }
