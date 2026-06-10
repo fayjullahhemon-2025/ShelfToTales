@@ -12,6 +12,7 @@ import { FadeIn } from '../components/common/AnimationUtils';
 function PurchaseHistory() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const orderAmount = (order) => Math.max(0, Number(order.totalAmount || 0) - Number(order.discountAmount || 0));
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -70,7 +71,7 @@ function PurchaseHistory() {
                                                 <td className="ps-4 font-weight-bold text-primary">#{order.id}</td>
                                                 <td>{new Date(order.orderDate).toLocaleDateString()}</td>
                                                 <td>{order.items?.length || 0} Books</td>
-                                                <td>${order.totalAmount.toFixed(2)}</td>
+                                                <td>${orderAmount(order).toFixed(2)}</td>
                                                 <td>
                                                     <span className={`badge ${order.status === 'COMPLETED' ? 'bg-success' : 'bg-warning'}`}>
                                                         {order.status}
@@ -94,5 +95,4 @@ function PurchaseHistory() {
 }
 
 export default PurchaseHistory;
-
 
