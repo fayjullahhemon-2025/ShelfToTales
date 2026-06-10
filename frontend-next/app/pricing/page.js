@@ -37,12 +37,12 @@ function Pricing(){
                                             </div>
                                             <p className="text">Aliquam dui lacus, lobortis quis sapien non.</p>
                                             <ul className="pricingtable-features">
-                                                <li>Graphic Design </li>
-                                                <li>Web Design</li>
-                                                <li>UI/UX</li>
-                                                <li>HTML/CSS</li>
-                                                <li>SEO Marketing</li>
-                                                <li>Business Analysis</li>
+                                                <li>Unlimited Book Access</li>
+                                                <li>Community Features</li>
+                                                <li>Reading Analytics</li>
+                                                <li>Priority Support</li>
+                                                <li>Book Exchange</li>
+                                                <li>AI Recommendations</li>
                                             </ul>
                                             <div className="pricingtable-footer"> 
                                                 <Link href={"/pricing"} className="btn btn-primary btnhover3">Start Now <i className="fa fa-angle-right m-l10"></i></Link> 

@@ -26,7 +26,7 @@ function ComingSoon(){
 		WebsiteLaunchDate =  WebsiteLaunchDate.getDate() + " " + monthNames[WebsiteLaunchDate.getMonth()] + " " + WebsiteLaunchDate.getFullYear();
 		/* Website Launch Date END */
 
-		const countdownDate = new Date("Dec 31, 2022 00:01:00").getTime();
+		const countdownDate = new Date("Dec 31, 2026 23:59:59").getTime();
 		//const countdownDate = new Date(WebsiteLaunchDate+' 23:5').getTime();
 		interval.current = setInterval(()=>{
 			const now = new Date().getTime();
