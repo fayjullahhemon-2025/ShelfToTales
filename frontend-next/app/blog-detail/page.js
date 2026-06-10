@@ -77,7 +77,13 @@ function BlogDetail() {
         <div className="row justify-content-center">
           <div className="col-lg-8">
             <div className="card border-0 shadow-sm" style={{ borderRadius: 20 }}>
-              <div style={{ height: 220, background: `linear-gradient(135deg, #eaa451, #1a1a2e)`, borderRadius: '20px 20px 0 0' }}/>
+              {blog.coverImage ? (
+                <div style={{ height: 220, overflow: 'hidden', borderRadius: '20px 20px 0 0' }}>
+                  <img src={blog.coverImage} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              ) : (
+                <div style={{ height: 220, background: `linear-gradient(135deg, #eaa451, #1a1a2e)`, borderRadius: '20px 20px 0 0' }} />
+              )}
               <div className="card-body p-4 p-lg-5">
                 <div className="d-flex flex-wrap gap-3 mb-3 text-muted small align-items-center">
                   <span><i className="fa-regular fa-calendar me-1"/>{displayDate}</span>
@@ -85,6 +91,16 @@ function BlogDetail() {
                   <span><i className="fa-solid fa-user me-1"/>By {blog.authorName || 'Anonymous'}</span>
                   <span className={`badge ${isPublished ? 'bg-success' : 'bg-secondary'}`}>{isPublished ? 'Published' : 'Draft'}</span>
                 </div>
+                {blog.coverImage && (
+                  <div className="blog-cover-image mb-4">
+                    <img
+                      src={blog.coverImage}
+                      alt={blog.title}
+                      className="img-fluid w-100"
+                      style={{ maxHeight: '400px', objectFit: 'cover', borderRadius: '12px' }}
+                    />
+                  </div>
+                )}
                 <h2 className="fw-bold mb-4" style={{ fontFamily: 'Playfair Display, serif', color: '#1a1a2e' }}>{blog.title}</h2>
                 <div style={{ fontSize: '1.1rem', lineHeight: 1.8, color: '#444' }}>
                   {blog.content?.split('\n').map((p, i) => <p key={i}>{p}</p>)}

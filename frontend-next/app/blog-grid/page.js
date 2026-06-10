@@ -39,7 +39,14 @@ function BlogGrid() {
               return (
                 <div key={post.id} className="col-md-6 col-lg-4">
                   <div className="card border-0 shadow-sm h-100" style={{ borderRadius: 16 }}>
-                    <div style={{ height: 180, background: `linear-gradient(135deg, #${(post.id*123456).toString(16).slice(0,6)}, #1a1a2e)`, borderRadius: '16px 16px 0 0' }}/>
+                    <div style={{ height: 180, overflow: 'hidden', borderRadius: '16px 16px 0 0' }}>
+                      <img
+                        src={post.coverImage || `/images/blog-default.jpg`}
+                        alt={post.title}
+                        className="img-fluid w-100 h-100"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
                     <div className="card-body">
                       <small className="text-muted">{displayDate}</small>
                       <h5 className="fw-bold mt-2 mb-2">{post.title}</h5>
