@@ -61,7 +61,7 @@ function BlogDetail() {
         <PageTitle parentPage="Blog" childPage="Post Not Found" />
         <div className="container py-5 text-center">
           <h5>No blog post found</h5>
-          <Link href="/blog-management" className="btn btn-dark rounded-pill mt-3">Go to Blog Management</Link>
+          <Link href="/blog-grid" className="btn btn-dark rounded-pill mt-3">Browse Blogs</Link>
         </div>
       </div>
     );
@@ -102,9 +102,10 @@ function BlogDetail() {
                   </div>
                 )}
                 <h2 className="fw-bold mb-4" style={{ fontFamily: 'Playfair Display, serif', color: '#1a1a2e' }}>{blog.title}</h2>
-                <div style={{ fontSize: '1.1rem', lineHeight: 1.8, color: '#444' }}>
-                  {blog.content?.split('\n').map((p, i) => <p key={i}>{p}</p>)}
-                </div>
+                <div
+                  style={{ fontSize: '1.1rem', lineHeight: 1.8, color: '#444' }}
+                  dangerouslySetInnerHTML={{ __html: blog.content || '' }}
+                />
                 <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4 pt-3 border-top">
                   <div className="d-flex gap-3">
                     <button className="btn btn-outline-dark rounded-pill" onClick={handleLike}><i className="fa-regular fa-heart me-2"/>{blog.likesCount ?? 0} Likes</button>

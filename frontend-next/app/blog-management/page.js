@@ -6,7 +6,12 @@ import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/layout/PageTitle';
 import Swal from 'sweetalert2';
 import { socialService, blogService } from '../lib/api';
-import BlogEditor from '../../components/features/Blog/BlogEditor';
+import BlogEditor from '@/components/features/Blog/BlogEditor';
+
+function stripHtml(html) {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '');
+}
 
 function BlogManagement() {
   const [blogs, setBlogs] = useState([]);
@@ -162,7 +167,7 @@ function BlogManagement() {
                             <small className="text-muted">{displayDate}</small>
                           </div>
                           <h6 className="fw-bold mb-2">{blog.title}</h6>
-                          <p className="text-muted small flex-grow-1" style={{display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{blog.content}</p>
+                          <p className="text-muted small flex-grow-1" style={{display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{stripHtml(blog.content)}</p>
                           <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
                             <div className="d-flex gap-3 text-muted small">
                               <span><i className="fa-solid fa-eye me-1"/>{blog.viewsCount ?? 0}</span>

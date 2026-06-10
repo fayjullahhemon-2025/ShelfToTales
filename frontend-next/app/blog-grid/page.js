@@ -6,6 +6,11 @@ import Link from 'next/link';
 import { blogService } from '../lib/api';
 import PageTitle from '../components/layout/PageTitle';
 
+function stripHtml(html) {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '');
+}
+
 function BlogGrid() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +55,7 @@ function BlogGrid() {
                     <div className="card-body">
                       <small className="text-muted">{displayDate}</small>
                       <h5 className="fw-bold mt-2 mb-2">{post.title}</h5>
-                      <p className="text-muted small" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{post.content}</p>
+                      <p className="text-muted small" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{stripHtml(post.content)}</p>
                       <div className="d-flex justify-content-between align-items-center mt-3">
                         <div className="d-flex gap-3 text-muted small">
                           <span><i className="fa-solid fa-eye me-1"/>{post.viewsCount ?? 0}</span>
