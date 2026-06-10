@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { bookService, categoryService, adminBookService } from '../../lib/api';
+import { bookService, categoryService, adminBookService, uploadService } from '../../lib/api';
 import Swal from 'sweetalert2';
 import { FadeIn } from '../../components/common/AnimationUtils';
 
@@ -17,6 +17,7 @@ export default function AdminBooksPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -35,6 +36,28 @@ export default function AdminBooksPage() {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((f) => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const handleFileUpload = async (e, field) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      let res;
+      if (field === 'coverUrl') {
+        res = await uploadService.image(file);
+      } else if (field === 'pdfUrl') {
+        res = await uploadService.pdf(file);
+      }
+      if (res?.data?.url) {
+        setForm(f => ({ ...f, [field]: res.data.url }));
+        Swal.fire('Uploaded', `${field === 'coverUrl' ? 'Cover image' : 'PDF file'} uploaded successfully`, 'success');
+      }
+    } catch (err) {
+      Swal.fire('Upload Failed', err.response?.data?.message || 'File upload failed', 'error');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -131,12 +154,38 @@ export default function AdminBooksPage() {
             <input className="form-control" type="number" name="stock" value={form.stock} onChange={handleChange} />
           </div>
           <div className="col-md-6">
-            <label className="form-label">Cover URL</label>
-            <input className="form-control" name="coverUrl" value={form.coverUrl} onChange={handleChange} />
+            <label className="form-label">Cover Image</label>
+            {form.coverUrl ? (
+              <div className="d-flex align-items-center gap-2">
+                <img src={form.coverUrl} alt="Cover preview" style={{ width: 60, height: 80, objectFit: 'cover', borderRadius: 6 }} />
+                <div>
+                  <small className="text-muted d-block" style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.coverUrl}</small>
+                  <button type="button" className="btn btn-sm btn-outline-danger mt-1" onClick={() => setForm(f => ({ ...f, coverUrl: '' }))}>Remove</button>
+                </div>
+              </div>
+            ) : (
+              <label className="btn btn-outline-primary btn-sm" style={{ cursor: 'pointer' }}>
+                <i className="fa-solid fa-cloud-arrow-up me-1" /> Upload Cover
+                <input type="file" accept="image/*" className="d-none" onChange={(e) => handleFileUpload(e, 'coverUrl')} disabled={uploading} />
+              </label>
+            )}
           </div>
           <div className="col-md-6">
-            <label className="form-label">PDF URL</label>
-            <input className="form-control" name="pdfUrl" value={form.pdfUrl} onChange={handleChange} />
+            <label className="form-label">PDF File</label>
+            {form.pdfUrl ? (
+              <div className="d-flex align-items-center gap-2">
+                <i className="fa-solid fa-file-pdf fa-2x text-danger" />
+                <div>
+                  <small className="text-muted d-block" style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.pdfUrl}</small>
+                  <button type="button" className="btn btn-sm btn-outline-danger mt-1" onClick={() => setForm(f => ({ ...f, pdfUrl: '' }))}>Remove</button>
+                </div>
+              </div>
+            ) : (
+              <label className="btn btn-outline-primary btn-sm" style={{ cursor: 'pointer' }}>
+                <i className="fa-solid fa-cloud-arrow-up me-1" /> Upload PDF
+                <input type="file" accept=".pdf" className="d-none" onChange={(e) => handleFileUpload(e, 'pdfUrl')} disabled={uploading} />
+              </label>
+            )}
           </div>
           <div className="col-md-6">
             <label className="form-label">Mood Tags</label>
