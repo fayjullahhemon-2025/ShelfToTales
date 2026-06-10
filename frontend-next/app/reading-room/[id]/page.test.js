@@ -28,37 +28,21 @@ vi.mock('../../lib/api', () => ({
   },
 }));
 
-// Mock LofiContext
-const mockNextTrack = vi.fn();
-const mockPrevTrack = vi.fn();
-const mockTogglePlay = vi.fn();
-const mockSetVolume = vi.fn();
-const mockToggleAmbient = vi.fn();
-
+// Mock LofiContext (used by MusicPlayerPanel internally)
 vi.mock('../../contexts/LofiContext', () => ({
   useLofi: () => ({
     isPlaying: false,
     currentTime: 0,
     duration: 180,
     volume: 0.5,
-    currentTrack: { title: "Autumn Rainfall", artist: "Lofi Girl & Study Beats", coverUrl: "" },
-    ambientStates: {
-      rain: { active: false, volume: 0.5 },
-      cafe: { active: false, volume: 0.5 },
-      fire: { active: false, volume: 0.5 },
-      nature: { active: false, volume: 0.5 },
-    },
-    ambientSounds: [
-      { id: 'rain', name: 'Rain', icon: 'fa-cloud-showers-heavy' },
-      { id: 'cafe', name: 'Cafe', icon: 'fa-mug-hot' },
-      { id: 'fire', name: 'Fire', icon: 'fa-fire' },
-      { id: 'nature', name: 'Nature', icon: 'fa-leaf' }
-    ],
-    nextTrack: mockNextTrack,
-    prevTrack: mockPrevTrack,
-    togglePlay: mockTogglePlay,
-    setVolume: mockSetVolume,
-    toggleAmbient: mockToggleAmbient,
+    currentTrack: { title: 'Autumn Rainfall', artist: 'Lofi Girl & Study Beats', coverUrl: '' },
+    ambientStates: {},
+    ambientSounds: [],
+    nextTrack: vi.fn(),
+    prevTrack: vi.fn(),
+    togglePlay: vi.fn(),
+    setVolume: vi.fn(),
+    toggleAmbient: vi.fn(),
   }),
 }));
 
@@ -67,12 +51,11 @@ describe('ReadingRoomDetail Component tests', () => {
     vi.clearAllMocks();
     localStorage.clear();
     localStorage.setItem('user', JSON.stringify({ email: 'user@example.com', fullName: 'Test User' }));
-    
-    // Default mock behavior
+
     readingRoomService.getMessages.mockResolvedValue({ data: [] });
   });
 
-  test('renders page and elements including Lofi Player', async () => {
+  test('renders page with 2-column layout and room details', async () => {
     readingRoomService.getAll.mockResolvedValue({
       data: [
         {
@@ -87,27 +70,25 @@ describe('ReadingRoomDetail Component tests', () => {
 
     render(<ReadingRoomDetail />);
 
-    // Wait for the room details to load
     await waitFor(() => {
-      expect(screen.getByText('Book Lovers Corner')).toBeInTheDocument();
+      expect(screen.getAllByText('Book Lovers Corner').length).toBeGreaterThanOrEqual(1);
     });
 
-    // Check if Lofi widget elements are rendered
-    expect(screen.getByText('Lofi Session')).toBeInTheDocument();
-    expect(screen.getByText('Autumn Rainfall')).toBeInTheDocument();
-    expect(screen.getByText('Ambient Toggles')).toBeInTheDocument();
+    // Book title appears in header meta and BookPreviewPanel
+    expect(screen.getAllByText('The Great Gatsby').length).toBe(2);
 
-    // Verify ambient sounds are present
-    expect(screen.getByText(/^Rain$/i)).toBeInTheDocument();
-    expect(screen.getByText(/^Cafe$/i)).toBeInTheDocument();
+    // Book preview panel renders the room name
+    const roomNames = screen.getAllByText('Book Lovers Corner');
+    expect(roomNames.length).toBe(2);
 
-    // Verify button Lofi control triggers
-    const ambientBtn = screen.getByText(/^Rain$/i);
-    fireEvent.click(ambientBtn);
-    expect(mockToggleAmbient).toHaveBeenCalledWith('rain');
+    // Open Reader button in BookPreviewPanel
+    expect(screen.getByText('Open Reader')).toBeInTheDocument();
+
+    // Chat input
+    expect(screen.getByPlaceholderText('Type a message…')).toBeInTheDocument();
   });
 
-  test('Open/Close Reader toggles split screen layout when pdfUrl is present', async () => {
+  test('Open Reader shows PDF iframe overlay', async () => {
     readingRoomService.getAll.mockResolvedValue({
       data: [
         {
@@ -122,19 +103,12 @@ describe('ReadingRoomDetail Component tests', () => {
 
     render(<ReadingRoomDetail />);
 
-    // Wait for the room to render
     await waitFor(() => {
-      expect(screen.getByText('Silent Library')).toBeInTheDocument();
+      expect(screen.getAllByText('Silent Library').length).toBeGreaterThanOrEqual(1);
     });
 
-    // Expect "Open Reader" button to be visible since pdfUrl is present
+    // Click Open Reader in BookPreviewPanel
     const openReaderBtn = screen.getByText('Open Reader');
-    expect(openReaderBtn).toBeInTheDocument();
-
-    // Verify iframe is NOT rendered initially
-    expect(screen.queryByTitle('The Great Gatsby')).not.toBeInTheDocument();
-
-    // Click "Open Reader"
     fireEvent.click(openReaderBtn);
 
     // Verify iframe IS rendered
@@ -143,14 +117,10 @@ describe('ReadingRoomDetail Component tests', () => {
       expect(screen.getByTitle('The Great Gatsby')).toHaveAttribute('src', 'http://example.com/gatsby.pdf');
     });
 
-    // Button should now say "Close Reader"
-    const closeReaderBtn = screen.getByText('Close Reader');
-    expect(closeReaderBtn).toBeInTheDocument();
+    // Close via the overlay close button
+    const closeBtn = screen.getByLabelText('Close reader');
+    fireEvent.click(closeBtn);
 
-    // Click "Close Reader"
-    fireEvent.click(closeReaderBtn);
-
-    // Verify iframe is gone
     await waitFor(() => {
       expect(screen.queryByTitle('The Great Gatsby')).not.toBeInTheDocument();
       expect(screen.getByText('Open Reader')).toBeInTheDocument();
