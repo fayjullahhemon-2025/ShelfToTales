@@ -7,6 +7,8 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 @Service
 public class ImageHashService {
@@ -19,6 +21,16 @@ public class ImageHashService {
             throw new IOException("Unable to read image file");
         }
         return computeDHash(image);
+    }
+
+    public long computeDHash(URL imageUrl) throws IOException {
+        try (InputStream in = imageUrl.openStream()) {
+            BufferedImage image = ImageIO.read(in);
+            if (image == null) {
+                throw new IOException("Unable to read image from URL: " + imageUrl);
+            }
+            return computeDHash(image);
+        }
     }
 
     public long computeDHash(BufferedImage image) {

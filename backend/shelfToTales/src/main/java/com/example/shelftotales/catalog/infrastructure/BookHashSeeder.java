@@ -6,11 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.nio.file.Files;
 
 @Component
 @RequiredArgsConstructor
@@ -49,20 +45,10 @@ public class BookHashSeeder implements CommandLineRunner {
 
         for (Book book : booksNeedingHash) {
             try {
-                var resource = new UrlResource(book.getCoverUrl());
-                File tempFile = File.createTempFile("hash_", ".jpg");
-                resource.downloadTo(tempFile.toPath());
-
-                var multipartFile = new org.springframework.mock.web.MockMultipartFile(
-                        "file", "cover.jpg", "image/jpeg",
-                        Files.newInputStream(tempFile.toPath()));
-
-                long hash = imageHashService.computeDHash(multipartFile);
+                long hash = imageHashService.computeDHash(new java.net.URL(book.getCoverUrl()));
                 book.setCoverHash(hash);
                 bookRepository.save(book);
                 success++;
-
-                tempFile.delete();
             } catch (Exception e) {
                 failed++;
                 log.warn("Failed to hash book {}: {}", book.getId(), e.getMessage());

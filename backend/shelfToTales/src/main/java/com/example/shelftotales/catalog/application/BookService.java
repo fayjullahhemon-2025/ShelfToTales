@@ -108,14 +108,8 @@ public class BookService {
 
         if (request.getCoverUrl() != null && !request.getCoverUrl().isEmpty()) {
             try {
-                var coverUrl = request.getCoverUrl();
-                var resource = new org.springframework.core.io.UrlResource(coverUrl);
-                var tempFile = java.io.File.createTempFile("cover", ".jpg");
-                java.nio.file.Files.copy(resource.getInputStream(), tempFile.toPath());
-                var multipartFile = new org.springframework.mock.web.MockMultipartFile(
-                    "file", tempFile.getName(), "image/jpeg", java.nio.file.Files.newInputStream(tempFile.toPath()));
-                book.setCoverHash(imageHashService.computeDHash(multipartFile));
-                tempFile.delete();
+                var hash = imageHashService.computeDHash(new java.net.URL(request.getCoverUrl()));
+                book.setCoverHash(hash);
             } catch (Exception e) {
                 // Log and continue without hash
             }
@@ -153,14 +147,8 @@ public class BookService {
 
         if (request.getCoverUrl() != null && !request.getCoverUrl().isEmpty()) {
             try {
-                var coverUrl = request.getCoverUrl();
-                var resource = new org.springframework.core.io.UrlResource(coverUrl);
-                var tempFile = java.io.File.createTempFile("cover", ".jpg");
-                java.nio.file.Files.copy(resource.getInputStream(), tempFile.toPath());
-                var multipartFile = new org.springframework.mock.web.MockMultipartFile(
-                    "file", tempFile.getName(), "image/jpeg", java.nio.file.Files.newInputStream(tempFile.toPath()));
-                book.setCoverHash(imageHashService.computeDHash(multipartFile));
-                tempFile.delete();
+                var hash = imageHashService.computeDHash(new java.net.URL(request.getCoverUrl()));
+                book.setCoverHash(hash);
             } catch (Exception e) {
                 // Log and continue without hash
             }
