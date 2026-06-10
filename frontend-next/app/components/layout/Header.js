@@ -19,12 +19,22 @@ function Header(){
 	const [headerFix, setheaderFix] = React.useState(false);
 	const router = useRouter();
 	const [searchQuery, setSearchQuery] = useState('');
+	const [imageSearchLoading, setImageSearchLoading] = useState(false);
 
 	const handleSearch = (e) => {
 		e.preventDefault();
 		if (searchQuery.trim()) {
 			router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
 		}
+	};
+
+	const handleImageSearch = (e) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		const formData = new FormData();
+		formData.append('file', file);
+		router.push(`/search?tab=image`);
+		// The search page will handle the actual upload
 	};
 
 	const handleMenuActive = (title) => {
@@ -221,6 +231,15 @@ function Header(){
 							/>
 							<button className="btn" type="submit"><i className="flaticon-loupe"></i></button>
 						</div>
+						<label className="header-image-search-btn" title="Search by image" style={{ cursor: 'pointer', marginLeft: '8px' }}>
+							<i className="fa-solid fa-camera" />
+							<input
+								type="file"
+								accept="image/*"
+								className="d-none"
+								onChange={handleImageSearch}
+							/>
+						</label>
 					</form>
 					</div>
 				</div>
@@ -266,9 +285,18 @@ function Header(){
 									value={searchQuery}
 									onChange={(e) => setSearchQuery(e.target.value)}
 								/>
-								<button className="btn" type="submit"><i className="flaticon-loupe"></i></button>
-							</div>
-						</form>
+							<button className="btn" type="submit"><i className="flaticon-loupe"></i></button>
+						</div>
+						<label className="header-image-search-btn" title="Search by image" style={{ cursor: 'pointer', marginLeft: '8px' }}>
+							<i className="fa-solid fa-camera" />
+							<input
+								type="file"
+								accept="image/*"
+								className="d-none"
+								onChange={handleImageSearch}
+							/>
+						</label>
+					</form>
 							<ul className="nav navbar-nav">
 								{MenuListArray2.map((data,index) => {										
 									return(
