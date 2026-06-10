@@ -45,6 +45,10 @@ import com.example.shelftotales.catalog.domain.*;
 import com.example.shelftotales.bookshelf.domain.*;
 import com.example.shelftotales.catalog.infrastructure.*;
 import com.example.shelftotales.shared.util.AuthUtils;
+import com.example.shelftotales.ai.infrastructure.UserProfileVectorRepository;
+import com.example.shelftotales.ai.application.EmbeddingService;
+import com.example.shelftotales.catalog.infrastructure.BookEmbeddingRepository;
+import com.example.shelftotales.ai.application.AIService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +58,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import com.example.shelftotales.ai.domain.UserProfileVector;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -69,6 +75,10 @@ class DashboardServiceTest {
     @Mock private OrderRepository orderRepository;
     @Mock private BookRepository bookRepository;
     @Mock private UserRepository userRepository;
+    @Mock private UserProfileVectorRepository profileVectorRepository;
+    @Mock private EmbeddingService embeddingService;
+    @Mock private BookEmbeddingRepository bookEmbeddingRepository;
+    @Mock private AIService aiService;
 
     private DashboardService dashboardService;
     private User testUser;
@@ -77,7 +87,8 @@ class DashboardServiceTest {
     void setUp() {
         dashboardService = new DashboardService(
             readingActivityRepository, bookshelfRepository, shelfBookRepository,
-            cartItemRepository, wishlistRepository, orderRepository, bookRepository, userRepository
+            cartItemRepository, wishlistRepository, orderRepository, bookRepository, userRepository,
+            profileVectorRepository, embeddingService, bookEmbeddingRepository, aiService
         );
         testUser = User.builder()
             .id(1L)
@@ -125,6 +136,59 @@ class DashboardServiceTest {
             assertEquals(0, response.getWishlistCount());
             assertEquals(12, response.getTotalOrders());
             assertEquals(BigDecimal.valueOf(459.75), response.getTotalSpent());
+        }
+    }
+
+    @Test
+    void getDashboard_shouldReturnFallbackRecommendations_whenNoProfileVector() {
+        try (var mockedAuth = mockStatic(AuthUtils.class)) {
+            mockedAuth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(testUser);
+
+            when(profileVectorRepository.findById(1L)).thenReturn(Optional.empty());
+            
+            org.springframework.data.domain.Page<Book> mockPage = new org.springframework.data.domain.PageImpl<>(List.of(
+                Book.builder().id(101L).title("Fallback Book 1").author("Author 1").build(),
+                Book.builder().id(102L).title("Fallback Book 2").author("Author 2").build()
+            ));
+            when(bookRepository.findAll(any(org.springframework.data.domain.PageRequest.class))).thenReturn(mockPage);
+
+            DashboardResponse response = dashboardService.getDashboard();
+
+            assertNotNull(response);
+            assertNotNull(response.getRecommendations());
+            assertEquals(2, response.getRecommendations().size());
+            assertEquals("Fallback Book 1", response.getRecommendations().get(0).getTitle());
+            assertEquals("Trending in our Bookstore", response.getRecommendations().get(0).getReason());
+        }
+    }
+
+    @Test
+    void getDashboard_shouldReturnCustomRecommendations_whenProfileVectorExists() {
+        try (var mockedAuth = mockStatic(AuthUtils.class)) {
+            mockedAuth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(testUser);
+
+            UserProfileVector userVector = UserProfileVector.builder()
+                .userId(1L)
+                .vectorData("0.1,0.2")
+                .build();
+            when(profileVectorRepository.findById(1L)).thenReturn(Optional.of(userVector));
+            
+            double[] vector = new double[384];
+            when(aiService.stringToVector(anyString())).thenReturn(vector);
+            when(embeddingService.getSimilarBookIds(any(double[].class), eq(3))).thenReturn(List.of(201L));
+            
+            Book book = Book.builder().id(201L).title("Custom Book").author("Author C").build();
+            BookEmbedding embedding = BookEmbedding.builder().bookId(201L).book(book).vectorData("0.3,0.4").build();
+            when(bookEmbeddingRepository.findAllById(anyList())).thenReturn(List.of(embedding));
+            when(aiService.calculateSimilarity(any(double[].class), any(double[].class))).thenReturn(0.85);
+
+            DashboardResponse response = dashboardService.getDashboard();
+
+            assertNotNull(response);
+            assertNotNull(response.getRecommendations());
+            assertEquals(1, response.getRecommendations().size());
+            assertEquals("Custom Book", response.getRecommendations().get(0).getTitle());
+            assertTrue(response.getRecommendations().get(0).getReason().contains("AI Match: 85%"));
         }
     }
 }

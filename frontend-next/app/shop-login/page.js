@@ -11,11 +11,7 @@ import Swal from 'sweetalert2';
 // Styles & Images
 import './AuthLayout.css';
 const loginImage = '/assets/images/login-signup.jpg';
-// Public Google OAuth client ID. Override via .env.local if you have a
-// project-specific ID. The fallback matches the CRA app's hardcoded value.
-const GOOGLE_CLIENT_ID =
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
-  '908376284076-qp26p58bj59uatj3am37l9dk6sqm5bcb.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 function LoginInner(){
     const { login, googleAuth } = useAuth();
@@ -23,6 +19,7 @@ function LoginInner(){
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     useEffect(() => {
+        if (!GOOGLE_CLIENT_ID) return;
         const initGoogle = () => {
             if (window.google) {
                 window.google.accounts.id.initialize({
@@ -78,9 +75,12 @@ function LoginInner(){
                 
                 {!forgotPass ? (
                     <>
-                        <div id="google-signin-btn" className="auth-google-btn"></div>
-
-                        <div className="auth-divider"><span>or</span></div>
+                        {GOOGLE_CLIENT_ID && (
+                            <>
+                                <div id="google-signin-btn" className="auth-google-btn"></div>
+                                <div className="auth-divider"><span>or</span></div>
+                            </>
+                        )}
                         
                         <form onSubmit={handleLogin}>
                             <div className="auth-input-group">

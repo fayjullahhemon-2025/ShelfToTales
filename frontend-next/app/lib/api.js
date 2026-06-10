@@ -119,7 +119,7 @@ export const cartService = {
 export const orderService = {
   checkout: (orderData) => api.post('/checkout', orderData),
   getUserOrders: () => api.get('/orders'),
-  getHistory: () => api.get('/orders/history'),
+  getHistory: () => api.get('/orders'),
   getById: (id) => api.get(`/orders/${id}`),
 };
 
@@ -147,6 +147,12 @@ export const readingRoomService = {
   getAll: () => api.get('/rooms'),
   getMessages: (roomId) => api.get(`/rooms/${roomId}/messages`),
   postMessage: (roomId, content) => api.post(`/rooms/${roomId}/messages`, { content }),
+  getMembers: (roomId) => api.get(`/rooms/${roomId}/members`),
+  removeMember: (roomId, userId) => api.delete(`/rooms/${roomId}/members/${userId}`),
+  invite: (roomId, userIds) => api.post(`/rooms/${roomId}/invites`, { userIds }),
+  getInvites: (roomId) => api.get(`/rooms/${roomId}/invites`),
+  deleteMessage: (roomId, messageId) => api.delete(`/rooms/${roomId}/messages/${messageId}`),
+  deleteRoom: (roomId) => api.delete(`/rooms/${roomId}`),
 };
 
 export const adminBookService = {
@@ -168,7 +174,7 @@ export const adminUserService = {
   warn: (userId, data) => api.post(`/admin/users/${userId}/warn`, data),
   getWarnings: (userId) => api.get(`/admin/users/${userId}/warnings`),
   changeRole: (userId, role) => api.put(`/admin/users/${userId}/role`, { role }),
-  getDashboard: () => api.get('/admin/dashboard'),
+  getDashboard: () => api.get('/admin/analytics/dashboard'),
 };
 
 export const adminOrderService = {
@@ -228,11 +234,13 @@ export const notificationService = {
 };
 
 export const friendService = {
-  sendRequest: (userId) => api.post(`/friends/request/${userId}`),
-  acceptRequest: (requestId) => api.put(`/friends/request/${requestId}/accept`),
-  rejectRequest: (requestId) => api.delete(`/friends/request/${requestId}`),
-  getFriends: () => api.get('/friends'),
-  getRequests: () => api.get('/friends/requests'),
+  sendRequest: (userId) => api.post(`/social/friends/request/${userId}`),
+  acceptRequest: (requestId) => api.put(`/social/friends/request/${requestId}/accept`),
+  rejectRequest: (requestId) => api.delete(`/social/friends/request/${requestId}`),
+  getFriends: () => api.get('/social/friends'),
+  getRequests: () => api.get('/social/friends/requests'),
+  getStatus: (userId) => api.get(`/social/friends/status/${userId}`),
+  unfriend: (friendId) => api.delete(`/social/friends/${friendId}`),
 };
 
 export const aiService = {

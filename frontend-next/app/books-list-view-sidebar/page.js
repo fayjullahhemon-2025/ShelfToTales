@@ -3,11 +3,13 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { bookService, cartService, wishlistService } from '../lib/api';
+import { bookService, wishlistService } from '../lib/api';
+import { useCart } from '../hooks/useCart';
 import Swal from 'sweetalert2';
 import PageTitle from '../components/layout/PageTitle';
 
 function BooksListViewSidebar() {
+  const { addToCart } = useCart();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,10 +20,10 @@ function BooksListViewSidebar() {
       .finally(() => setLoading(false));
   }, []);
 
-  const addToCart = useCallback(async (id) => {
-    try { await cartService.addToCart(id, 1); Swal.fire({ icon: 'success', title: 'Added to cart', timer: 1200, showConfirmButton: false, toast: true, position: 'top-end' }); }
+  const handleAddToCart = useCallback(async (id) => {
+    try { await addToCart(id, 1); Swal.fire({ icon: 'success', title: 'Added to cart', timer: 1200, showConfirmButton: false, toast: true, position: 'top-end' }); }
     catch (e) { Swal.fire('Error', e.response?.data?.message || 'Failed', 'error'); }
-  }, []);
+  }, [addToCart]);
 
   const addToWishlist = useCallback(async (id) => {
     try { await wishlistService.addToWishlist(id); Swal.fire({ icon: 'success', title: 'Added to wishlist', timer: 1200, showConfirmButton: false, toast: true, position: 'top-end' }); }
@@ -55,7 +57,7 @@ function BooksListViewSidebar() {
                       <div className="fw-bold fs-5 mb-2" style={{ color: '#eaa451' }}>${book.price || '0.00'}</div>
                       <div className="d-flex gap-2">
                         <button className="btn btn-sm btn-outline-dark rounded-pill" onClick={() => addToWishlist(book.id)}><i className="fa-regular fa-heart"/></button>
-                        <button className="btn btn-sm btn-dark rounded-pill px-3" onClick={() => addToCart(book.id)}><i className="fa-solid fa-cart-plus me-1"/> Add</button>
+                        <button className="btn btn-sm btn-dark rounded-pill px-3" onClick={() => handleAddToCart(book.id)}><i className="fa-solid fa-cart-plus me-1"/> Add</button>
                       </div>
                     </div>
                   </div>

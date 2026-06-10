@@ -25,4 +25,7 @@ public class ReadingRoomResponse {
     private String bookTitle;
     private String pdfUrl;
     private boolean previewAvailable;
+    private String visibility;
+    private boolean isMember;
+    private int memberCount;
 }

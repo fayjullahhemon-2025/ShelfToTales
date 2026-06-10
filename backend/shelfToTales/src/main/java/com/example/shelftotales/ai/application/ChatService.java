@@ -43,19 +43,48 @@ public class ChatService {
         history.add(ChatMessage.user(userMessage));
         if (history.size() > MAX_HISTORY) history.subList(0, history.size() - MAX_HISTORY).clear();
 
+        // RAG Retrieval: fetch top 4 similar books from database catalog
+        List<Map.Entry<Book, Double>> results = embeddingService.searchSimilar(userMessage, 4, null);
+
+        // Construct Catalog Context for the LLM
+        StringBuilder catalogCtx = new StringBuilder("\n\nAvailable Books in our Catalog matching user's search:\n");
+        if (results.isEmpty()) {
+            catalogCtx.append("(No direct matches found in database. Recommend generic matching genres or ask for clarification.)\n");
+        } else {
+            for (Map.Entry<Book, Double> entry : results) {
+                Book b = entry.getKey();
+                catalogCtx.append("- ID: ").append(b.getId())
+                          .append(", Title: \"").append(b.getTitle()).append("\"")
+                          .append(", Author: \"").append(b.getAuthor()).append("\"");
+                if (b.getCategory() != null) {
+                    catalogCtx.append(", Genre: \"").append(b.getCategory().getName()).append("\"");
+                }
+                if (b.getDescription() != null) {
+                    catalogCtx.append(", Description: \"").append(b.getDescription()).append("\"");
+                }
+                catalogCtx.append("\n");
+            }
+        }
+
+        // Constrain System Prompt
+        String ragSystemPrompt = SYSTEM_PROMPT + "\n\n" +
+            "You MUST recommend books ONLY from the 'Available Books in our Catalog' list below. " +
+            "Explain why you selected them based on their descriptions. Do not suggest titles not listed. " +
+            "If the list is empty, explain that we don't have matching books right now and recommend exploring other genres.\n" +
+            catalogCtx.toString();
+
         String reply = openAIChatProvider.isAvailable()
-                ? openAIChatProvider.chat(history, SYSTEM_PROMPT)
+                ? openAIChatProvider.chat(history, ragSystemPrompt)
                 : null;
-        if (reply == null) reply = ruleBasedChatProvider.chat(history, SYSTEM_PROMPT);
+        if (reply == null) reply = ruleBasedChatProvider.chat(history, ragSystemPrompt);
 
         history.add(ChatMessage.assistant(reply));
 
-        List<Map.Entry<Book, Double>> results = embeddingService.searchSimilar(userMessage, 5, null);
         List<ChatResponse.BookRecommendation> recommendations = results.stream()
                 .map(e -> ChatResponse.BookRecommendation.builder()
                         .bookId(e.getKey().getId()).title(e.getKey().getTitle())
                         .author(e.getKey().getAuthor()).coverUrl(e.getKey().getCoverUrl())
-                        .reason("Matches your description").build())
+                        .reason("Highly relevant match in our catalog").build())
                 .collect(Collectors.toList());
 
         return ChatResponse.builder().reply(reply).recommendations(recommendations).build();

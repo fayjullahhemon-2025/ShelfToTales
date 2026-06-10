@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/social/friends")
@@ -46,5 +47,16 @@ public class FriendController {
     @GetMapping("/requests")
     public ResponseEntity<Page<FriendRequestResponse>> pendingRequests(Pageable pageable) {
         return ResponseEntity.ok(friendService.getPendingRequests(pageable));
+    }
+
+    @GetMapping("/status/{userId}")
+    public ResponseEntity<Map<String, String>> getFriendStatus(@PathVariable Long userId) {
+        return ResponseEntity.ok(Map.of("status", friendService.getFriendStatus(userId)));
+    }
+
+    @DeleteMapping("/{friendId}")
+    public ResponseEntity<Void> unfriend(@PathVariable Long friendId) {
+        friendService.unfriend(friendId);
+        return ResponseEntity.ok().build();
     }
 }

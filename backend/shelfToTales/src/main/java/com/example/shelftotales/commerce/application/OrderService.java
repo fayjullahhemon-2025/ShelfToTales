@@ -13,8 +13,10 @@ import com.example.shelftotales.commerce.infrastructure.OrderRepository;
 import com.example.shelftotales.notification.Notification;
 import com.example.shelftotales.notification.NotificationFactory;
 import com.example.shelftotales.notification.NotificationType;
+import com.example.shelftotales.event.OrderConfirmedEvent;
 import com.example.shelftotales.shared.util.AuthUtils;
 import io.github.resilience4j.retry.annotation.Retry;
+import org.springframework.context.ApplicationEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,7 @@ public class OrderService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final NotificationFactory notificationFactory;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     @Retry(name = "orderCheckout")
@@ -78,6 +81,12 @@ public class OrderService {
                 .subject("Order Confirmed #" + savedOrder.getId())
                 .message("Your order of " + savedOrder.getItems().size() + " items has been confirmed.")
                 .build());
+
+        // Publish event for AI profiling
+        List<Long> bookIds = savedOrder.getItems().stream()
+                .map(item -> item.getBook().getId())
+                .collect(Collectors.toList());
+        eventPublisher.publishEvent(new OrderConfirmedEvent(user.getId(), savedOrder.getId(), bookIds));
 
         log.info("Checkout complete: orderId={}, total={}", savedOrder.getId(), savedOrder.getTotalAmount());
         return mapToOrderResponse(savedOrder);

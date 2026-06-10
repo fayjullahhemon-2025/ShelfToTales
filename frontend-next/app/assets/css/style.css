@@ -18522,6 +18522,9 @@ ul a.rsswidget {
             padding: 10px 0; } }
       .header-nav .nav > li.active > a {
         color: var(--primary); }
+      .header-nav .nav > li .sub-menu li.active > a,
+      .header-nav .nav > li .sub-menu li > a.active {
+        color: var(--primary); }
       .header-nav .nav > li:hover > a {
         color: var(--primary); }
       .header-nav .nav > li:hover > .mega-menu,

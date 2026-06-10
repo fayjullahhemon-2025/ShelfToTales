@@ -6,7 +6,8 @@ export const dynamic = 'force-dynamic';
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Dropdown } from 'react-bootstrap';
-import { bookService, wishlistService, cartService } from '../lib/api';
+import { bookService, wishlistService } from '../lib/api';
+import { useCart } from '../hooks/useCart';
 import Swal from 'sweetalert2';
 import { FadeIn, StaggerContainer, StaggerItem } from '../components/common/AnimationUtils';
 
@@ -16,6 +17,7 @@ import QuickView from '../components/features/Shop/QuickView';
 import BookGridCard from '../components/common/BookGridCard';
 
 function BooksGridView() {
+    const { addToCart } = useCart();
     const [books, setBooks] = useState([]);
     const [accordBtn, setAccordBtn] = useState();
     const [selectBtn, setSelectBtn] = useState('Newest');
@@ -67,7 +69,7 @@ function BooksGridView() {
 
     const handleAddToCart = useCallback(async (bookId) => {
         try {
-            await cartService.addToCart(bookId, 1);
+            await addToCart(bookId, 1);
             Swal.fire({ icon: 'success', title: 'Added to cart', showConfirmButton: false, timer: 1500, toast: true, position: 'top-end' });
         } catch (error) {
             if (error.response?.status === 401 || !localStorage.getItem('token')) {

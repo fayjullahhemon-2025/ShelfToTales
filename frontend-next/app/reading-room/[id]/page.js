@@ -9,6 +9,8 @@ import { readingRoomService } from '../../lib/api';
 import BookPreviewPanel from '../../components/features/ReadingRoom/BookPreviewPanel';
 import MusicPlayerPanel from '../../components/features/ReadingRoom/MusicPlayerPanel';
 import AdminSongManager from '../../components/features/ReadingRoom/AdminSongManager';
+import RoomMembersPanel from '../../components/features/ReadingRoom/RoomMembersPanel';
+import InviteFriendsModal from '../../components/features/ReadingRoom/InviteFriendsModal';
 import './RoomChat.css';
 
 if (typeof window !== 'undefined' && typeof window.global === 'undefined') window.global = window;
@@ -25,6 +27,9 @@ export default function ReadingRoomDetail() {
   const [connected, setConnected] = useState(false);
   const [showReader, setShowReader] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const isOwner = room?.createdBy?.id === user?.id;
 
   const stompRef = useRef(null);
   const chatEnd = useRef(null);
@@ -89,6 +94,9 @@ export default function ReadingRoomDetail() {
           <span className="rc-room-meta">{room.bookTitle || 'Open Discussion'}</span>
         </div>
         <div className="rc-header-right">
+          <button onClick={() => setShowMembers(true)} className="btn btn-sm btn-outline-secondary rounded-pill me-2" style={{ fontSize: '0.8rem' }} aria-label="Show members">
+            <i className="fa-solid fa-users me-1" /> Members
+          </button>
           <span className={`rc-status ${connected ? 'live' : ''}`}>{connected ? '● Live' : '○ Offline'}</span>
         </div>
       </header>
@@ -130,7 +138,19 @@ export default function ReadingRoomDetail() {
                     <div className="rc-msg-bubble">
                       {!isMe && <span className="rc-msg-name">{msg.sender?.fullName || 'Reader'}</span>}
                       <p className="rc-msg-text">{msg.content}</p>
-                      <span className="rc-msg-time">{msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="rc-msg-time">{msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
+                        {isOwner && (
+                          <button onClick={async () => {
+                            const r = await import('sweetalert2').then(m => m.default.fire({ title: 'Delete message?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Delete' }));
+                            if (r.isConfirmed) {
+                              try { await readingRoomService.deleteMessage(roomId, msg.id); setMessages(prev => prev.filter(m => m.id !== msg.id)); } catch { }
+                            }
+                          }} style={{ border: 'none', background: 'none', color: '#ef4444', fontSize: '0.7rem', cursor: 'pointer', padding: 0 }} aria-label="Delete message">
+                            <i className="fa-solid fa-trash" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -164,6 +184,24 @@ export default function ReadingRoomDetail() {
       {showAdmin && (
         <AdminSongManager onClose={() => setShowAdmin(false)} onSongsUpdated={() => {}} />
       )}
+
+      {/* Members Panel */}
+      <RoomMembersPanel
+        roomId={roomId}
+        isOwner={isOwner}
+        show={showMembers}
+        onClose={() => setShowMembers(false)}
+        onInvite={() => { setShowMembers(false); setShowInvite(true); }}
+      />
+
+      {/* Invite Friends Modal */}
+      <InviteFriendsModal
+        roomId={roomId}
+        roomName={room?.name}
+        show={showInvite}
+        onClose={() => setShowInvite(false)}
+        onInvited={() => {}}
+      />
     </div>
   );
 }

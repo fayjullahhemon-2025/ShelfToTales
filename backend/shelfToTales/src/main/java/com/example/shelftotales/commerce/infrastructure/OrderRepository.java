@@ -25,4 +25,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     BigDecimal sumTotalAmountByUserId(Long userId);
 
     boolean existsByUserIdAndItemsBookId(Long userId, Long bookId);
+
+    @Query("SELECT DISTINCT i.book.id FROM Order o JOIN o.items i WHERE o.user.id = :userId AND o.status <> 'CANCELLED'")
+    java.util.List<Long> findBoughtBookIdsByUserId(@Param("userId") Long userId);
 }

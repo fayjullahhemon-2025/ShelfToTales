@@ -33,4 +33,5 @@ public class DashboardResponse {
     private BigDecimal totalSpent;
 
     private List<RecentActivityDTO> recentActivities;
+    private List<RecommendedBookDTO> recommendations;
 }

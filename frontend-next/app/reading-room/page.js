@@ -13,6 +13,7 @@ function ReadingRoom() {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [newRoom, setNewRoom] = useState({ name: '', description: '', bookTitle: '' });
+  const [visibility, setVisibility] = useState('PUBLIC');
 
   useEffect(() => {
     readingRoomService.getAll()
@@ -25,9 +26,10 @@ function ReadingRoom() {
     e.preventDefault();
     if (!newRoom.name.trim()) return;
     try {
-      const res = await readingRoomService.create(newRoom);
+      const res = await readingRoomService.create({ ...newRoom, visibility });
       setRooms([res.data, ...rooms]);
       setNewRoom({ name: '', description: '', bookTitle: '' });
+      setVisibility('PUBLIC');
       setShowCreate(false);
       Swal.fire({ icon: 'success', title: 'Room created!', timer: 1200, showConfirmButton: false });
     } catch (e) {
@@ -64,6 +66,14 @@ function ReadingRoom() {
                     <input type="text" className="form-control" placeholder="Short description" value={newRoom.description} onChange={e => setNewRoom({ ...newRoom, description: e.target.value })}/>
                   </div>
                 </div>
+                <div className="row g-3 mt-1">
+                  <div className="col-md-4">
+                    <select className="form-select" value={visibility} onChange={e => setVisibility(e.target.value)}>
+                      <option value="PUBLIC">Public — Anyone can join</option>
+                      <option value="PRIVATE">Private — Invite only</option>
+                    </select>
+                  </div>
+                </div>
                 <button type="submit" className="btn btn-primary rounded-pill mt-3 px-4">Create</button>
               </form>
             </div>
@@ -83,7 +93,7 @@ function ReadingRoom() {
                         <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: 40, height: 40, background: 'rgba(234,164,81,0.1)' }}>
                           <i className="fa-solid fa-book-open" style={{ color: '#eaa451' }}/>
                         </div>
-                        <h6 className="fw-bold mb-0" style={{ color: '#1a1a2e' }}>{room.name}</h6>
+                        <h6 className="fw-bold mb-0" style={{ color: '#1a1a2e' }}>{room.name}{room.visibility === 'PRIVATE' && <i className="fa-solid fa-lock ms-2" style={{ fontSize: '0.75rem', color: '#EAA451' }} />}</h6>
                       </div>
                       {room.bookTitle && <p className="text-muted small mb-1"><i className="fa-solid fa-bookmark me-1"/>{room.bookTitle}</p>}
                       {room.description && <p className="text-muted small mb-0">{room.description}</p>}

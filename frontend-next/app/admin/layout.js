@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuthContext } from '@/contexts/AuthContext';
 import './admin.css';
 
 const navItems = [
@@ -17,6 +18,28 @@ const navItems = [
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading } = useAuthContext();
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user || user.role !== 'ADMIN') {
+      router.replace('/dashboard');
+      return;
+    }
+    setAuthorized(true);
+  }, [user, loading, router]);
+
+  if (loading || !authorized) {
+    return (
+      <div className="adm-layout">
+        <div className="adm-main" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="adm-layout">
@@ -27,7 +50,7 @@ export default function AdminLayout({ children }) {
         </div>
         <nav className="adm-nav">
           {navItems.map(item => (
-            <Link key={item.href} href={item.href} className={`adm-nav-item ${pathname === item.href ? 'active' : ''}`}>
+            <Link key={item.href} href={item.href} className={`adm-nav-item ${pathname === item.href || pathname.startsWith(item.href + '/') ? 'active' : ''}`}>
               <i className={`fa-solid ${item.icon}`}/>
               <span>{item.label}</span>
             </Link>

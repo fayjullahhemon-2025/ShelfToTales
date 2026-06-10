@@ -10,6 +10,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -27,6 +28,9 @@ public class GoogleAuthService {
     private final JwtService jwtService;
     private final RestTemplate restTemplate;
 
+    @Value("${google.oauth.client-id:}")
+    private String expectedClientId;
+
     @Transactional
     public AuthResponse authenticateWithGoogle(String idToken) {
         Map<String, Object> payload = verifyGoogleToken(idToken);
@@ -37,7 +41,8 @@ public class GoogleAuthService {
         String pictureUrl = (String) payload.get("picture");
         String audience = (String) payload.get("aud");
 
-        if (!"908376284076-qp26p58bj59uatj3am37l9dk6sqm5bcb.apps.googleusercontent.com".equals(audience)) {
+        if (expectedClientId != null && !expectedClientId.isBlank()
+                && !expectedClientId.equals(audience)) {
             throw new IllegalArgumentException("Google token not issued for this application");
         }
 

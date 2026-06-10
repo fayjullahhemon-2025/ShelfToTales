@@ -36,6 +36,8 @@ public class ReadingRoomService {
     private final UserRepository userRepository;
     private final SocialService socialService;
     private final BookRepository bookRepository;
+    private final RoomMemberService roomMemberService;
+    private final RoomMemberRepository roomMemberRepository;
 
     @Transactional
     public ReadingRoomResponse createRoom(ReadingRoomRequest request) {
@@ -44,6 +46,7 @@ public class ReadingRoomService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .createdBy(user)
+                .visibility(request.getVisibility() != null ? request.getVisibility() : "PUBLIC")
                 .build();
 
         if (request.getBookTitle() != null && !request.getBookTitle().isBlank()) {
@@ -54,6 +57,16 @@ public class ReadingRoomService {
         }
 
         ReadingRoom savedRoom = readingRoomRepository.save(room);
+
+        // Add creator as OWNER member
+        roomMemberService.addMember(savedRoom.getId(), user.getId(), "OWNER");
+
+        // Auto-add invited users as members for PRIVATE rooms
+        if ("PRIVATE".equals(savedRoom.getVisibility()) && request.getInviteUserIds() != null) {
+            for (Long userId : request.getInviteUserIds()) {
+                roomMemberService.addMember(savedRoom.getId(), userId, "MEMBER");
+            }
+        }
 
         // Log Social Activity
         String creatorName = user.getFullName();
@@ -68,6 +81,7 @@ public class ReadingRoomService {
     public List<ReadingRoomResponse> getRooms() {
         User currentUser = AuthUtils.getCurrentUser(userRepository);
         return readingRoomRepository.findAllByOrderByCreatedAtDesc().stream()
+                .filter(room -> "PUBLIC".equals(room.getVisibility()) || roomMemberService.isMember(room.getId(), currentUser.getId()))
                 .map(room -> mapToReadingRoomResponse(room, currentUser))
                 .collect(Collectors.toList());
     }
@@ -75,9 +89,11 @@ public class ReadingRoomService {
     @Transactional(readOnly = true)
     public List<RoomMessageResponse> getMessages(Long roomId) {
         User currentUser = AuthUtils.getCurrentUser(userRepository);
-        if (!readingRoomRepository.existsById(roomId)) {
-            throw new IllegalArgumentException("Reading room not found: " + roomId);
-        }
+        ReadingRoom room = readingRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Reading room not found: " + roomId));
+
+        if ("PRIVATE".equals(room.getVisibility()) && !roomMemberService.isMember(roomId, currentUser.getId()))
+            throw new IllegalArgumentException("Not a member of this private room");
 
         List<RoomMessage> messages = roomMessageRepository.findByRoomIdOrderByCreatedAtAsc(roomId);
         return messages.stream()
@@ -104,6 +120,22 @@ public class ReadingRoomService {
         return mapToRoomMessageResponse(savedMsg, sender);
     }
 
+    @Transactional
+    public void deleteRoom(Long roomId) {
+        User currentUser = AuthUtils.getCurrentUser(userRepository);
+        if (!roomMemberService.isOwner(roomId, currentUser.getId()))
+            throw new IllegalArgumentException("Only owner can delete the room");
+        readingRoomRepository.deleteById(roomId);
+    }
+
+    @Transactional
+    public void deleteMessage(Long roomId, Long messageId) {
+        User currentUser = AuthUtils.getCurrentUser(userRepository);
+        if (!roomMemberService.isOwner(roomId, currentUser.getId()))
+            throw new IllegalArgumentException("Only owner can delete messages");
+        roomMessageRepository.deleteById(messageId);
+    }
+
     private ReadingRoomResponse mapToReadingRoomResponse(ReadingRoom room, User currentUser) {
         return ReadingRoomResponse.builder()
                 .id(room.getId())
@@ -115,6 +147,9 @@ public class ReadingRoomService {
                 .bookTitle(room.getBookTitle())
                 .pdfUrl(room.getBook() != null ? room.getBook().getPdfUrl() : null)
                 .previewAvailable(room.getBook() != null && room.getBook().isPreviewAvailable())
+                .visibility(room.getVisibility())
+                .isMember(roomMemberService.isMember(room.getId(), currentUser.getId()))
+                .memberCount((int) roomMemberRepository.countByRoomId(room.getId()))
                 .build();
     }
 

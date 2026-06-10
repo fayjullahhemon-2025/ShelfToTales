@@ -4,11 +4,13 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { bookService, categoryService, wishlistService, cartService } from '../lib/api';
+import { bookService, categoryService, wishlistService } from '../lib/api';
+import { useCart } from '../hooks/useCart';
 import Swal from 'sweetalert2';
 import './BooksSidebar.css';
 
 function BooksGridViewSidebar() {
+  const { addToCart } = useCart();
   const [books, setBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [page, setPage] = useState(0);
@@ -52,7 +54,7 @@ function BooksGridViewSidebar() {
   }, []);
 
   const handleAddToCart = useCallback(async (bookId) => {
-    try { await cartService.addToCart(bookId, 1); Swal.fire({ icon:'success', title:'Added to cart', showConfirmButton:false, timer:1200, toast:true, position:'top-end' }); }
+    try { await addToCart(bookId, 1); Swal.fire({ icon:'success', title:'Added to cart', showConfirmButton:false, timer:1200, toast:true, position:'top-end' }); }
     catch (e) {
       if (e.response?.status === 401 || !localStorage.getItem('token')) {
         Swal.fire('Session Expired', 'Please log in again to add items to cart', 'warning');

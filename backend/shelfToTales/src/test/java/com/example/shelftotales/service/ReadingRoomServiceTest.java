@@ -79,6 +79,12 @@ class ReadingRoomServiceTest {
     @Mock
     private BookRepository bookRepository;
 
+    @Mock
+    private RoomMemberService roomMemberService;
+
+    @Mock
+    private RoomMemberRepository roomMemberRepository;
+
     @InjectMocks
     private ReadingRoomService readingRoomService;
 
@@ -120,6 +126,8 @@ class ReadingRoomServiceTest {
         try (MockedStatic<AuthUtils> auth = mockStatic(AuthUtils.class)) {
             auth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(currentUser);
             when(readingRoomRepository.save(any(ReadingRoom.class))).thenReturn(readingRoom);
+            when(roomMemberRepository.countByRoomId(10L)).thenReturn(1L);
+            when(roomMemberService.isMember(10L, 1L)).thenReturn(true);
 
             ReadingRoomRequest request = ReadingRoomRequest.builder()
                     .name("Fiction Club")
@@ -133,6 +141,7 @@ class ReadingRoomServiceTest {
             assertEquals("Fiction Club", response.getName());
             verify(readingRoomRepository).save(any(ReadingRoom.class));
             verify(socialService).logCustomActivity(eq(currentUser), eq("CREATE_ROOM"), eq(10L), anyString());
+            verify(roomMemberService).addMember(10L, 1L, "OWNER");
         }
     }
 
@@ -141,6 +150,8 @@ class ReadingRoomServiceTest {
         try (MockedStatic<AuthUtils> auth = mockStatic(AuthUtils.class)) {
             auth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(currentUser);
             when(readingRoomRepository.findAllByOrderByCreatedAtDesc()).thenReturn(List.of(readingRoom));
+            when(roomMemberService.isMember(10L, 1L)).thenReturn(true);
+            when(roomMemberRepository.countByRoomId(10L)).thenReturn(1L);
 
             List<ReadingRoomResponse> rooms = readingRoomService.getRooms();
 
@@ -154,7 +165,7 @@ class ReadingRoomServiceTest {
     void getMessages_returnsMessages() {
         try (MockedStatic<AuthUtils> auth = mockStatic(AuthUtils.class)) {
             auth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(currentUser);
-            when(readingRoomRepository.existsById(10L)).thenReturn(true);
+            when(readingRoomRepository.findById(10L)).thenReturn(Optional.of(readingRoom));
             when(roomMessageRepository.findByRoomIdOrderByCreatedAtAsc(10L)).thenReturn(List.of(roomMessage));
 
             List<RoomMessageResponse> messages = readingRoomService.getMessages(10L);
@@ -210,6 +221,8 @@ class ReadingRoomServiceTest {
                 assertEquals(book, roomToSave.getBook());
                 return savedRoom;
             });
+            when(roomMemberRepository.countByRoomId(10L)).thenReturn(1L);
+            when(roomMemberService.isMember(10L, 1L)).thenReturn(true);
 
             ReadingRoomRequest request = ReadingRoomRequest.builder()
                     .name("Fiction Club")
@@ -230,6 +243,7 @@ class ReadingRoomServiceTest {
             verify(bookRepository).findByTitleContainingIgnoreCase("The Great Gatsby");
             verify(readingRoomRepository).save(any(ReadingRoom.class));
             verify(socialService).logCustomActivity(eq(currentUser), eq("CREATE_ROOM"), eq(10L), anyString());
+            verify(roomMemberService).addMember(10L, 1L, "OWNER");
         }
     }
 }

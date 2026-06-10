@@ -257,6 +257,37 @@ function Dashboard() {
         {/* Main Content */}
         <div className="dash-content">
           <div>
+            {/* Recommendations Panel ("Ad-style" premium display) */}
+            {data.recommendations && data.recommendations.length > 0 && (
+              <div className="dash-card dash-animate dash-recommendations-banner mb-4">
+                <div className="dash-recs-header">
+                  <div>
+                    <h3 className="dash-card-title mb-1" style={{ color: '#eaa451' }}>Tailored For You</h3>
+                    <p className="text-muted small mb-0">AI-powered recommendations based on books you read and buy</p>
+                  </div>
+                  <span className="dash-recs-tag"><i className="fa-solid fa-sparkles me-1"/> AI Match</span>
+                </div>
+                <div className="dash-recs-grid mt-3">
+                  {data.recommendations.map((book, idx) => (
+                    <div key={idx} className="dash-rec-ad-card">
+                      <div className="dash-rec-badge">Featured Pick</div>
+                      <div className="dash-rec-cover-wrap">
+                        <img src={book.coverUrl || 'https://via.placeholder.com/150x220/EAA451/fff?text=Book'} alt={book.title} className="dash-rec-cover"/>
+                      </div>
+                      <div className="dash-rec-info">
+                        <h5 className="dash-rec-title">{book.title}</h5>
+                        <p className="dash-rec-author">by {book.author}</p>
+                        <div className="dash-rec-reason">{book.reason}</div>
+                        <Link href={`/shop-detail/${book.bookId}`} className="dash-rec-btn">
+                          View Details <i className="fa-solid fa-arrow-right ms-1"/>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Currently Reading */}
             <div className="dash-card dash-animate">
               <h3 className="dash-card-title">Currently Reading</h3>

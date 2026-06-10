@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { wishlistService, cartService } from '../lib/api';
+import { wishlistService } from '../lib/api';
+import { useCart } from '../hooks/useCart';
 import Swal from 'sweetalert2';
 import { FadeIn } from '../components/common/AnimationUtils';
 
@@ -13,6 +14,7 @@ import { FadeIn } from '../components/common/AnimationUtils';
 import PageTitle from '../components/layout/PageTitle';
 
 function Wishlist(){
+    const { addToCart } = useCart();
     const [wishData, setWishData] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -43,7 +45,7 @@ function Wishlist(){
 
     const handleAddToCart = async (bookId) => {
         try {
-            await cartService.addToCart(bookId, 1);
+            await addToCart(bookId, 1);
             Swal.fire({ icon: 'success', title: 'Added to cart', showConfirmButton: false, timer: 1500, toast: true, position: 'top-end' });
         } catch (error) {
             Swal.fire('Error', error.response?.data?.message || 'Failed to add to cart', 'error');

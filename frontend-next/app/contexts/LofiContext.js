@@ -9,7 +9,7 @@ import {
   useMemo,
 } from 'react';
 
-import { playlistService } from '../../lib/api';
+import { playlistService } from '@/lib/api';
 
 // ---------------------------------------------------------------------------
 // Config & Constants

@@ -7,7 +7,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Nav, Tab } from 'react-bootstrap';
-import { bookService, wishlistService, cartService, reviewService, reviewCommentService } from '../../lib/api';
+import { bookService, wishlistService, reviewService, reviewCommentService } from '../../lib/api';
+import { useCart } from '../../hooks/useCart';
 import Swal from 'sweetalert2';
 import { FadeIn } from '../../components/common/AnimationUtils';
 
@@ -287,6 +288,7 @@ function CommentBlog({id, title, comment, date, rating, avatar, isSpoiler}){
 
 function ShopDetail(){
     const { id } = useParams();
+    const { addToCart } = useCart();
     const [book, setBook] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [count, setCount] = useState(1);
@@ -336,7 +338,7 @@ function ShopDetail(){
 
     const handleAddToCart = async () => {
         try {
-            await cartService.addToCart(id, count);
+            await addToCart(id, count);
             Swal.fire({ icon: 'success', title: 'Added to cart', showConfirmButton: false, timer: 1500, toast: true, position: 'top-end' });
         } catch (error) {
             if (error.response?.status === 401) {

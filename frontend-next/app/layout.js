@@ -17,6 +17,7 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import PageAnimationWrapper from "./components/layout/PageAnimationWrapper";
+import RouteAnimator from "./components/layout/RouteAnimator";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -78,9 +79,7 @@ export default function RootLayout({ children }) {
                 <div className="App">
                   <div className="page-wraper">
                     <Header />
-                    <PageAnimationWrapper>
-                      {children}
-                    </PageAnimationWrapper>
+                    <RouteAnimator>{children}</RouteAnimator>
                     <Footer footerChange="style-1" />
                   </div>
                   <ScrollToTop />

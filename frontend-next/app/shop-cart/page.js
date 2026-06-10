@@ -3,7 +3,7 @@
 // Force fully-dynamic rendering — page reads localStorage/window at render time.
 export const dynamic = 'force-dynamic';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '../hooks/useCart';
 import Swal from 'sweetalert2';
@@ -14,6 +14,10 @@ import { FadeIn } from '../components/common/AnimationUtils';
 
 function ShopCart(){
     const { items, count, total, loading, refreshCart, updateQuantity, removeFromCart } = useCart();
+
+    useEffect(() => {
+        refreshCart();
+    }, [refreshCart]);
 
     const handleUpdateQuantity = async (bookId, newQuantity) => {
         if (newQuantity < 1) return;

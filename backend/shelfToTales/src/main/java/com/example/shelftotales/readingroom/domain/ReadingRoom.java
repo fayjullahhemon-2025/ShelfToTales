@@ -39,6 +39,14 @@ public class ReadingRoom {
     @Builder.Default
     private List<RoomMessage> messages = new ArrayList<>();
 
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private String visibility = "PUBLIC";
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<RoomMember> members = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() { createdAt = LocalDateTime.now(); }
 }

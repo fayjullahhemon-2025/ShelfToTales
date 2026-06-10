@@ -49,4 +49,16 @@ public class ReadingRoomController {
         User currentUser = AuthUtils.getCurrentUser(userRepository);
         return ResponseEntity.ok(readingRoomService.postMessage(roomId, body.get("content"), currentUser));
     }
+
+    @DeleteMapping("/{roomId}")
+    public ResponseEntity<Void> deleteRoom(@PathVariable Long roomId) {
+        readingRoomService.deleteRoom(roomId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{roomId}/messages/{messageId}")
+    public ResponseEntity<Void> deleteMessage(@PathVariable Long roomId, @PathVariable Long messageId) {
+        readingRoomService.deleteMessage(roomId, messageId);
+        return ResponseEntity.ok().build();
+    }
 }

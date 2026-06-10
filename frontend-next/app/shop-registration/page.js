@@ -12,9 +12,7 @@ import Swal from 'sweetalert2';
 // Styles & Images
 import './AuthLayout.css';
 const loginImage = '/assets/images/login-signup.jpg';
-const GOOGLE_CLIENT_ID =
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
-  '908376284076-qp26p58bj59uatj3am37l9dk6sqm5bcb.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 function RegistrationInner(){
     const [fullName, setFullName] = useState('');
@@ -24,6 +22,7 @@ function RegistrationInner(){
     const router = useRouter();
 
     useEffect(() => {
+        if (!GOOGLE_CLIENT_ID) return;
         const initGoogle = () => {
             if (window.google) {
                 window.google.accounts.id.initialize({
@@ -89,9 +88,12 @@ function RegistrationInner(){
                 <h1 className="auth-heading">Ready to start your<br />success story?</h1>
                 <p className="auth-subheading">Signup to our website and start leafing through your favorite literature today!</p>
                 
-                <div id="google-signup-btn" className="auth-google-btn"></div>
-
-                <div className="auth-divider"><span>or</span></div>
+                {GOOGLE_CLIENT_ID && (
+                    <>
+                        <div id="google-signup-btn" className="auth-google-btn"></div>
+                        <div className="auth-divider"><span>or</span></div>
+                    </>
+                )}
                 
                 <form onSubmit={handleRegister}>
                     <div className="auth-input-group">

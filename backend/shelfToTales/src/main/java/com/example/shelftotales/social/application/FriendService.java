@@ -116,4 +116,22 @@ public class FriendService {
                         .createdAt(r.getCreatedAt())
                         .build());
     }
+
+    @Transactional(readOnly = true)
+    public String getFriendStatus(Long targetUserId) {
+        User currentUser = AuthUtils.getCurrentUser(userRepository);
+        if (friendshipRepository.existsByUserIdAndFriendId(currentUser.getId(), targetUserId)) return "FRIENDS";
+        if (friendRequestRepository.existsBySenderIdAndReceiverIdAndStatus(currentUser.getId(), targetUserId, "PENDING")) return "REQUEST_SENT";
+        if (friendRequestRepository.existsBySenderIdAndReceiverIdAndStatus(targetUserId, currentUser.getId(), "PENDING")) return "REQUEST_RECEIVED";
+        return "NONE";
+    }
+
+    @Transactional
+    public void unfriend(Long friendId) {
+        User currentUser = AuthUtils.getCurrentUser(userRepository);
+        if (!friendshipRepository.existsByUserIdAndFriendId(currentUser.getId(), friendId))
+            throw new IllegalArgumentException("Not friends with this user");
+        friendshipRepository.deleteByUserIdAndFriendId(currentUser.getId(), friendId);
+        friendshipRepository.deleteByUserIdAndFriendId(friendId, currentUser.getId());
+    }
 }

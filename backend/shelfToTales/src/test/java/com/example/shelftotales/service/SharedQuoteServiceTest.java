@@ -57,7 +57,7 @@ class SharedQuoteServiceTest {
             assertNotNull(res);
             assertEquals(100L, res.getId());
             assertEquals("Selected Quote", res.getQuoteText());
-            verify(eventPublisher, times(1)).publishEvent(any());
+            verify(eventPublisher, times(1)).publishEvent(any(Object.class));
         }
     }
 

@@ -21,6 +21,12 @@ import com.example.shelftotales.commerce.domain.*;
 import com.example.shelftotales.commerce.infrastructure.*;
 import com.example.shelftotales.commerce.application.*;
 import com.example.shelftotales.shared.util.AuthUtils;
+import com.example.shelftotales.ai.domain.UserProfileVector;
+import com.example.shelftotales.ai.infrastructure.UserProfileVectorRepository;
+import com.example.shelftotales.ai.application.EmbeddingService;
+import com.example.shelftotales.ai.application.AIService;
+import com.example.shelftotales.catalog.domain.BookEmbedding;
+import com.example.shelftotales.catalog.infrastructure.BookEmbeddingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,6 +51,10 @@ public class DashboardService {
     private final OrderRepository orderRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final UserProfileVectorRepository profileVectorRepository;
+    private final EmbeddingService embeddingService;
+    private final BookEmbeddingRepository bookEmbeddingRepository;
+    private final AIService aiService;
 
     @Transactional(readOnly = true)
     public DashboardResponse getDashboard() {
@@ -111,6 +121,7 @@ public class DashboardService {
         List<CategoryBreakdownDTO> booksByCategory = buildCategoryBreakdown(user.getId());
         List<CurrentlyReadingDTO> currentlyReading = buildCurrentlyReading(activeReadings);
         List<RecentActivityDTO> recentActivities = buildRecentActivity(activeReadings, cartItems, wishlistItems);
+        List<RecommendedBookDTO> recommendations = getDashboardRecommendations(user.getId());
 
         return DashboardResponse.builder()
             .fullName(user.getFullName())
@@ -131,6 +142,7 @@ public class DashboardService {
             .totalOrders(totalOrders)
             .totalSpent(totalSpent)
             .recentActivities(recentActivities)
+            .recommendations(recommendations)
             .build();
     }
 
@@ -179,6 +191,46 @@ public class DashboardService {
             .flatMap(s -> s)
             .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
             .limit(10)
+            .collect(Collectors.toList());
+    }
+
+    private List<RecommendedBookDTO> getDashboardRecommendations(Long userId) {
+        return safeGet(() -> {
+            Optional<UserProfileVector> profileOpt = profileVectorRepository.findById(userId);
+            if (profileOpt.isEmpty()) {
+                return getFallbackRecommendations();
+            }
+
+            double[] userVec = aiService.stringToVector(profileOpt.get().getVectorData());
+            List<Long> matchedIds = embeddingService.getSimilarBookIds(userVec, 3);
+            if (matchedIds.isEmpty()) {
+                return getFallbackRecommendations();
+            }
+
+            List<BookEmbedding> embeddings = bookEmbeddingRepository.findAllById(matchedIds);
+            if (embeddings.isEmpty()) {
+                return getFallbackRecommendations();
+            }
+
+            return embeddings.stream()
+                .map(emb -> Map.entry(emb.getBook(),
+                        aiService.calculateSimilarity(userVec, aiService.stringToVector(emb.getVectorData()))))
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
+                .map(e -> RecommendedBookDTO.builder()
+                        .bookId(e.getKey().getId()).title(e.getKey().getTitle())
+                        .author(e.getKey().getAuthor()).coverUrl(e.getKey().getCoverUrl())
+                        .score(e.getValue())
+                        .reason(String.format("AI Match: %.0f%% - Tailored to your reading taste", Math.max(0.0, Math.min(1.0, e.getValue())) * 100))
+                        .build())
+                .collect(Collectors.toList());
+        }, Collections.emptyList());
+    }
+
+    private List<RecommendedBookDTO> getFallbackRecommendations() {
+        return bookRepository.findAll(org.springframework.data.domain.PageRequest.of(0, 3)).getContent().stream()
+            .map(b -> RecommendedBookDTO.builder()
+                .bookId(b.getId()).title(b.getTitle()).author(b.getAuthor())
+                .coverUrl(b.getCoverUrl()).score(0.5).reason("Trending in our Bookstore").build())
             .collect(Collectors.toList());
     }
 

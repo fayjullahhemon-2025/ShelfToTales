@@ -48,6 +48,7 @@ import com.example.shelftotales.catalog.infrastructure.*;
 import com.example.shelftotales.shared.util.AuthUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -82,6 +83,9 @@ class OrderServiceTest {
 
     @Mock
     private NotificationFactory notificationFactory;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private OrderService orderService;

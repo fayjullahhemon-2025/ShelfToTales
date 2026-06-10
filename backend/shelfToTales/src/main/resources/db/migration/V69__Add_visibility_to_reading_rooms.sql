@@ -1,0 +1,1 @@
+ALTER TABLE reading_rooms ADD COLUMN visibility VARCHAR(20) NOT NULL DEFAULT 'PUBLIC';

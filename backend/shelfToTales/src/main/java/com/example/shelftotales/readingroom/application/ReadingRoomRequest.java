@@ -19,4 +19,6 @@ public class ReadingRoomRequest {
     private String name;
     private String description;
     private String bookTitle;
+    private String visibility;
+    private java.util.List<Long> inviteUserIds;
 }
