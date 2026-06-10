@@ -28,6 +28,11 @@ public class CouponController {
         return ResponseEntity.ok(Map.of("valid", true, "discount", discount, "type", coupon.getType()));
     }
 
+    @GetMapping("/api/admin/coupons")
+    public ResponseEntity<?> listAll() {
+        return ResponseEntity.ok(couponService.getAllCoupons());
+    }
+
     @PostMapping("/api/admin/coupons")
     public ResponseEntity<Coupon> create(@RequestBody Map<String, Object> body) {
         return ResponseEntity.ok(couponService.createCoupon(
@@ -37,5 +42,23 @@ public class CouponController {
                 body.get("maxDiscount") != null ? new BigDecimal(body.get("maxDiscount").toString()) : null,
                 body.get("usageLimit") != null ? Integer.parseInt(body.get("usageLimit").toString()) : null,
                 body.get("expiresAt") != null ? LocalDateTime.parse((String) body.get("expiresAt")) : null));
+    }
+
+    @PutMapping("/api/admin/coupons/{id}")
+    public ResponseEntity<Coupon> update(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        return ResponseEntity.ok(couponService.updateCoupon(id,
+                (String) body.get("code"), (String) body.get("type"),
+                new BigDecimal(body.get("value").toString()),
+                body.get("minOrderAmount") != null ? new BigDecimal(body.get("minOrderAmount").toString()) : null,
+                body.get("maxDiscount") != null ? new BigDecimal(body.get("maxDiscount").toString()) : null,
+                body.get("usageLimit") != null ? Integer.parseInt(body.get("usageLimit").toString()) : null,
+                body.get("expiresAt") != null ? LocalDateTime.parse((String) body.get("expiresAt")) : null,
+                body.get("active") != null ? (Boolean) body.get("active") : true));
+    }
+
+    @DeleteMapping("/api/admin/coupons/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        couponService.deleteCoupon(id);
+        return ResponseEntity.noContent().build();
     }
 }

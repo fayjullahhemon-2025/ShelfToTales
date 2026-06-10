@@ -15,9 +15,15 @@ import { FadeIn } from '../components/common/AnimationUtils';
 const pic1 = '/assets/images/about/pic1.jpg';
 const pic2 = '/assets/images/about/pic2.jpg';
 const accordionBlog = [
-    {title:'Cras turpis felis, elementum sed mi at ?'},
-    {title:'Vestibulum nibh risus, in neque eleifen ?'},
-    {title:'Donec maximus, sapien id auctor ?'}
+    {title:'How do I create an account?', answer:'Click Register and fill in your details. You can also sign up with Google.'},
+    {title:'How does the book exchange work?', answer:'List books you want to give away, browse available books, send requests, and arrange exchanges with other readers.'},
+    {title:'Can I read books online?', answer:'Yes! Click Read PDF on any book detail page to access our embedded reader.'},
+];
+
+const faqBookManaging = [
+    {title:'How do reading challenges work?', answer:'Join a challenge, set your reading goal, and track your progress on your dashboard.'},
+    {title:'Is ShelfToTales free?', answer:'Browsing and community features are free. Some books are available for purchase.'},
+    {title:'How do I contact support?', answer:'Visit our Help Desk page or email support@shelftotales.com for assistance.'},
 ];
 
 function Faq(){
@@ -33,12 +39,12 @@ function Faq(){
                                 <div className="faq-content-box">
                                     <div className="section-head">
                                         <h2 className="title">What Is Shelf To Tales?</h2>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation</p>
+                                        <p>ShelfToTales is a community-driven bookstore platform connecting readers, writers, and book lovers worldwide. Here are answers to common questions.</p>
                                     </div>
                                     <div className="faq-accordion">
                                         <Accordion  flush>
                                             {accordionBlog.map((item, i)=>(
-                                                <Accordion.Item eventKey={`${i}`} className="card">
+                                                <Accordion.Item key={i} eventKey={`${i}`} className="card">
                                                     <div className="card-header" >
                                                         <Accordion.Header as="h3" className="title">
                                                             <span>{item.title}</span> 
@@ -49,7 +55,7 @@ function Faq(){
                                                     </div>    
                                                     <Accordion.Body eventKey={`${i}`}>
                                                         <p>
-                                                            Vestibulum nibh risus, lobortis in neque eleifend, varius vulputate sem. Donec maximus, sapien id auctor ornare, odio mi luctus massa, id rhoncus velit purus eu turpis onec aliquet mauris est.
+                                                            {item.answer}
                                                         </p>
                                                     </Accordion.Body>
                                                 </Accordion.Item>
@@ -79,12 +85,12 @@ function Faq(){
                                 <div className="faq-content-box">
                                     <div className="section-head">
                                         <h2 className="title">Managing Books</h2>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation</p>
+                                        <p>Everything you need to know about reading, exchanging, and tracking books on ShelfToTales.</p>
                                     </div>
                                     <div className="faq-accordion">
                                         <Accordion  flush>
-                                            {accordionBlog.map((item, i)=>(
-                                                <Accordion.Item eventKey={`${i}`} className="card">
+                                            {faqBookManaging.map((item, i)=>(
+                                                <Accordion.Item key={i} eventKey={`bm-${i}`} className="card">
                                                     <div className="card-header" >
                                                         <Accordion.Header as="h3" className="title">
                                                             <span>{item.title}</span> 
@@ -93,9 +99,9 @@ function Faq(){
                                                             </span>
                                                         </Accordion.Header>
                                                     </div>    
-                                                    <Accordion.Body eventKey={`${i}`}>
+                                                    <Accordion.Body eventKey={`bm-${i}`}>
                                                         <p>
-                                                            Vestibulum nibh risus, lobortis in neque eleifend, varius vulputate sem. Donec maximus, sapien id auctor ornare, odio mi luctus massa, id rhoncus velit purus eu turpis onec aliquet mauris est.
+                                                            {item.answer}
                                                         </p>
                                                     </Accordion.Body>
                                                 </Accordion.Item>

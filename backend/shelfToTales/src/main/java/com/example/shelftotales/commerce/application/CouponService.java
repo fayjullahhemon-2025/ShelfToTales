@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -58,11 +60,38 @@ public class CouponService {
     @Transactional
     public Coupon createCoupon(String code, String type, BigDecimal value,
                                BigDecimal minOrderAmount, BigDecimal maxDiscount,
-                               Integer usageLimit, java.time.LocalDateTime expiresAt) {
+                               Integer usageLimit, LocalDateTime expiresAt) {
         return couponRepository.save(Coupon.builder()
                 .code(code.toUpperCase()).type(type).value(value)
                 .minOrderAmount(minOrderAmount != null ? minOrderAmount : BigDecimal.ZERO)
                 .maxDiscount(maxDiscount).usageLimit(usageLimit).expiresAt(expiresAt)
                 .build());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Coupon> getAllCoupons() {
+        return couponRepository.findAll();
+    }
+
+    @Transactional
+    public Coupon updateCoupon(Long id, String code, String type, BigDecimal value,
+                               BigDecimal minOrderAmount, BigDecimal maxDiscount,
+                               Integer usageLimit, LocalDateTime expiresAt, boolean active) {
+        Coupon coupon = couponRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Coupon not found"));
+        coupon.setCode(code.toUpperCase());
+        coupon.setType(type);
+        coupon.setValue(value);
+        coupon.setMinOrderAmount(minOrderAmount != null ? minOrderAmount : BigDecimal.ZERO);
+        coupon.setMaxDiscount(maxDiscount);
+        coupon.setUsageLimit(usageLimit);
+        coupon.setExpiresAt(expiresAt);
+        coupon.setActive(active);
+        return couponRepository.save(coupon);
+    }
+
+    @Transactional
+    public void deleteCoupon(Long id) {
+        couponRepository.deleteById(id);
     }
 }

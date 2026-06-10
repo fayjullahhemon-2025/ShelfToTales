@@ -96,9 +96,7 @@ export default function AboutUsPage() {
                 <div className="section-head style-1">
                   <h2 className="title">Shelf To Tales Is Best Choice For Learners</h2>
                   <p>
-                    There are many variations of passages of Lorem Ipsum
-                    available, but the majority have suffered alteration which
-                    don’t look even slightly believable.
+                    ShelfToTales is a community-driven bookstore platform that connects readers, writers, and book lovers worldwide. We believe every book has a story beyond its pages — a story of the people who read it, discuss it, and share it. Our mission is to build a space where reading becomes a shared adventure, not a solitary one.
                   </p>
                 </div>
                 <Link href="/contact-us" className="btn btn-primary btnhover shadow-primary">
@@ -115,8 +113,7 @@ export default function AboutUsPage() {
           <div className="section-head text-center">
             <h2 className="title">Our Mission</h2>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              To empower readers everywhere by building tools that make discovering, sharing, and exchanging books effortless and enjoyable.
             </p>
           </div>
           <div className="row">
@@ -129,9 +126,7 @@ export default function AboutUsPage() {
                   <div className="icon-content">
                     <h4 className="title">{data.title}</h4>
                     <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                      sed do eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua.
+                      Curated selections, trusted sellers, and a growing marketplace — everything you need for your reading journey.
                     </p>
                     <Link href="/about-us">
                       Learn More <i className="fa-solid fa-angles-right" />

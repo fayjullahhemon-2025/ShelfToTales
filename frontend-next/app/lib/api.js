@@ -176,7 +176,10 @@ export const adminOrderService = {
 };
 
 export const adminCouponService = {
+  getAll: () => api.get('/admin/coupons'),
   create: (data) => api.post('/admin/coupons', data),
+  update: (id, data) => api.put(`/admin/coupons/${id}`, data),
+  delete: (id) => api.delete(`/admin/coupons/${id}`),
 };
 
 export const adminSecurityService = {

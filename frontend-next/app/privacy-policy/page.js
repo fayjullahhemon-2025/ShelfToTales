@@ -20,21 +20,31 @@ function PrivacyPolicy(){
                         <div className="row">
                             {/* <!-- Left part start --> */}
                             <div className="col-lg-8 col-md-7 col-sm-12 inner-text">
-                                <h4 className="title">The DexignZone Privacy Policy was updated on 20 July 2022.</h4>
-                                <p className="m-b30">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages,<Link href={"contact-us"}> Contact Us </Link>and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+                                <h4 className="title">ShelfToTales Privacy Policy</h4>
+                                <p className="m-b30">Last updated: January 2025. We are committed to protecting your privacy and ensuring transparency about how we handle your data.</p>
                                 <div className="dlab-divider bg-gray-dark"></div>
-                                <h4 className="title">Who We Are and What This Policy Covers</h4>
-                                <p className="m-b30">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+                                <h4 className="title">What We Collect</h4>
+                                <p className="m-b30">We collect only the data needed to provide our services: your name, email address, and reading activity. We do not collect unnecessary personal information.</p>
                                 
-                                <h4 className="title">What personal information we collect</h4>
+                                <h4 className="title">How We Use Your Data</h4>
                                 <ul className="list-check primary m-a0">
-                                    <li>The DexignLab Privacy Policy was updated on 25 June 2018. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's </li>
-                                    <li>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</li>
-                                    <li>Remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</li>
-                                    <li>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</li>
-                                    <li>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</li>
-                                    
+                                    <li>To provide and improve ShelfToTales services</li>
+                                    <li>To personalize your reading recommendations</li>
+                                    <li>To communicate account updates and community activity</li>
+                                    <li>To process purchases and book exchanges</li>
+                                    <li>For analytics to improve the platform experience</li>
                                 </ul>
+
+                                <h4 className="title" style={{ marginTop: 20 }}>Your Rights</h4>
+                                <ul className="list-check primary m-a0">
+                                    <li>We never sell your personal data to third parties</li>
+                                    <li>Reading activity is private unless you choose to share it</li>
+                                    <li>You can delete your account and data at any time</li>
+                                    <li>You can request a copy of all data we hold about you</li>
+                                </ul>
+
+                                <h4 className="title" style={{ marginTop: 20 }}>Cookies &amp; Contact</h4>
+                                <p>We use cookies for authentication and analytics. For data requests or questions, contact us at <strong>privacy@shelftotales.com</strong>.</p>
                             </div>
                             <div className="col-lg-4 col-md-5 col-sm-12 m-b30 mt-md-0 mt-4">
                                 <aside className="side-bar sticky-top right">
