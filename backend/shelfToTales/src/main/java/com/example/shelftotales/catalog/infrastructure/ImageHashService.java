@@ -1,0 +1,49 @@
+package com.example.shelftotales.catalog.infrastructure;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+@Service
+public class ImageHashService {
+
+    private static final int HASH_SIZE = 8;
+
+    public long computeDHash(MultipartFile file) throws IOException {
+        BufferedImage image = ImageIO.read(file.getInputStream());
+        if (image == null) {
+            throw new IOException("Unable to read image file");
+        }
+        return computeDHash(image);
+    }
+
+    public long computeDHash(BufferedImage image) {
+        BufferedImage resized = new BufferedImage(HASH_SIZE + 1, HASH_SIZE, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = resized.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.drawImage(image, 0, 0, HASH_SIZE + 1, HASH_SIZE, null);
+        g.dispose();
+
+        long hash = 0;
+        for (int y = 0; y < HASH_SIZE; y++) {
+            for (int x = 0; x < HASH_SIZE; x++) {
+                int rgb1 = resized.getRGB(x, y);
+                int rgb2 = resized.getRGB(x + 1, y);
+                int gray1 = ((rgb1 >> 16) & 0xff) * 299 + ((rgb1 >> 8) & 0xff) * 587 + (rgb1 & 0xff) * 114;
+                int gray2 = ((rgb2 >> 16) & 0xff) * 299 + ((rgb2 >> 8) & 0xff) * 587 + (rgb2 & 0xff) * 114;
+                if (gray1 < gray2) {
+                    hash |= (1L << (y * HASH_SIZE + x));
+                }
+            }
+        }
+        return hash;
+    }
+
+    public int hammingDistance(long hash1, long hash2) {
+        return Long.bitCount(hash1 ^ hash2);
+    }
+}

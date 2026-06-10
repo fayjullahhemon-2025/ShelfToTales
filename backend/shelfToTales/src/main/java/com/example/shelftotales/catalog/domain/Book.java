@@ -56,6 +56,9 @@ public class Book {
     @Column(name = "mood_tags")
     private String moodTags;
 
+    @Column(name = "cover_hash")
+    private Long coverHash;
+
     @Version
     private Long version;
 }
