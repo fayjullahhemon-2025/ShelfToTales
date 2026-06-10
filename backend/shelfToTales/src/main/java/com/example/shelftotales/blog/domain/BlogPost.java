@@ -22,6 +22,9 @@ public class BlogPost {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "cover_image", length = 500)
+    private String coverImage;
+
     @Column(nullable = false, length = 20)
     @Builder.Default
     private String status = "PUBLISHED";

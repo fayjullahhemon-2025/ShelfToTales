@@ -10,6 +10,7 @@ public class BlogPostResponse {
     private String authorName;
     private String title;
     private String content;
+    private String coverImage;
     private String status;
     private int viewsCount;
     private int likesCount;
