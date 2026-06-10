@@ -6,12 +6,14 @@ import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/layout/PageTitle';
 import Swal from 'sweetalert2';
 import { socialService, blogService } from '../lib/api';
+import BlogEditor from '../../components/features/Blog/BlogEditor';
 
 function BlogManagement() {
   const [blogs, setBlogs] = useState([]);
   const [tab, setTab] = useState('my'); // 'my' | 'create' | 'feed'
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [coverImage, setCoverImage] = useState('');
   const [editId, setEditId] = useState(null);
   const [feedPosts, setFeedPosts] = useState([]);
   const [feedLoading, setFeedLoading] = useState(false);
@@ -54,22 +56,22 @@ function BlogManagement() {
     if (editId) {
       const existingBlog = blogs.find(b => b.id === editId);
       const currentStatus = existingBlog ? existingBlog.status : 'PUBLISHED';
-      blogService.update(editId, { title, content, status: currentStatus })
+      blogService.update(editId, { title, content, coverImage: coverImage || undefined, status: currentStatus })
         .then(() => {
           loadMyBlogs();
           setEditId(null);
           Swal.fire({ icon: 'success', title: 'Updated!', timer: 1500, showConfirmButton: false });
-          setTitle(''); setContent(''); setTab('my');
+          setTitle(''); setContent(''); setCoverImage(''); setTab('my');
         })
         .catch(err => {
           Swal.fire('Error', err.response?.data?.message || 'Failed to update blog', 'error');
         });
     } else {
-      blogService.create({ title, content, status: 'PUBLISHED' })
+      blogService.create({ title, content, coverImage: coverImage || undefined, status: 'PUBLISHED' })
         .then(() => {
           loadMyBlogs();
           Swal.fire({ icon: 'success', title: 'Published!', timer: 1500, showConfirmButton: false });
-          setTitle(''); setContent(''); setTab('my');
+          setTitle(''); setContent(''); setCoverImage(''); setTab('my');
         })
         .catch(err => {
           Swal.fire('Error', err.response?.data?.message || 'Failed to publish blog', 'error');
@@ -78,7 +80,7 @@ function BlogManagement() {
   };
 
   const handleEdit = (blog) => {
-    setTitle(blog.title); setContent(blog.content); setEditId(blog.id); setTab('create');
+    setTitle(blog.title); setContent(blog.content); setCoverImage(blog.coverImage || ''); setEditId(blog.id); setTab('create');
   };
 
   const handleDelete = (id) => {
@@ -123,7 +125,7 @@ function BlogManagement() {
           <button className={`btn ${tab==='my'?'btn-dark':'btn-outline-dark'} rounded-pill px-4`} onClick={() => setTab('my')}>
             <i className="fa-solid fa-file-lines me-2"/>My Posts ({blogs.length})
           </button>
-          <button className={`btn ${tab==='create'?'btn-dark':'btn-outline-dark'} rounded-pill px-4`} onClick={() => { setTab('create'); setEditId(null); setTitle(''); setContent(''); }}>
+          <button className={`btn ${tab==='create'?'btn-dark':'btn-outline-dark'} rounded-pill px-4`} onClick={() => { setTab('create'); setEditId(null); setTitle(''); setContent(''); setCoverImage(''); }}>
             <i className="fa-solid fa-plus me-2"/>{editId ? 'Edit Post' : 'Create New'}
           </button>
           <button className={`btn ${tab==='feed'?'btn-dark':'btn-outline-dark'} rounded-pill px-4`} onClick={() => setTab('feed')}>
@@ -193,11 +195,27 @@ function BlogManagement() {
               </div>
               <div className="mb-4">
                 <label className="form-label fw-bold">Content</label>
-                <textarea className="form-control" rows="10" placeholder="Write your blog post here..." value={content} onChange={e => setContent(e.target.value)} style={{borderRadius:12}}/>
+                <BlogEditor
+                  content={content}
+                  onChange={(val) => setContent(val)}
+                  placeholder="Write your blog post here..."
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label fw-bold">Cover Image URL (optional)</label>
+                <input
+                  type="url"
+                  className="form-control"
+                  placeholder="https://example.com/image.jpg"
+                  value={coverImage}
+                  onChange={(e) => setCoverImage(e.target.value)}
+                  style={{borderRadius:12}}
+                />
+                <small className="text-muted">Enter a URL for the blog post cover image</small>
               </div>
               <div className="d-flex gap-2">
                 <button className="btn btn-dark rounded-pill px-4" onClick={handleCreate}><i className="fa-solid fa-paper-plane me-2"/>{editId ? 'Update' : 'Publish'}</button>
-                {editId && <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => { setEditId(null); setTitle(''); setContent(''); }}>Cancel</button>}
+                {editId && <button className="btn btn-outline-secondary rounded-pill px-4" onClick={() => { setEditId(null); setTitle(''); setContent(''); setCoverImage(''); }}>Cancel</button>}
               </div>
             </div>
           </div>
