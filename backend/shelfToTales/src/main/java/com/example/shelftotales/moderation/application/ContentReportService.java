@@ -78,6 +78,7 @@ public class ContentReportService {
                 case "REVIEW":
                     reviewRepository.deleteById(report.getTargetId());
                     break;
+                case "BLOG":
                 case "BLOG_POST":
                     blogPostRepository.deleteById(report.getTargetId());
                     break;
@@ -123,6 +124,7 @@ public class ContentReportService {
                         preview = "Review by " + rv.getUser().getFullName() + " on Book '" + rv.getBook().getTitle() + "': \"" + rv.getComment() + "\"";
                     }
                     break;
+                case "BLOG":
                 case "BLOG_POST":
                     BlogPost post = blogPostRepository.findById(r.getTargetId()).orElse(null);
                     if (post != null) {

@@ -21,5 +21,8 @@ public class OrderResponse {
     private LocalDateTime orderDate;
     private BigDecimal totalAmount;
     private OrderStatus status;
+    private String paymentMethod;
+    private String couponCode;
+    private BigDecimal discountAmount;
     private List<OrderItemResponse> items;
 }

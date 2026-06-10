@@ -122,6 +122,9 @@ public class OrderService {
                 .orderDate(order.getOrderDate())
                 .totalAmount(order.getTotalAmount())
                 .status(order.getStatus())
+                .paymentMethod(order.getPaymentMethod())
+                .couponCode(order.getCouponCode())
+                .discountAmount(order.getDiscountAmount())
                 .items(itemResponses)
                 .build();
     }

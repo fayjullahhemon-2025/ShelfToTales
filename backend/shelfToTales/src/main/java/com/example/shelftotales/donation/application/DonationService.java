@@ -182,6 +182,8 @@ public class DonationService {
                 .recipientId(r.getRecipient().getId())
                 .recipientName(r.getRecipient().getFullName())
                 .recipientEmail(r.getRecipient().getEmail())
+                .donorName(r.getDonation().getDonor().getFullName())
+                .donorEmail(r.getDonation().getDonor().getEmail())
                 .reason(r.getReason())
                 .status(r.getStatus())
                 .createdAt(r.getCreatedAt())

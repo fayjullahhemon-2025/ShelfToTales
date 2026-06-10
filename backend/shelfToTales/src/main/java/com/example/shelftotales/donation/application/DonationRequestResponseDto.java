@@ -14,6 +14,8 @@ public class DonationRequestResponseDto {
     private Long recipientId;
     private String recipientName;
     private String recipientEmail;
+    private String donorName;
+    private String donorEmail;
     private String reason;
     private String status;
     private LocalDateTime createdAt;
