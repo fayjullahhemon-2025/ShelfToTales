@@ -1,0 +1,108 @@
+.blog-editor-wrapper {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.blog-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+  background: #fafafa;
+}
+
+.blog-editor-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #555;
+  font-size: 0.85rem;
+  transition: all 0.15s;
+}
+
+.blog-editor-toolbar button:hover {
+  background: #e8e4df;
+  color: #1a1a2e;
+}
+
+.blog-editor-toolbar button.active {
+  background: #eaa451;
+  color: #fff;
+}
+
+.blog-editor-toolbar .separator {
+  width: 1px;
+  background: #ddd;
+  margin: 0 4px;
+  align-self: stretch;
+}
+
+.blog-editor-content {
+  min-height: 300px;
+  padding: 1rem;
+  outline: none;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #333;
+}
+
+.blog-editor-content p {
+  margin-bottom: 0.8rem;
+}
+
+.blog-editor-content h1,
+.blog-editor-content h2,
+.blog-editor-content h3 {
+  font-family: 'Playfair Display', serif;
+  color: #1a1a2e;
+  margin-top: 1.2rem;
+  margin-bottom: 0.6rem;
+}
+
+.blog-editor-content img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 1rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.blog-editor-content blockquote {
+  border-left: 3px solid #eaa451;
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  background: #faf8f5;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #555;
+}
+
+.blog-editor-content iframe {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.blog-editor-content ul,
+.blog-editor-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.blog-editor-content a {
+  color: #eaa451;
+  text-decoration: underline;
+}
+
+.blog-editor-placeholder {
+  color: #aaa;
+  pointer-events: none;
+}
