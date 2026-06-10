@@ -35,6 +35,7 @@ public class ReadingRoomService {
     private final RoomMessageRepository roomMessageRepository;
     private final UserRepository userRepository;
     private final SocialService socialService;
+    private final BookRepository bookRepository;
 
     @Transactional
     public ReadingRoomResponse createRoom(ReadingRoomRequest request) {
@@ -44,6 +45,13 @@ public class ReadingRoomService {
                 .description(request.getDescription())
                 .createdBy(user)
                 .build();
+
+        if (request.getBookTitle() != null && !request.getBookTitle().isBlank()) {
+            room.setBookTitle(request.getBookTitle().trim());
+            bookRepository.findByTitleContainingIgnoreCase(request.getBookTitle().trim())
+                    .stream().findFirst()
+                    .ifPresent(room::setBook);
+        }
 
         ReadingRoom savedRoom = readingRoomRepository.save(room);
 
@@ -103,6 +111,10 @@ public class ReadingRoomService {
                 .description(room.getDescription())
                 .createdAt(room.getCreatedAt())
                 .createdBy(mapToUserSummaryResponse(room.getCreatedBy(), currentUser))
+                .bookId(room.getBook() != null ? room.getBook().getId() : null)
+                .bookTitle(room.getBookTitle())
+                .pdfUrl(room.getBook() != null ? room.getBook().getPdfUrl() : null)
+                .previewAvailable(room.getBook() != null && room.getBook().isPreviewAvailable())
                 .build();
     }
 

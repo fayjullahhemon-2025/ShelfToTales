@@ -28,6 +28,13 @@ public class ReadingRoom {
 
     private LocalDateTime createdAt;
 
+    @Column(name = "book_title", length = 150)
+    private String bookTitle;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id")
+    private Book book;
+
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<RoomMessage> messages = new ArrayList<>();

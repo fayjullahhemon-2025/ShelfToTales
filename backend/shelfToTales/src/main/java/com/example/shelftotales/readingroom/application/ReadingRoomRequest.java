@@ -18,4 +18,5 @@ public class ReadingRoomRequest {
     @NotBlank(message = "Room name is required")
     private String name;
     private String description;
+    private String bookTitle;
 }

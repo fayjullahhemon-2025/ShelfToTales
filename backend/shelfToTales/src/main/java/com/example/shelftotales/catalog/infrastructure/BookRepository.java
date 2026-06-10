@@ -50,6 +50,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     Optional<Book> findByIdAndPdfUrlIsNotNull(Long id);
 
+    List<Book> findByTitleContainingIgnoreCase(String title);
+
     @Query("SELECT b FROM Book b WHERE b.moodTags IS NOT NULL AND LOWER(b.moodTags) LIKE LOWER(CONCAT('%', :mood, '%'))")
     java.util.List<Book> findByMood(@Param("mood") String mood);
 

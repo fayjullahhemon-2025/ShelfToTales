@@ -76,6 +76,9 @@ class ReadingRoomServiceTest {
     @Mock
     private SocialService socialService;
 
+    @Mock
+    private BookRepository bookRepository;
+
     @InjectMocks
     private ReadingRoomService readingRoomService;
 
@@ -173,5 +176,60 @@ class ReadingRoomServiceTest {
         assertEquals(100L, response.getId());
         assertEquals("Hello World", response.getContent());
         verify(roomMessageRepository).save(any(RoomMessage.class));
+    }
+
+    @Test
+    void createRoom_withBookTitle_resolvesBook() {
+        try (MockedStatic<AuthUtils> auth = mockStatic(AuthUtils.class)) {
+            auth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(currentUser);
+
+            Book book = Book.builder()
+                    .id(5L)
+                    .title("The Great Gatsby")
+                    .pdfUrl("/books/gatsby.pdf")
+                    .previewAvailable(true)
+                    .build();
+
+            when(bookRepository.findByTitleContainingIgnoreCase("The Great Gatsby"))
+                    .thenReturn(List.of(book));
+
+            ReadingRoom savedRoom = ReadingRoom.builder()
+                    .id(10L)
+                    .name("Fiction Club")
+                    .description("Talk about fiction books")
+                    .createdBy(currentUser)
+                    .createdAt(LocalDateTime.now())
+                    .bookTitle("The Great Gatsby")
+                    .book(book)
+                    .messages(new ArrayList<>())
+                    .build();
+
+            when(readingRoomRepository.save(any(ReadingRoom.class))).thenAnswer(invocation -> {
+                ReadingRoom roomToSave = invocation.getArgument(0);
+                assertEquals("The Great Gatsby", roomToSave.getBookTitle());
+                assertEquals(book, roomToSave.getBook());
+                return savedRoom;
+            });
+
+            ReadingRoomRequest request = ReadingRoomRequest.builder()
+                    .name("Fiction Club")
+                    .description("Talk about fiction books")
+                    .bookTitle("The Great Gatsby")
+                    .build();
+
+            ReadingRoomResponse response = readingRoomService.createRoom(request);
+
+            assertNotNull(response);
+            assertEquals(10L, response.getId());
+            assertEquals("Fiction Club", response.getName());
+            assertEquals(5L, response.getBookId());
+            assertEquals("The Great Gatsby", response.getBookTitle());
+            assertEquals("/books/gatsby.pdf", response.getPdfUrl());
+            assertTrue(response.isPreviewAvailable());
+
+            verify(bookRepository).findByTitleContainingIgnoreCase("The Great Gatsby");
+            verify(readingRoomRepository).save(any(ReadingRoom.class));
+            verify(socialService).logCustomActivity(eq(currentUser), eq("CREATE_ROOM"), eq(10L), anyString());
+        }
     }
 }

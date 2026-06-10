@@ -1,0 +1,2 @@
+ALTER TABLE reading_rooms ADD COLUMN book_title VARCHAR(150);
+ALTER TABLE reading_rooms ADD COLUMN book_id BIGINT REFERENCES books(id) ON DELETE SET NULL;

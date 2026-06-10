@@ -21,4 +21,8 @@ public class ReadingRoomResponse {
     private String description;
     private UserSummaryResponse createdBy;
     private LocalDateTime createdAt;
+    private Long bookId;
+    private String bookTitle;
+    private String pdfUrl;
+    private boolean previewAvailable;
 }

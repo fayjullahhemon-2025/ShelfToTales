@@ -54,3 +54,20 @@ vi.mock('next/link', () => {
       ),
   };
 });
+
+// Mock stompjs and sockjs-client globally to prevent JSDom evaluation issues
+vi.mock('@stomp/stompjs', () => ({
+  Client: vi.fn().mockImplementation(() => ({
+    activate: vi.fn(),
+    deactivate: vi.fn(),
+    subscribe: vi.fn(),
+    publish: vi.fn(),
+  })),
+}));
+
+vi.mock('sockjs-client', () => {
+  return {
+    default: vi.fn().mockImplementation(() => ({})),
+  };
+});
+
