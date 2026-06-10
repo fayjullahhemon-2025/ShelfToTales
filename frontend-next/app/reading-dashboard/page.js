@@ -17,6 +17,7 @@ const ReadingDashboard = () => {
     const [feed, setFeed] = useState([]);
     const [following, setFollowing] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [revealedSpoilers, setRevealedSpoilers] = useState({});
 
     const {
         isPlaying,
@@ -228,10 +229,14 @@ const ReadingDashboard = () => {
                                     <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                                         {feed.map(activity => {
                                             const isQuote = activity.activityType === "SHARE_QUOTE";
+                                            const isReview = activity.activityType === "POSTED_REVIEW";
 
                                             let quoteText = '';
                                             let bookTitle = '';
                                             let themeStyle = 'sunset';
+                                            let reviewComment = '';
+                                            let rating = 0;
+                                            let isSpoiler = false;
 
                                             if (isQuote && activity.metadata) {
                                                 try {
@@ -246,6 +251,25 @@ const ReadingDashboard = () => {
                                                     if (matchTitle) bookTitle = matchTitle[1];
                                                 }
                                             }
+
+                                            if (isReview && activity.metadata) {
+                                                try {
+                                                    const meta = JSON.parse(activity.metadata);
+                                                    reviewComment = meta.reviewComment || '';
+                                                    bookTitle = meta.bookTitle || '';
+                                                    rating = meta.rating || 0;
+                                                    isSpoiler = meta.isSpoiler || false;
+                                                } catch(e) {
+                                                    const matchComment = activity.metadata.match(/"reviewComment":"([^"]+)"/);
+                                                    const matchTitle = activity.metadata.match(/"bookTitle":"([^"]+)"/);
+                                                    const matchSpoiler = activity.metadata.match(/"isSpoiler":(true|false)/);
+                                                    if (matchComment) reviewComment = matchComment[1];
+                                                    if (matchTitle) bookTitle = matchTitle[1];
+                                                    if (matchSpoiler) isSpoiler = matchSpoiler[1] === 'true';
+                                                }
+                                            }
+
+                                            const isBlurred = isSpoiler && !revealedSpoilers[activity.id];
 
                                             const THEMES = {
                                                 sunset: 'linear-gradient(135deg, #ff5e62, #ff9966)',
@@ -288,9 +312,55 @@ const ReadingDashboard = () => {
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <p className="mb-0 small" style={{ lineHeight: '1.3' }}>
-                                                                {activity.content}
-                                                            </p>
+                                                            <div className="mb-0 small" style={{ lineHeight: '1.3' }}>
+                                                                <p className="mb-1">
+                                                                    {activity.content}
+                                                                </p>
+                                                                {isReview && reviewComment && (
+                                                                    <div className="mt-1">
+                                                                        <div className="dz-rating mb-1" style={{ fontSize: '0.75rem' }}>
+                                                                            {[...Array(5)].map((_, i) => (
+                                                                                <i key={i} className={`fa fa-star ${i < rating ? 'text-warning' : 'text-muted'}`}></i>
+                                                                            ))}
+                                                                        </div>
+                                                                        <div style={{ position: 'relative' }}>
+                                                                            <div style={{
+                                                                                filter: isBlurred ? 'blur(5px)' : 'none',
+                                                                                transition: 'filter 0.3s ease',
+                                                                                pointerEvents: isBlurred ? 'none' : 'auto',
+                                                                                userSelect: isBlurred ? 'none' : 'auto'
+                                                                            }}>
+                                                                                <p className="mb-0 text-muted font-italic small">{reviewComment}</p>
+                                                                            </div>
+                                                                            {isBlurred && (
+                                                                                <div 
+                                                                                    onClick={() => setRevealedSpoilers(prev => ({ ...prev, [activity.id]: true }))}
+                                                                                    style={{
+                                                                                        position: 'absolute',
+                                                                                        top: 0, left: 0, right: 0, bottom: 0,
+                                                                                        display: 'flex', flexDirection: 'column',
+                                                                                        alignItems: 'center', justifyContent: 'center',
+                                                                                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                                                        border: '1px dashed #ff5e5e',
+                                                                                        borderRadius: '6px',
+                                                                                        cursor: 'pointer',
+                                                                                        padding: '5px',
+                                                                                        textAlign: 'center',
+                                                                                        zIndex: 2
+                                                                                    }}
+                                                                                >
+                                                                                    <span className="text-danger fw-bold" style={{ fontSize: '10px' }}>
+                                                                                        ⚠️ Spoiler Warning
+                                                                                    </span>
+                                                                                    <span className="text-muted" style={{ fontSize: '8px' }}>
+                                                                                        Click to reveal review
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>
