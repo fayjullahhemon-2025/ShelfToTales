@@ -284,6 +284,15 @@ export const blogService = {
   like: (id) => api.post(`/blogs/${id}/like`),
 };
 
+export const playlistService = {
+  getAll: () => api.get('/playlist/songs'),
+  addSong: (formData) => api.post('/admin/playlist/songs', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  updateSong: (id, data) => api.put(`/admin/playlist/songs/${id}`, data),
+  deleteSong: (id) => api.delete(`/admin/playlist/songs/${id}`),
+};
+
 export const donationService = {
   create: (data) => api.post('/donations', data),
   getAvailable: (params = {}) => api.get('/donations', { params }),

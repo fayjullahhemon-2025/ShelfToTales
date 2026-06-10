@@ -9,11 +9,13 @@ import {
   useMemo,
 } from 'react';
 
+import { playlistService } from '../../lib/api';
+
 // ---------------------------------------------------------------------------
 // Config & Constants
 // ---------------------------------------------------------------------------
 
-export const TRACKS = [
+const FALLBACK_TRACKS = [
   {
     title: "Autumn Rainfall",
     artist: "Lofi Girl & Study Beats",
@@ -63,7 +65,8 @@ export function LofiProvider({ children }) {
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(0.5);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  
+  const [tracks, setTracks] = useState(FALLBACK_TRACKS);
+
   const [ambientStates, setAmbientStates] = useState({
     rain: { active: false, volume: 0.5 },
     cafe: { active: false, volume: 0.5 },
@@ -80,12 +83,12 @@ export function LofiProvider({ children }) {
 
   const nextTrack = () => {
     setIsPlaying(true);
-    setCurrentTrackIndex((prevIndex) => (prevIndex + 1) % TRACKS.length);
+    setCurrentTrackIndex((prevIndex) => (prevIndex + 1) % tracks.length);
   };
 
   const prevTrack = () => {
     setIsPlaying(true);
-    setCurrentTrackIndex((prevIndex) => (prevIndex - 1 + TRACKS.length) % TRACKS.length);
+    setCurrentTrackIndex((prevIndex) => (prevIndex - 1 + tracks.length) % tracks.length);
   };
 
   const togglePlay = () => {
@@ -129,6 +132,19 @@ export function LofiProvider({ children }) {
       ambientAudioRefs.current[sound.id] = audio;
     });
 
+    // Fetch songs from API, fall back to hardcoded tracks
+    playlistService.getAll()
+      .then(res => {
+        const apiTracks = res.data?.map(s => ({
+          title: s.title,
+          artist: s.artist || '',
+          url: s.fileUrl,
+          coverUrl: s.coverUrl || FALLBACK_TRACKS[0].coverUrl,
+        }));
+        if (apiTracks && apiTracks.length > 0) setTracks(apiTracks);
+      })
+      .catch(() => {});
+
     isInitialized.current = true;
 
     return () => {
@@ -147,7 +163,7 @@ export function LofiProvider({ children }) {
   useEffect(() => {
     if (!isInitialized.current || !musicAudioRef.current) return;
 
-    const currentTrack = TRACKS[currentTrackIndex];
+    const currentTrack = tracks[currentTrackIndex];
     if (musicAudioRef.current.src !== currentTrack.url) {
       musicAudioRef.current.src = currentTrack.url;
       musicAudioRef.current.load();
@@ -163,7 +179,7 @@ export function LofiProvider({ children }) {
     } else {
       musicAudioRef.current.pause();
     }
-  }, [currentTrackIndex, isPlaying, volume]);
+  }, [currentTrackIndex, isPlaying, volume, tracks]);
 
   const changeVolume = (newVol) => {
     setVolumeState(newVol);
@@ -211,7 +227,7 @@ export function LofiProvider({ children }) {
     });
   };
 
-  const currentTrack = TRACKS[currentTrackIndex];
+  const currentTrack = tracks[currentTrackIndex];
 
   const value = useMemo(
     () => ({
@@ -220,7 +236,7 @@ export function LofiProvider({ children }) {
       duration,
       volume,
       currentTrackIndex,
-      tracks: TRACKS,
+      tracks,
       currentTrack,
       ambientStates,
       ambientSounds: AMBIENT_SOUNDS,
@@ -232,7 +248,7 @@ export function LofiProvider({ children }) {
       toggleAmbient,
       setAmbientVolume,
     }),
-    [isPlaying, currentTime, duration, volume, currentTrackIndex, ambientStates, currentTrack]
+    [isPlaying, currentTime, duration, volume, currentTrackIndex, ambientStates, currentTrack, tracks]
   );
 
   return <LofiContext.Provider value={value}>{children}</LofiContext.Provider>;
