@@ -6,6 +6,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { bookService, quoteService } from '../../lib/api';
 import Swal from 'sweetalert2';
 import ClientOnly from '../../components/ClientOnly';
+import PdfViewer from '../../components/features/PdfViewer/PdfViewer';
+import '../../components/features/PdfViewer/PdfViewer.css';
 
 function ReadBookInner() {
   const { bookId } = useParams();
@@ -19,6 +21,7 @@ function ReadBookInner() {
   const [explanation, setExplanation] = useState('');
   const [themeStyle, setThemeStyle] = useState('sunset');
   const [submitting, setSubmitting] = useState(false);
+  const [readingMode, setReadingMode] = useState(false);
 
   const containerRef = useRef(null);
 
@@ -99,7 +102,12 @@ function ReadBookInner() {
 
         {/* Book Cover */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src={book.coverUrl} alt={book.title} style={{ maxWidth: 280, borderRadius: 12, boxShadow: '0 12px 40px rgba(0,0,0,0.15)' }}/>
+          <img
+            src={book.coverUrl || '/images/book-default.jpg'}
+            alt={book.title}
+            style={{ maxWidth: 280, borderRadius: 12, boxShadow: '0 12px 40px rgba(0,0,0,0.15)' }}
+            onError={(e) => { e.target.src = '/images/book-default.jpg'; }}
+          />
         </div>
 
         {/* Selection Tooltip */}
@@ -153,9 +161,29 @@ function ReadBookInner() {
 
           {book.pdfUrl && (
             <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #f0ede8' }}>
-              <a href={book.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #eaa451, #e58c23)', color: '#fff', padding: '12px 24px', borderRadius: 12, textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
-                <i className="fa-solid fa-book-open"/> Read PDF in browser
-              </a>
+              {!readingMode ? (
+                <button
+                  onClick={() => setReadingMode(true)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    background: 'linear-gradient(135deg, #eaa451, #e58c23)',
+                    color: '#fff', padding: '12px 24px', borderRadius: 12,
+                    border: 'none', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer'
+                  }}
+                >
+                  <i className="fa-solid fa-book-open"/> Read PDF
+                </button>
+              ) : (
+                <div>
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h5 className="mb-0" style={{ fontFamily: 'Playfair Display, serif' }}>Reading: {book.title}</h5>
+                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setReadingMode(false)}>
+                      <i className="fa-solid fa-xmark me-1" /> Close Reader
+                    </button>
+                  </div>
+                  <PdfViewer url={book.pdfUrl} title={book.title} />
+                </div>
+              )}
             </div>
           )}
         </div>
