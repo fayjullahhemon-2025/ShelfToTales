@@ -3,12 +3,14 @@ package com.example.shelftotales.wishlist.application;
 import com.example.shelftotales.wishlist.application.WishlistItemResponse;
 import com.example.shelftotales.catalog.domain.Book;
 import com.example.shelftotales.auth.domain.User;
+import com.example.shelftotales.event.WishlistAddedEvent;
 import com.example.shelftotales.wishlist.domain.WishlistItem;
 import com.example.shelftotales.catalog.infrastructure.BookRepository;
 import com.example.shelftotales.auth.infrastructure.UserRepository;
 import com.example.shelftotales.wishlist.infrastructure.WishlistRepository;
 import com.example.shelftotales.shared.util.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ public class WishlistService {
     private final WishlistRepository wishlistRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<WishlistItemResponse> getUserWishlist() {
@@ -38,6 +41,7 @@ public class WishlistService {
 
         try {
             wishlistRepository.save(WishlistItem.builder().user(user).book(book).build());
+            eventPublisher.publishEvent(new WishlistAddedEvent(user.getId(), bookId));
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("Book already in wishlist");
         }

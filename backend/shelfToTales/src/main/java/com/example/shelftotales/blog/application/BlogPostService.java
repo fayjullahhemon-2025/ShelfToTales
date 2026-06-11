@@ -5,8 +5,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import com.example.shelftotales.blog.domain.BlogPost;
 import com.example.shelftotales.blog.infrastructure.BlogPostRepository;
+import com.example.shelftotales.event.BlogCreatedEvent;
 import com.example.shelftotales.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BlogPostService {
     private final BlogPostRepository blogPostRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<BlogPostResponse> getAllPublished() {
@@ -49,7 +52,13 @@ public class BlogPostService {
                 .coverImage(request.getCoverImage())
                 .status(request.getStatus() != null ? request.getStatus() : "PUBLISHED")
                 .build();
-        return mapToResponse(blogPostRepository.save(post));
+        BlogPost saved = blogPostRepository.save(post);
+        eventPublisher.publishEvent(new BlogCreatedEvent(
+                author.getId(), saved.getId(), saved.getTitle(),
+                saved.getContent() != null && saved.getContent().length() > 200
+                        ? saved.getContent().substring(0, 200)
+                        : saved.getContent()));
+        return mapToResponse(saved);
     }
 
     @Transactional
