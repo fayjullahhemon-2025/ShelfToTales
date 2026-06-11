@@ -10,4 +10,5 @@ public class RecommendedBookDTO {
     private String coverUrl;
     private double score;
     private String reason;
+    private String matchCategory;
 }
