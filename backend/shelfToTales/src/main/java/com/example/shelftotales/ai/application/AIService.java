@@ -10,15 +10,19 @@ import java.util.*;
 @Service
 public class AIService {
 
+    private static final Map<String, Integer> GENRE_DIMENSIONS = Map.of(
+        "sci-fi", 0, "science fiction", 0, "fantasy", 1, "mystery", 2, "thriller", 3,
+        "romance", 4, "horror", 5, "nonfiction", 6, "biography", 7, "history", 8,
+        "poetry", 9, "classics", 10, "young adult", 11, "children", 12, "self-help", 13,
+        "philosophy", 14, "religion", 15, "art", 16, "cookbook", 17, "travel", 18, "science", 19
+    );
+
     private static final List<String> SPOILER_KEYWORDS = Arrays.asList(
             "spoiler", "spoilers", "dies", "dying", "death", "kills", "killed", 
             "murderer", "betrays", "betrayal", "ending", "turns out", "revealed", 
             "reveals", "plot twist", "murdered"
     );
 
-    /**
-     * Generates a deterministic, normalized 384-dimensional embedding vector based on input text hash.
-     */
     public double[] generateEmbedding(String text) {
         double[] vector = new double[384];
         if (text == null || text.trim().isEmpty()) {
@@ -26,7 +30,6 @@ public class AIService {
             return vector;
         }
 
-        // Seed random with text hash code to make it deterministic
         Random rand = new Random(text.hashCode());
         double sumSq = 0;
         for (int i = 0; i < 384; i++) {
@@ -34,7 +37,16 @@ public class AIService {
             sumSq += vector[i] * vector[i];
         }
 
-        // Normalize vector to unit length
+        // Boost dimensions based on detected genre keywords
+        String lowerText = text.toLowerCase();
+        for (Map.Entry<String, Integer> entry : GENRE_DIMENSIONS.entrySet()) {
+            if (lowerText.contains(entry.getKey())) {
+                int dim = entry.getValue();
+                vector[dim] += 2.0;
+                sumSq += 4.0;
+            }
+        }
+
         double magnitude = Math.sqrt(sumSq);
         if (magnitude > 0) {
             for (int i = 0; i < 384; i++) {
