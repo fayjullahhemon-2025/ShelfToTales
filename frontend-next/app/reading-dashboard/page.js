@@ -246,6 +246,7 @@ const ReadingDashboard = () => {
                                                     className="rn-mood-book-card"
                                                     onClick={() => router.push(`/shop-detail/${rec.bookId}`)}
                                                 >
+                                                    <span className="badge bg-warning text-dark mb-1">{rec.matchCategory || 'Recommended'}</span>
                                                     <img
                                                         src={rec.coverUrl || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400"}
                                                         alt={`Cover of ${rec.title}`}
@@ -255,6 +256,11 @@ const ReadingDashboard = () => {
                                                     />
                                                     <h6 className="rn-mood-book-title">{rec.title}</h6>
                                                     <span className="text-muted rn-mood-book-author">By {rec.author}</span>
+                                                    {rec.score > 0 && (
+                                                        <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, background: '#eaa451', color: '#fff', fontSize: '0.75rem', fontWeight: 600, marginTop: 4 }}>
+                                                            {Math.round(rec.score * 100)}% Match
+                                                        </span>
+                                                    )}
                                                     {rec.reason && (
                                                         <span className="rn-mood-tag">{rec.reason}</span>
                                                     )}

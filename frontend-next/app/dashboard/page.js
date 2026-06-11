@@ -270,13 +270,18 @@ function Dashboard() {
                 <div className="dash-recs-grid mt-3">
                   {data.recommendations.map((book, idx) => (
                     <div key={idx} className="dash-rec-ad-card">
-                      <div className="dash-rec-badge">Featured Pick</div>
+                      <div className="dash-rec-badge">{book.matchCategory || 'Featured Pick'}</div>
                       <div className="dash-rec-cover-wrap">
                         <img src={book.coverUrl || 'https://via.placeholder.com/150x220/EAA451/fff?text=Book'} alt={book.title} className="dash-rec-cover"/>
                       </div>
                       <div className="dash-rec-info">
                         <h5 className="dash-rec-title">{book.title}</h5>
                         <p className="dash-rec-author">by {book.author}</p>
+                        {book.score > 0 && (
+                          <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, background: '#eaa451', color: '#fff', fontSize: '0.75rem', fontWeight: 600, marginBottom: 6 }}>
+                            {Math.round(book.score * 100)}% Match
+                          </span>
+                        )}
                         <div className="dash-rec-reason">{book.reason}</div>
                         <Link href={`/shop-detail/${book.bookId}`} className="dash-rec-btn">
                           View Details <i className="fa-solid fa-arrow-right ms-1"/>
