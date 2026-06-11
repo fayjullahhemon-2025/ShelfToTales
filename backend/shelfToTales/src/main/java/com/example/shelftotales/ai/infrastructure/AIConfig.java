@@ -42,6 +42,10 @@ public class AIConfig {
 
     @Bean
     public OrtSession ortSession(OrtEnvironment env) {
+        if (env == null) {
+            log.warn("OrtEnvironment not available — semantic search will use fallback");
+            return null;
+        }
         try {
             Path modelPath = getResourcePath(modelResource, "all-MiniLM-L6-v2-", ".onnx");
             log.info("Loading ONNX embedding model from: {}", modelPath);

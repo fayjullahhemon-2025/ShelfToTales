@@ -34,7 +34,13 @@ public class OpenAIChatProvider implements ChatProvider {
 
     @Override
     public boolean isAvailable() {
-        return ("openai".equals(provider) || "openrouter".equals(provider)) && apiKey != null && !apiKey.isBlank();
+        if ("openai".equals(provider)) {
+            return apiKey != null && !apiKey.isBlank();
+        }
+        if ("openrouter".equals(provider)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -54,7 +60,9 @@ public class OpenAIChatProvider implements ChatProvider {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(apiKey);
+            if (apiKey != null && !apiKey.isBlank()) {
+                headers.setBearerAuth(apiKey);
+            }
 
             ResponseEntity<Map> response = restTemplate.exchange(
                     baseUrl, HttpMethod.POST, new HttpEntity<>(body, headers), Map.class);
