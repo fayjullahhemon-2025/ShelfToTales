@@ -4,21 +4,31 @@ import com.example.shelftotales.event.BookCompletedEvent;
 import com.example.shelftotales.event.OrderConfirmedEvent;
 import com.example.shelftotales.auth.domain.User;
 import com.example.shelftotales.auth.infrastructure.UserRepository;
+import com.example.shelftotales.catalog.domain.Book;
 import com.example.shelftotales.catalog.domain.BookEmbedding;
 import com.example.shelftotales.catalog.infrastructure.BookEmbeddingRepository;
+import com.example.shelftotales.bookshelf.domain.ShelfBook;
 import com.example.shelftotales.bookshelf.infrastructure.ShelfBookRepository;
+import com.example.shelftotales.commerce.domain.Order;
+import com.example.shelftotales.commerce.domain.OrderItem;
 import com.example.shelftotales.commerce.infrastructure.OrderRepository;
 import com.example.shelftotales.ai.application.AIService;
 import com.example.shelftotales.ai.infrastructure.UserProfileVectorRepository;
 import com.example.shelftotales.ai.domain.UserProfileVector;
+import com.example.shelftotales.wishlist.infrastructure.WishlistRepository;
+import com.example.shelftotales.exchange.infrastructure.ExchangeListingRepository;
+import com.example.shelftotales.social.infrastructure.FollowRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,6 +54,15 @@ public class ProfileVectorObserverTest {
     @Mock
     private AIService aiService;
 
+    @Mock
+    private WishlistRepository wishlistRepository;
+
+    @Mock
+    private ExchangeListingRepository exchangeListingRepository;
+
+    @Mock
+    private FollowRepository followRepository;
+
     @InjectMocks
     private ProfileVectorObserver profileVectorObserver;
 
@@ -66,9 +85,38 @@ public class ProfileVectorObserverTest {
         Long userId = 1L;
         BookCompletedEvent event = new BookCompletedEvent(userId, 100L, "Book Title", "http://cover.url", 5L);
 
-        when(shelfBookRepository.findBookIdsByUserIdAndStatus(userId, "COMPLETED")).thenReturn(List.of(10L));
-        when(shelfBookRepository.findBookIdsByUserIdAndStatus(userId, "READING")).thenReturn(List.of(20L));
-        when(orderRepository.findBoughtBookIdsByUserId(userId)).thenReturn(List.of(30L));
+        Book book1 = Book.builder().id(10L).title("Book 1").build();
+        Book book2 = Book.builder().id(20L).title("Book 2").build();
+        Book book3 = Book.builder().id(30L).title("Book 3").build();
+
+        ShelfBook completedSb = ShelfBook.builder()
+                .book(book1)
+                .readingStatus("COMPLETED")
+                .addedAt(LocalDateTime.now().minusDays(10))
+                .build();
+        
+        ShelfBook readingSb = ShelfBook.builder()
+                .book(book2)
+                .readingStatus("READING")
+                .addedAt(LocalDateTime.now())
+                .build();
+
+        OrderItem item = OrderItem.builder().book(book3).quantity(1).build();
+        Order order = Order.builder()
+                .status(com.example.shelftotales.commerce.domain.OrderStatus.CONFIRMED)
+                .orderDate(LocalDateTime.now().minusDays(100))
+                .items(List.of(item))
+                .build();
+        item.setOrder(order);
+
+        when(shelfBookRepository.findShelfBooksByUserIdAndStatus(userId, "COMPLETED")).thenReturn(List.of(completedSb));
+        when(shelfBookRepository.findShelfBooksByUserIdAndStatus(userId, "READING")).thenReturn(List.of(readingSb));
+        when(orderRepository.findByUserIdOrderByOrderDateDesc(userId)).thenReturn(List.of(order));
+        
+        when(wishlistRepository.findByUserIdWithBook(userId)).thenReturn(Collections.emptyList());
+        when(exchangeListingRepository.findByUserIdOrderByCreatedAtDesc(eq(userId), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Collections.emptyList()));
+        when(followRepository.findFollowingIds(userId)).thenReturn(Collections.emptyList());
 
         BookEmbedding emb1 = BookEmbedding.builder().bookId(10L).vectorData("1,0").build();
         BookEmbedding emb2 = BookEmbedding.builder().bookId(20L).vectorData("0,1").build();
@@ -98,6 +146,30 @@ public class ProfileVectorObserverTest {
         UserProfileVector savedProfile = captor.getValue();
         assertEquals(userId, savedProfile.getUserId());
         assertEquals("recalculated_vector_data", savedProfile.getVectorData());
+
+        ArgumentCaptor<double[]> vectorCaptor = ArgumentCaptor.forClass(double[].class);
+        verify(aiService).vectorToString(vectorCaptor.capture());
+        double[] resultingVector = vectorCaptor.getValue();
+
+        // Calculate expected norm of the resulting vector to ensure it is 1.0 (normalized)
+        double norm = 0;
+        for (double v : resultingVector) {
+            norm += v * v;
+        }
+        assertEquals(1.0, Math.sqrt(norm), 1e-6);
+
+        // Verify expected weighted average vector ratios:
+        // Weight 1 (completed, base 1.5, 10 days decay): 1.5 * e^(-0.0231 * 10) = 1.1906
+        // Weight 2 (reading, base 1.0, 0 days decay): 1.0 * e^(0) = 1.0
+        // Weight 3 (purchased, base 1.5, 100 days decay): 1.5 * max(0.2, e^(-2.31)) = 1.5 * 0.2 = 0.3
+        // avgVector[0] = 1.1906 * 1.0 + 1.0 * 0.0 + 0.3 * 0.5 = 1.3406
+        // avgVector[1] = 1.1906 * 0.0 + 1.0 * 1.0 + 0.3 * 0.5 = 1.15
+        // totalWeight = 1.3406 / 2.4906 = 0.5383, 1.15 / 2.4906 = 0.4617
+        // normalized (norm ~ 0.7091):
+        // avgVector[0] = 0.759, avgVector[1] = 0.651
+        assertEquals(0.759, resultingVector[0], 1e-2);
+        assertEquals(0.651, resultingVector[1], 1e-2);
+        assertEquals(0.0, resultingVector[2], 1e-6);
     }
 
     @Test
@@ -105,9 +177,13 @@ public class ProfileVectorObserverTest {
         Long userId = 2L;
         OrderConfirmedEvent event = new OrderConfirmedEvent(userId, 500L, List.of(30L));
 
-        when(shelfBookRepository.findBookIdsByUserIdAndStatus(userId, "COMPLETED")).thenReturn(Collections.emptyList());
-        when(shelfBookRepository.findBookIdsByUserIdAndStatus(userId, "READING")).thenReturn(Collections.emptyList());
-        when(orderRepository.findBoughtBookIdsByUserId(userId)).thenReturn(Collections.emptyList());
+        when(shelfBookRepository.findShelfBooksByUserIdAndStatus(userId, "COMPLETED")).thenReturn(Collections.emptyList());
+        when(shelfBookRepository.findShelfBooksByUserIdAndStatus(userId, "READING")).thenReturn(Collections.emptyList());
+        when(orderRepository.findByUserIdOrderByOrderDateDesc(userId)).thenReturn(Collections.emptyList());
+        when(wishlistRepository.findByUserIdWithBook(userId)).thenReturn(Collections.emptyList());
+        when(exchangeListingRepository.findByUserIdOrderByCreatedAtDesc(eq(userId), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Collections.emptyList()));
+        when(followRepository.findFollowingIds(userId)).thenReturn(Collections.emptyList());
 
         profileVectorObserver.onOrderConfirmed(event);
 

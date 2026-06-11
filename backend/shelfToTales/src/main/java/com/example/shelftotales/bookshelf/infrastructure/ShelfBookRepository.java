@@ -42,6 +42,9 @@ public interface ShelfBookRepository extends JpaRepository<ShelfBook, Long> {
     @Query("SELECT sb.book.id FROM ShelfBook sb WHERE sb.bookshelf.user.id = :userId AND sb.readingStatus = :status")
     java.util.List<Long> findBookIdsByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
 
+    @Query("SELECT sb FROM ShelfBook sb JOIN FETCH sb.book WHERE sb.bookshelf.user.id = :userId AND sb.readingStatus = :status")
+    java.util.List<ShelfBook> findShelfBooksByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
+
     @Query("SELECT sb.book.id FROM ShelfBook sb " +
            "WHERE sb.readingStatus = 'COMPLETED' OR sb.readingStatus = 'READING' " +
            "GROUP BY sb.book.id " +
