@@ -48,7 +48,7 @@ public class RedisConfig {
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         if (!"redis".equals(cacheType)) {
-            return new ConcurrentMapCacheManager("books", "bookById", "categories", "profiles");
+            return new ConcurrentMapCacheManager("books", "bookById", "categories", "profiles", "dashboardStats");
         }
 
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(cacheObjectMapper());
@@ -65,6 +65,7 @@ public class RedisConfig {
         cacheConfigs.put("bookById", defaultConfig.entryTtl(Duration.ofMinutes(10)));
         cacheConfigs.put("categories", defaultConfig.entryTtl(Duration.ofHours(1)));
         cacheConfigs.put("profiles", defaultConfig.entryTtl(Duration.ofMinutes(15)));
+        cacheConfigs.put("dashboardStats", defaultConfig.entryTtl(Duration.ofSeconds(10)));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
