@@ -81,6 +81,7 @@ class DashboardRecommendationServiceTest {
         assertNotNull(recommendations);
         assertEquals(1, recommendations.size());
         assertEquals("Custom Book", recommendations.get(0).getTitle());
-        assertTrue(recommendations.get(0).getReason().contains("AI Match: 85%"));
+        assertEquals("Great match based on your profile", recommendations.get(0).getReason());
+        assertEquals("Great Match", recommendations.get(0).getMatchCategory());
     }
 }
