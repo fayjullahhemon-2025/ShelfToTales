@@ -16,13 +16,11 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -78,10 +76,6 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        // Generate and set request ID for security event correlation
-        String requestId = UUID.randomUUID().toString();
-        MDC.put("requestId", requestId);
-        
         evictStaleEntries();
 
         String key = clientKey(request);
@@ -93,7 +87,6 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         });
 
         if (entry.bucket().tryConsume(1)) {
-            MDC.clear();
             filterChain.doFilter(request, response);
             return;
         }
@@ -110,8 +103,6 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                 "Rate limit exceeded. Try again in " + WINDOW.toSeconds() + " seconds."
         );
         response.getWriter().write(objectMapper.writeValueAsString(err));
-        
-        MDC.clear();
     }
 
     private void recordRateLimitEvent(HttpServletRequest request) {

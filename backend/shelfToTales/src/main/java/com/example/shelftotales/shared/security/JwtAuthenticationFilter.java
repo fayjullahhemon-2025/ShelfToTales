@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,7 +20,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -39,10 +37,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        // Generate and set request ID for security event correlation
-        String requestId = UUID.randomUUID().toString();
-        MDC.put("requestId", requestId);
-        
         String tempJwt = null;
         if (request.getCookies() != null) {
             for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
@@ -59,7 +53,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (tempJwt == null) {
-            MDC.clear();
             filterChain.doFilter(request, response);
             return;
         }
@@ -70,7 +63,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (tokenBlacklist.isBlacklisted(jwt)) {
             logger.debug("Token is blacklisted");
             recordSecurityEvent(SecurityEventType.BLACKLISTED_TOKEN_USED, SecurityEventSeverity.HIGH, request, null, "Blacklisted JWT used");
-            MDC.clear();
             filterChain.doFilter(request, response);
             return;
         }
@@ -95,7 +87,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             recordSecurityEvent(SecurityEventType.JWT_AUTHENTICATION_FAILED, SecurityEventSeverity.MEDIUM, request, null, e.getMessage());
         }
         
-        MDC.clear();
         filterChain.doFilter(request, response);
     }
 
