@@ -49,7 +49,7 @@ function RegistrationInner(){
         try {
             console.log('Google token received, sending to backend...');
             const res = await authService.googleAuth(response.credential);
-            localStorage.setItem('token', 'present');
+            localStorage.setItem('token', res.data?.token || 'present');
             const profileRes = await userService.getProfile();
             localStorage.setItem('user', JSON.stringify(profileRes.data));
             Swal.fire('Success', 'Account created with Google', 'success');

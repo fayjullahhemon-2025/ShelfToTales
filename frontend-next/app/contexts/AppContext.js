@@ -9,6 +9,7 @@ import {
   useMemo,
 } from 'react';
 import { categoryService, wishlistService } from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
 
 // ---------------------------------------------------------------------------
 // Context
@@ -21,6 +22,7 @@ const AppContext = createContext(null);
 // ---------------------------------------------------------------------------
 
 export function AppProvider({ children }) {
+  const { isAuthenticated } = useAuth();
   const [categories, setCategories] = useState([]);
   const [wishlistIds, setWishlistIds] = useState(new Set());
 
@@ -29,26 +31,35 @@ export function AppProvider({ children }) {
     let cancelled = false;
 
     async function bootstrap() {
-      const [catResult, wishResult] = await Promise.allSettled([
-        categoryService.getAll(),
-        wishlistService.getWishlist(),
-      ]);
+      const promises = [categoryService.getAll()];
+      if (isAuthenticated) {
+        promises.push(wishlistService.getWishlist());
+      }
+
+      const results = await Promise.allSettled(promises);
 
       if (cancelled) return;
+
+      const catResult = results[0];
+      const wishResult = isAuthenticated ? results[1] : null;
 
       if (catResult.status === 'fulfilled') {
         setCategories(catResult.value.data ?? []);
       }
 
-      if (wishResult.status === 'fulfilled') {
-        const items = wishResult.value.data ?? [];
-        setWishlistIds(new Set(items.map((item) => item.bookId)));
+      if (isAuthenticated) {
+        if (wishResult && wishResult.status === 'fulfilled') {
+          const items = wishResult.value.data ?? [];
+          setWishlistIds(new Set(items.map((item) => item.bookId)));
+        }
+      } else {
+        setWishlistIds(new Set());
       }
     }
 
     bootstrap();
     return () => { cancelled = true; };
-  }, []);
+  }, [isAuthenticated]);
 
   // --- Actions -----------------------------------------------------------
 

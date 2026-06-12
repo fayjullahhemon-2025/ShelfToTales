@@ -101,15 +101,16 @@ export function AuthProvider({ children }) {
    * rolling back the token if the profile fetch fails.
    */
   const handleAuthResponse = useCallback(async (data) => {
-    // Persist dummy token first so existing checks pass, but real token is in HttpOnly cookie
-    localStorage.setItem(STORAGE_KEY_TOKEN, 'present');
+    const token = data?.token || 'present';
+    // Persist token first so existing checks pass
+    localStorage.setItem(STORAGE_KEY_TOKEN, token);
 
     try {
       const profileRes = await userService.getProfile();
       // Merge login response (has role) with profile response (has full details)
       const user = { ...profileRes.data, role: data.role || profileRes.data.role };
       localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
-      dispatch({ type: ACTIONS.LOGIN_SUCCESS, payload: { token: 'present', user } });
+      dispatch({ type: ACTIONS.LOGIN_SUCCESS, payload: { token, user } });
       return user;
     } catch (err) {
       localStorage.removeItem(STORAGE_KEY_TOKEN);

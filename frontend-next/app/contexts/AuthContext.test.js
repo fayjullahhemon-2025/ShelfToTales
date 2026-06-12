@@ -152,8 +152,8 @@ describe('AuthContext', () => {
     expect(userService.getProfile).toHaveBeenCalled();
     expect(screen.getByTestId('isAuthenticated').textContent).toBe('true');
     expect(screen.getByTestId('user').textContent).toBe(JSON.stringify(fakeUser));
-    expect(screen.getByTestId('token').textContent).toBe('present');
-    expect(localStorage.getItem('token')).toBe('present');
+    expect(screen.getByTestId('token').textContent).toBe('login-jwt');
+    expect(localStorage.getItem('token')).toBe('login-jwt');
     expect(localStorage.getItem('user')).toBe(JSON.stringify(fakeUser));
   });
 
@@ -173,8 +173,8 @@ describe('AuthContext', () => {
     expect(userService.getProfile).toHaveBeenCalled();
     expect(screen.getByTestId('isAuthenticated').textContent).toBe('true');
     expect(screen.getByTestId('user').textContent).toBe(JSON.stringify(fakeUser));
-    expect(screen.getByTestId('token').textContent).toBe('present');
-    expect(localStorage.getItem('token')).toBe('present');
+    expect(screen.getByTestId('token').textContent).toBe('google-jwt');
+    expect(localStorage.getItem('token')).toBe('google-jwt');
     expect(localStorage.getItem('user')).toBe(JSON.stringify(fakeUser));
   });
 

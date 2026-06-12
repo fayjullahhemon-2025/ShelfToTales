@@ -25,12 +25,12 @@ function BooksGridView() {
     const [selectedBook, setSelectedBook] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
-    const [sortBy, setSortBy] = useState('createdAt');
+    const [sortBy, setSortBy] = useState('id');
     const [sortDir, setSortDir] = useState('desc');
 
     const sortMap = {
-        'Newest': { sortBy: 'createdAt', sortDir: 'desc' },
-        'Oldest': { sortBy: 'createdAt', sortDir: 'asc' },
+        'Newest': { sortBy: 'id', sortDir: 'desc' },
+        'Oldest': { sortBy: 'id', sortDir: 'asc' },
         'Price Low': { sortBy: 'price', sortDir: 'asc' },
         'Price High': { sortBy: 'price', sortDir: 'desc' },
     };
