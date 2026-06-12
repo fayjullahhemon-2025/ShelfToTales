@@ -1,11 +1,13 @@
 'use client';
 
-import React,{useEffect, useState} from 'react';
+import React,{useEffect, useState, useCallback} from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {Dropdown} from 'react-bootstrap';
 import { useAuth } from '../../hooks/useAuth';
 import { useCart } from '../../hooks/useCart';
+import { useWishlist } from '../../hooks/useWishlist';
+import { notificationService } from '../../lib/api';
 //images
 const logo = '/assets/images/logo.png';
 import Collapse from 'react-bootstrap/Collapse';
@@ -14,7 +16,60 @@ import {MenuListArray2} from './MenuListArray2';
 function Header(){
 	const { user, isAuthenticated, logout } = useAuth();
 	const { count: cartCount } = useCart();
+	const { wishlistCount } = useWishlist();
 	const [selectBtn, setSelectBtn] = useState('Category');
+
+	const [notifications, setNotifications] = useState([]);
+	const [unreadCount, setUnreadCount] = useState(0);
+
+	const fetchNotifications = useCallback(async () => {
+		if (!isAuthenticated) return;
+		try {
+			const res = await notificationService.getAll({ page: 0, size: 10 });
+			setNotifications(res.data?.content || res.data || []);
+			const countRes = await notificationService.getUnreadCount();
+			setUnreadCount(countRes.data?.count || countRes.data || 0);
+		} catch (err) {
+			console.error('Failed to fetch notifications:', err);
+		}
+	}, [isAuthenticated]);
+
+	useEffect(() => {
+		fetchNotifications();
+		const interval = setInterval(fetchNotifications, 30000);
+		return () => clearInterval(interval);
+	}, [fetchNotifications]);
+
+	const handleMarkAllRead = async () => {
+		try {
+			await notificationService.markAllRead();
+			setUnreadCount(0);
+			setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+		} catch (err) {
+			console.error('Failed to mark all read:', err);
+		}
+	};
+
+	const handleNotificationClick = async (notif) => {
+		if (!notif.read) {
+			try {
+				await notificationService.markRead(notif.id);
+				setUnreadCount(prev => Math.max(0, prev - 1));
+				setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
+			} catch (err) {
+				console.error('Failed to mark read:', err);
+			}
+		}
+		if (notif.referenceType === 'ROOM') {
+			router.push(`/reading-room/${notif.referenceId}`);
+		} else if (notif.referenceType === 'USER') {
+			router.push(`/reader-network`);
+		} else if (notif.referenceType === 'ORDER') {
+			router.push(`/purchase-history`);
+		} else if (notif.referenceType === 'BOOK') {
+			router.push(`/shop-detail/${notif.referenceId}`);
+		}
+	};
 	const [active, setActive] = useState(null);
 	const [headerFix, setheaderFix] = React.useState(false);
 	const router = useRouter();
@@ -73,15 +128,67 @@ function Header(){
 								<li className="nav-item">
 									<Link href={"/wishlist"} className="nav-link">
 										<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>
-										<span className="badge">Wishlist</span>
+										<span className="badge">{wishlistCount}</span>
 									</Link>
 								</li>
 								<li className="nav-item">
 									<Link href={"/shop-cart"} className="nav-link">
 										<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M15.55 13c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45zM6.16 6h12.15l-2.76 5H8.53L6.16 6zM7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-										<span className="badge">Cart {cartCount > 0 && `(${cartCount})`}</span>
+										<span className="badge">{cartCount}</span>
 									</Link>
 								</li>
+								{isAuthenticated && (
+									<Dropdown as="li" className="nav-item dropdown notification-dropdown">
+										<Dropdown.Toggle as="div" className="nav-link i-false" style={{cursor: 'pointer'}}>
+											<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+												<path d="M0 0h24v24H0V0z" fill="none"/>
+												<path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+											</svg>
+											{unreadCount > 0 && <span className="badge">{unreadCount}</span>}
+										</Dropdown.Toggle>
+										<Dropdown.Menu className="dropdown-menu dropdown-menu-end py-0" style={{ width: '340px', maxHeight: '420px', overflowY: 'auto' }}>
+											<div className="dropdown-header d-flex justify-content-between align-items-center">
+												<h6 className="m-0">Notifications</h6>
+												{unreadCount > 0 && (
+													<button onClick={handleMarkAllRead} className="btn-link" style={{ fontSize: '0.8rem', border: 'none', background: 'none', color: '#eaa451' }}>
+														Mark all read
+													</button>
+												)}
+											</div>
+											<div className="dropdown-body">
+												{notifications.length === 0 ? (
+													<div className="text-center py-4 text-muted">No notifications</div>
+												) : (
+													notifications.map((notif) => (
+														<div 
+															key={notif.id} 
+															className={`dropdown-item p-3 d-flex align-items-start ${!notif.read ? 'bg-light' : ''}`}
+															style={{ borderBottom: '1px solid #f0f0f0', whiteSpace: 'normal', cursor: 'pointer' }}
+															onClick={() => handleNotificationClick(notif)}
+														>
+															{notif.actorAvatar ? (
+																<img src={notif.actorAvatar} alt="" style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 10, objectFit: 'cover' }} />
+															) : (
+																<div className="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white" style={{ width: 32, height: 32, marginRight: 10, fontSize: '0.8rem' }}>
+																	<i className="fa-solid fa-bell" />
+																</div>
+															)}
+															<div style={{ flex: 1 }}>
+																<p className="m-0 small" style={{ fontWeight: !notif.read ? 600 : 400 }}>{notif.message}</p>
+																<span className="text-muted" style={{ fontSize: '0.7rem' }}>
+																	{new Date(notif.createdAt).toLocaleDateString()}
+																</span>
+															</div>
+															{!notif.read && (
+																<span className="bg-primary rounded-circle" style={{ width: 8, height: 8, alignSelf: 'center', marginLeft: 8 }} />
+															)}
+														</div>
+													))
+												)}
+											</div>
+										</Dropdown.Menu>
+									</Dropdown>
+								)}
 								{isAuthenticated ? (
 									<Dropdown as="li" className="nav-item dropdown profile-dropdown ms-4">
 										<Dropdown.Toggle as="div" className="nav-link i-false" style={{cursor: 'pointer'}}>

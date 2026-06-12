@@ -7,7 +7,7 @@ import { useAppContext } from '../contexts/AppContext';
  * clean and decouples them from the context implementation.
  */
 export function useWishlist() {
-  const { isWishlisted, toggleWishlist } = useAppContext();
+  const { isWishlisted, toggleWishlist, wishlistIds } = useAppContext();
 
-  return { isWishlisted, toggleWishlist };
+  return { isWishlisted, toggleWishlist, wishlistCount: wishlistIds?.size || 0 };
 }

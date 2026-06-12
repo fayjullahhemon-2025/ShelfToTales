@@ -19,6 +19,7 @@ import com.example.shelftotales.catalog.infrastructure.*;
 import com.example.shelftotales.bookshelf.infrastructure.*;
 import com.example.shelftotales.wishlist.infrastructure.*;
 import com.example.shelftotales.review.infrastructure.*;
+import com.example.shelftotales.social.infrastructure.FriendshipRepository;
 import com.example.shelftotales.shared.util.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,8 @@ public class ReadingRoomService {
     private final BookRepository bookRepository;
     private final RoomMemberService roomMemberService;
     private final RoomMemberRepository roomMemberRepository;
+    private final FriendshipRepository friendshipRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public ReadingRoomResponse createRoom(ReadingRoomRequest request) {
@@ -73,6 +76,18 @@ public class ReadingRoomService {
         if (creatorName == null || creatorName.isBlank()) creatorName = user.getEmail();
         socialService.logCustomActivity(user, "CREATE_ROOM", savedRoom.getId(),
                 creatorName + " created community reading room: " + savedRoom.getName());
+
+        // Notify friends about room creation
+        try {
+            List<Long> friendIds = friendshipRepository.findFriendIds(user.getId());
+            for (Long friendId : friendIds) {
+                notificationService.create(friendId, user.getId(), "FRIEND_ROOM_CREATED",
+                        "ROOM", savedRoom.getId(),
+                        creatorName + " created a reading room: " + savedRoom.getName());
+            }
+        } catch (Exception e) {
+            // Ignore to prevent room creation from failing if notification fails
+        }
 
         boolean isMember = true;
         int memberCount = 1 + ("PRIVATE".equals(savedRoom.getVisibility()) && request.getInviteUserIds() != null ? request.getInviteUserIds().size() : 0);

@@ -30,6 +30,7 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public CartResponse getCart() {
@@ -51,12 +52,16 @@ public class CartService {
                             item.addQuantity(quantity);
                             item.validateStockAvailability();
                             cartItemRepository.save(item);
+                            notificationService.create(user.getId(), null, "CART_UPDATED", "BOOK", bookId,
+                                    "Updated '" + book.getTitle() + "' quantity in your cart");
                         },
                         () -> {
                             CartItem newItem = CartItem.builder().user(user).book(book).quantity(0).build();
                             newItem.updateQuantity(quantity);
                             newItem.validateStockAvailability();
                             cartItemRepository.save(newItem);
+                            notificationService.create(user.getId(), null, "CART_ADDED", "BOOK", bookId,
+                                    "Added '" + book.getTitle() + "' to your cart");
                         });
 
         return buildCartResponse(cartItemRepository.findByUserIdWithBook(user.getId()));

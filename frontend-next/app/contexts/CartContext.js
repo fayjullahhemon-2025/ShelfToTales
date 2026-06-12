@@ -25,8 +25,8 @@ function cartReducer(state, action) {
       return {
         ...state,
         items: action.payload.items ?? [],
-        count: action.payload.count ?? 0,
-        total: action.payload.total ?? 0,
+        count: action.payload.count ?? action.payload.totalItems ?? 0,
+        total: action.payload.total ?? action.payload.totalPrice ?? 0,
         loading: false,
       };
     case ACTIONS.SET_LOADING:

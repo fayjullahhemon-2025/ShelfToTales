@@ -68,12 +68,12 @@ function ShopCart(){
                                                         <td className="product-item-price">${item.unitPrice?.toFixed(2)}</td>
                                                         <td className="product-item-quantity">
                                                             <div className="quantity btn-quantity style-1 me-3">
-                                                                <button className="btn btn-plus" type="button" onClick={() => handleUpdateQuantity(item.bookId, item.quantity + 1)}>
-                                                                    <i className="ti-plus"></i>
-                                                                </button>
-                                                                <input type="text" className="quantity-input" value={item.quantity} readOnly />
                                                                 <button className="btn btn-minus" type="button" onClick={() => handleUpdateQuantity(item.bookId, item.quantity - 1)}>
                                                                     <i className="ti-minus"></i>
+                                                                </button>
+                                                                <input type="text" className="quantity-input" value={item.quantity} readOnly />
+                                                                <button className="btn btn-plus" type="button" onClick={() => handleUpdateQuantity(item.bookId, item.quantity + 1)}>
+                                                                    <i className="ti-plus"></i>
                                                                 </button>
                                                             </div>
                                                         </td>

@@ -30,6 +30,7 @@ public class FriendService {
     private final UserBlockRepository userBlockRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final NotificationService notificationService;
 
     @Transactional
     public void sendRequest(Long targetUserId) {
@@ -52,6 +53,9 @@ public class FriendService {
         }
 
         friendRequestRepository.save(FriendRequest.builder().sender(currentUser).receiver(target).build());
+        notificationService.create(targetUserId, currentUser.getId(), "FRIEND_REQUEST",
+                "USER", currentUser.getId(),
+                currentUser.getFullName() + " sent you a friend request");
     }
 
     @Transactional

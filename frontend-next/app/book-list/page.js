@@ -140,43 +140,48 @@ function BookListPage() {
                     <div className="row book-grid-row">
                         {books.map((book, index) => (
                             <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6 m-b30" key={index}>
-                                <div className="dz-shop-card style-1 bg-white p-3 rounded shadow-sm h-100 d-flex flex-column">
-                                    <div className="dz-media position-relative mb-3 overflow-hidden rounded">
-                                        <img loading="lazy" decoding="async" src={book.coverUrl} alt={`Cover of ${book.title}`} style={{ height: '300px', width: '100%', objectFit: 'cover' }} />
-                                        <div className="bookmark-btn position-absolute top-0 end-0 m-3">
-                                            <button onClick={() => handleAddToWishlist(book.id)} className="btn btn-white btn-sm rounded-circle shadow-sm" style={{ width: '35px', height: '35px', padding: '0' }} aria-label={`Add ${book.title} to wishlist`}>
-                                                <i className="fa-regular fa-heart text-muted"></i>
-                                            </button>
+                                <div className="book-card-new" role="article" aria-label={`Book: ${book.title}`}>
+                                    {/* Cover image fills top portion */}
+                                    <div className="book-card-cover">
+                                        <img
+                                            loading="lazy"
+                                            decoding="async"
+                                            src={book.coverUrl || '/placeholder-book.png'}
+                                            alt={`Cover of ${book.title}`}
+                                        />
+                                        {/* Price badge top-left */}
+                                        <div className="book-card-price-badge" aria-label={`Price: $${book.discountPrice || book.price}`}>
+                                            ${book.discountPrice || book.price}
                                         </div>
-                                        <div className="shop-card-btn position-absolute bottom-0 start-0 w-100 p-2 opacity-0 transition-3s">
-                                            <button onClick={() => handleAddToWishlist(book.id)} className="btn btn-primary w-100 btn-sm mb-1" aria-label={`Add ${book.title} to wishlist`}>
-                                                <i className="fa-solid fa-heart me-2"></i> Add To Wishlist
+                                        {/* Hover action overlay */}
+                                        <div className="book-card-hover-actions">
+                                            <button
+                                                onClick={() => handleAddToWishlist(book.id)}
+                                                className="book-card-action-btn wishlist-btn"
+                                                aria-label={`Add ${book.title} to wishlist`}
+                                            >
+                                                <i className="fa-regular fa-heart me-2"></i> Wishlist
                                             </button>
-                                            <button onClick={() => handleAddToCart(book.id)} className="btn btn-secondary w-100 btn-sm" aria-label={`Add ${book.title} to cart`}>
-                                                <i className="fa-solid fa-cart-shopping me-2"></i> Add To Cart
+                                            <button
+                                                onClick={() => handleAddToCart(book.id)}
+                                                className="book-card-action-btn cart-btn"
+                                                aria-label={`Add ${book.title} to cart`}
+                                            >
+                                                <i className="fa-solid fa-cart-shopping me-2"></i> Add to Cart
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="dz-content text-center flex-grow-1">
-                                        <h5 className="title mb-2">
-                                            <Link href={`/books-detail/${book.id}`} className="text-dark fw-bold" aria-label={`View details of ${book.title}`}>{book.title}</Link>
-                                        </h5>
-                                        <div className="text-uppercase small fw-bold mb-2" style={{ color: '#E9AD28' }}>
-                                            {book.category?.name || 'ADVENTURE'}
-                                        </div>
-                                        <div className="dz-rating mb-2">
-                                            <ul className="d-flex justify-content-center list-unstyled mb-0 text-yellow">
-                                                <li><i className="fa-solid fa-star"></i></li>
-                                                <li><i className="fa-solid fa-star"></i></li>
-                                                <li><i className="fa-solid fa-star"></i></li>
-                                                <li><i className="fa-solid fa-star"></i></li>
-                                                <li><i className="fa-solid fa-star"></i></li>
-                                            </ul>
-                                        </div>
-                                        <div className="price mb-0">
-                                            <span className="h5 fw-bold" style={{ color: '#E9AD28' }}>${book.discountPrice || book.price}</span>
-                                            {book.discountPrice && <del className="ms-2 text-muted small">${book.price}</del>}
-                                        </div>
+                                    {/* White info panel */}
+                                    <div className="book-card-info">
+                                        <h6 className="book-card-title">
+                                            <Link href={`/books-detail/${book.id}`} aria-label={`View details of ${book.title}`}>
+                                                {book.title}
+                                            </Link>
+                                        </h6>
+                                        <p className="book-card-author">{book.author || 'Unknown Author'}</p>
+                                        <span className="book-card-genre">
+                                            {book.category?.name || 'General'}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -226,15 +231,149 @@ function BookListPage() {
             <NewsLetter />
             
             <style dangerouslySetInnerHTML={{ __html: `
-                .text-yellow {
-                    color: #FFC107;
+                /* ── New Book Card Design ── */
+                .book-card-new {
+                    background: #fff;
+                    border-radius: 16px;
+                    overflow: hidden;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+                    transition: transform 0.28s ease, box-shadow 0.28s ease;
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
                 }
-                .dz-shop-card.style-1 .dz-media:hover .shop-card-btn {
-                    opacity: 1 !important;
+                .book-card-new:hover {
+                    transform: translateY(-6px);
+                    box-shadow: 0 12px 36px rgba(0,0,0,0.18);
                 }
-                .transition-3s {
-                    transition: all 0.3s ease;
+
+                /* Cover area */
+                .book-card-cover {
+                    position: relative;
+                    width: 100%;
+                    aspect-ratio: 3 / 4;
+                    overflow: hidden;
+                    background: #e8e8e4;
                 }
+                .book-card-cover img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                    transition: transform 0.4s ease;
+                }
+                .book-card-new:hover .book-card-cover img {
+                    transform: scale(1.05);
+                }
+
+                /* Price badge */
+                .book-card-price-badge {
+                    position: absolute;
+                    top: 14px;
+                    left: 14px;
+                    background: #1A162E;
+                    color: #E9AD28;
+                    font-weight: 700;
+                    font-size: 0.92rem;
+                    padding: 5px 12px;
+                    border-radius: 8px;
+                    letter-spacing: 0.02em;
+                    z-index: 2;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+                }
+
+                /* Hover action overlay */
+                .book-card-hover-actions {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    padding: 12px;
+                    background: linear-gradient(to top, rgba(26,22,46,0.88) 0%, transparent 100%);
+                    opacity: 0;
+                    transform: translateY(8px);
+                    transition: opacity 0.28s ease, transform 0.28s ease;
+                    z-index: 3;
+                }
+                .book-card-new:hover .book-card-hover-actions {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                .book-card-action-btn {
+                    border: none;
+                    border-radius: 8px;
+                    padding: 7px 14px;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    width: 100%;
+                    transition: filter 0.2s ease;
+                }
+                .book-card-action-btn:hover {
+                    filter: brightness(1.1);
+                }
+                .wishlist-btn {
+                    background: rgba(255,255,255,0.18);
+                    color: #fff;
+                    border: 1px solid rgba(255,255,255,0.35);
+                    backdrop-filter: blur(4px);
+                }
+                .cart-btn {
+                    background: #E9AD28;
+                    color: #1A162E;
+                }
+
+                /* Info panel */
+                .book-card-info {
+                    padding: 16px 16px 18px;
+                    background: #fff;
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+                .book-card-title {
+                    margin: 0;
+                    font-size: 0.97rem;
+                    font-weight: 700;
+                    line-height: 1.3;
+                    color: #1A162E;
+                    overflow: hidden;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                }
+                .book-card-title a {
+                    color: inherit;
+                    text-decoration: none;
+                }
+                .book-card-title a:hover {
+                    color: #E9AD28;
+                }
+                .book-card-author {
+                    margin: 0;
+                    font-size: 0.83rem;
+                    color: #888;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .book-card-genre {
+                    display: inline-block;
+                    margin-top: 6px;
+                    padding: 3px 10px;
+                    border-radius: 20px;
+                    background: #F3F3F3;
+                    color: #555;
+                    font-size: 0.76rem;
+                    font-weight: 600;
+                    align-self: flex-start;
+                }
+
+                /* Pagination */
                 .pagination .page-link:hover {
                     background-color: #1A162E !important;
                     color: white !important;
