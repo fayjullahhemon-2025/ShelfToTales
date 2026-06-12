@@ -16,11 +16,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PdfExtractionService {
 
     private final S3Client s3Client;
+
+    public PdfExtractionService(@org.springframework.beans.factory.annotation.Autowired(required = false) S3Client s3Client) {
+        this.s3Client = s3Client;
+    }
 
     @Value("${storage.r2.bucket:shelftotales}")
     private String bucket;

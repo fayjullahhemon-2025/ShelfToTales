@@ -75,6 +75,9 @@ class CartServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private CartService cartService;
 

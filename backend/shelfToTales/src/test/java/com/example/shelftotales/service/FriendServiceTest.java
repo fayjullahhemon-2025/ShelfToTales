@@ -63,6 +63,7 @@ class FriendServiceTest {
     @Mock private UserBlockRepository userBlockRepository;
     @Mock private UserRepository userRepository;
     @Mock private ApplicationEventPublisher eventPublisher;
+    @Mock private NotificationService notificationService;
     @InjectMocks private FriendService friendService;
 
     @Test
