@@ -24,6 +24,9 @@ function BookListPage() {
     const [selectBtn, setSelectBtn] = useState('Newest');
     const [sortBy, setSortBy] = useState('id');
     const [sortDir, setSortDir] = useState('desc');
+    const [selectedCategory, setSelectedCategory] = useState('All Books');
+
+    const CATEGORIES = ['All Books', 'Fictions', 'Fantasy', 'Science'];
 
     const sortMap = {
         'Newest': { sortBy: 'id', sortDir: 'desc' },
@@ -84,7 +87,7 @@ function BookListPage() {
 
     if (loading) {
         return (
-            <div className="d-flex justify-content-center align-items-center" style={{height: '50vh'}}>
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
                 <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Loading...</span>
                 </div>
@@ -95,142 +98,166 @@ function BookListPage() {
     return (
         <div className="page-content bg-grey">
             <PageTitle parentPage="Pages" childPage="Book List" />
-                <FadeIn>
-            
-            <section className="content-inner-1 border-bottom">
-                <div className="container">
-                    {/* Title */}
-                    <div className="d-flex justify-content-between align-items-center m-b20">
-                        <h4 className="title mb-0 fw-bold" style={{ color: '#1A162E' }}>Books</h4>
-                    </div>
+            <FadeIn>
 
-                    {/* Toolbar */}
-                    <div className="filter-area m-b30 p-3 bg-white rounded-3 border d-flex justify-content-between align-items-center shadow-sm">
-                        <div className="d-flex align-items-center gap-4 ps-2">
-                            <Link href="/book-list" className="text-decoration-none" style={{ color: '#1A162E' }} aria-label="List View">
-                                <i className="fa-solid fa-bars fa-lg"></i>
-                            </Link>
-                            <Link href="/book-list" className="text-decoration-none" style={{ color: '#1A162E' }} aria-label="Grid View">
-                                <i className="fa-solid fa-table-cells fa-lg"></i>
-                            </Link>
-                            <Link href="/book-list" className="text-decoration-none" style={{ color: '#1A162E' }} aria-label="Detailed Grid View">
-                                <i className="fa-solid fa-table-list fa-lg"></i>
-                            </Link>
+                <section className="content-inner-1 border-bottom">
+                    <div className="container">
+                        {/* Title */}
+                        <div className="d-flex justify-content-between align-items-center m-b20">
+                            <h4 className="title mb-0 fw-bold" style={{ color: '#1A162E' }}>Books</h4>
                         </div>
-                        <div className="d-flex align-items-center gap-4 pe-2">
-                            <div className="dropdown">
-                                <button className="btn btn-link fw-bold text-decoration-none d-flex align-items-center gap-2 p-0" type="button" style={{ color: '#1A162E' }} aria-label="Toggle categories list">
-                                    <i className="fa-solid fa-list-ul"></i> Categories
-                                </button>
+
+                        {/* Toolbar */}
+                        <div className="filter-area m-b30 p-3 bg-white rounded-3 border d-flex justify-content-between align-items-center shadow-sm">
+                            {/* Left: Categories dropdown */}
+                            <div className="d-flex align-items-center gap-4 ps-2">
+                                <Dropdown>
+                                    <Dropdown.Toggle
+                                        as="button"
+                                        id="categories-dropdown"
+                                        className="toolbar-plain-btn"
+                                        aria-label="Filter by category"
+                                    >
+                                        <i className="fa-solid fa-list-ul me-2"></i>
+                                        Categories
+                                        <i className="fa-solid fa-caret-down small ms-2"></i>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        {CATEGORIES.map(cat => (
+                                            <Dropdown.Item
+                                                key={cat}
+                                                onClick={() => { setSelectedCategory(cat); setCurrentPage(0); }}
+                                                active={selectedCategory === cat}
+                                            >
+                                                {cat}
+                                            </Dropdown.Item>
+                                        ))}
+                                    </Dropdown.Menu>
+                                </Dropdown>
                             </div>
-                            <Dropdown className="dropdown">
-                                <Dropdown.Toggle className="btn btn-link fw-bold text-decoration-none d-flex align-items-center gap-2 p-0 border-0 bg-transparent i-false" style={{ color: '#1A162E', boxShadow: 'none' }} aria-label={`Sort books by: ${selectBtn}`}>
-                                    <i className="fa-solid fa-arrow-down-wide-short"></i> {selectBtn} <i className="fa-solid fa-caret-down small ms-1"></i>
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    <Dropdown.Item onClick={() => handleSortChange('Newest')}>Newest</Dropdown.Item>
-                                    <Dropdown.Item onClick={() => handleSortChange('Oldest')}>Oldest</Dropdown.Item>
-                                    <Dropdown.Item onClick={() => handleSortChange('Price Low')}>Price Low</Dropdown.Item>
-                                    <Dropdown.Item onClick={() => handleSortChange('Price High')}>Price High</Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
+                            {/* Right: Sort dropdown */}
+                            <div className="d-flex align-items-center gap-4 pe-2">
+                                <Dropdown>
+                                    <Dropdown.Toggle
+                                        as="button"
+                                        id="sort-dropdown"
+                                        className="toolbar-plain-btn"
+                                        aria-label={`Sort books by: ${selectBtn}`}
+                                    >
+                                        <i className="fa-solid fa-arrow-down-wide-short me-2"></i>
+                                        {selectBtn}
+                                        <i className="fa-solid fa-caret-down small ms-2"></i>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item onClick={() => handleSortChange('Newest')}>Newest</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => handleSortChange('Oldest')}>Oldest</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => handleSortChange('Price Low')}>Price Low</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => handleSortChange('Price High')}>Price High</Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="row book-grid-row">
-                        {books.map((book, index) => (
-                            <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6 m-b30" key={index}>
-                                <div className="book-card-new" role="article" aria-label={`Book: ${book.title}`}>
-                                    {/* Cover image fills top portion */}
-                                    <div className="book-card-cover">
-                                        <img
-                                            loading="lazy"
-                                            decoding="async"
-                                            src={book.coverUrl || '/placeholder-book.png'}
-                                            alt={`Cover of ${book.title}`}
-                                        />
-                                        {/* Price badge top-left */}
-                                        <div className="book-card-price-badge" aria-label={`Price: $${book.discountPrice || book.price}`}>
-                                            ${book.discountPrice || book.price}
+                        <div className="row book-grid-row">
+                            {books
+                              .filter(book =>
+                                selectedCategory === 'All Books' ||
+                                (book.category?.name || '').toLowerCase() === selectedCategory.toLowerCase()
+                              )
+                              .map((book, index) => (
+                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6 m-b30" key={index}>
+                                    <div className="book-card-new" role="article" aria-label={`Book: ${book.title}`}>
+                                        {/* Cover image fills top portion */}
+                                        <div className="book-card-cover">
+                                            <img
+                                                loading="lazy"
+                                                decoding="async"
+                                                src={book.coverUrl || '/placeholder-book.png'}
+                                                alt={`Cover of ${book.title}`}
+                                            />
+                                            {/* Price badge top-left */}
+                                            <div className="book-card-price-badge" aria-label={`Price: $${book.discountPrice || book.price}`}>
+                                                ${book.discountPrice || book.price}
+                                            </div>
+                                            {/* Hover action overlay */}
+                                            <div className="book-card-hover-actions">
+                                                <button
+                                                    onClick={() => handleAddToWishlist(book.id)}
+                                                    className="book-card-action-btn wishlist-btn"
+                                                    aria-label={`Add ${book.title} to wishlist`}
+                                                >
+                                                    <i className="fa-regular fa-heart me-2"></i> Wishlist
+                                                </button>
+                                                <button
+                                                    onClick={() => handleAddToCart(book.id)}
+                                                    className="book-card-action-btn cart-btn"
+                                                    aria-label={`Add ${book.title} to cart`}
+                                                >
+                                                    <i className="fa-solid fa-cart-shopping me-2"></i> Add to Cart
+                                                </button>
+                                            </div>
                                         </div>
-                                        {/* Hover action overlay */}
-                                        <div className="book-card-hover-actions">
-                                            <button
-                                                onClick={() => handleAddToWishlist(book.id)}
-                                                className="book-card-action-btn wishlist-btn"
-                                                aria-label={`Add ${book.title} to wishlist`}
-                                            >
-                                                <i className="fa-regular fa-heart me-2"></i> Wishlist
-                                            </button>
-                                            <button
-                                                onClick={() => handleAddToCart(book.id)}
-                                                className="book-card-action-btn cart-btn"
-                                                aria-label={`Add ${book.title} to cart`}
-                                            >
-                                                <i className="fa-solid fa-cart-shopping me-2"></i> Add to Cart
-                                            </button>
+                                        {/* White info panel */}
+                                        <div className="book-card-info">
+                                            <h6 className="book-card-title">
+                                                <Link href={`/books-detail/${book.id}`} aria-label={`View details of ${book.title}`}>
+                                                    {book.title}
+                                                </Link>
+                                            </h6>
+                                            <p className="book-card-author">{book.author || 'Unknown Author'}</p>
+                                            <span className="book-card-genre">
+                                                {book.category?.name || 'General'}
+                                            </span>
                                         </div>
-                                    </div>
-                                    {/* White info panel */}
-                                    <div className="book-card-info">
-                                        <h6 className="book-card-title">
-                                            <Link href={`/books-detail/${book.id}`} aria-label={`View details of ${book.title}`}>
-                                                {book.title}
-                                            </Link>
-                                        </h6>
-                                        <p className="book-card-author">{book.author || 'Unknown Author'}</p>
-                                        <span className="book-card-genre">
-                                            {book.category?.name || 'General'}
-                                        </span>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Pagination Section */}
-                    {totalPages > 1 && (
-                        <div className="row align-items-center mt-5">
-                            <div className="col-12">
-                                <nav aria-label="Page navigation">
-                                    <ul className="pagination justify-content-center mb-0 gap-2 border-0">
-                                        <li className={`page-item ${currentPage === 0 ? 'disabled' : ''}`}>
-                                            <button className="page-link border-0 bg-light rounded text-dark px-3 py-2" onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 0} aria-label="Previous page">Prev</button>
-                                        </li>
-                                        {Array.from({ length: totalPages }, (_, i) => (
-                                            <li key={i} className={`page-item ${currentPage === i ? 'active' : ''}`}>
-                                                <button className={`page-link border-0 rounded px-3 py-2 ${currentPage === i ? 'text-white' : 'bg-light text-dark'}`} style={currentPage === i ? { backgroundColor: '#1A162E' } : {}} onClick={() => setCurrentPage(i)} aria-label={`Page ${i + 1}`} aria-current={currentPage === i ? "page" : undefined}>{i + 1}</button>
-                                            </li>
-                                        ))}
-                                        <li className={`page-item ${currentPage >= totalPages - 1 ? 'disabled' : ''}`}>
-                                            <button className="page-link border-0 bg-light rounded text-dark px-3 py-2" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= totalPages - 1} aria-label="Next page">Next</button>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            </div>
+                            ))}
                         </div>
-                    )}
-                </div>
-            </section>
 
-            <div className="bg-white py-5">
-                <div className="container">
-                    <ClientsSlider />
-                </div>
-            </div>
+                        {/* Pagination Section */}
+                        {totalPages > 1 && (
+                            <div className="row align-items-center mt-5">
+                                <div className="col-12">
+                                    <nav aria-label="Page navigation">
+                                        <ul className="pagination justify-content-center mb-0 gap-2 border-0">
+                                            <li className={`page-item ${currentPage === 0 ? 'disabled' : ''}`}>
+                                                <button className="page-link border-0 bg-light rounded text-dark px-3 py-2" onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 0} aria-label="Previous page">Prev</button>
+                                            </li>
+                                            {Array.from({ length: totalPages }, (_, i) => (
+                                                <li key={i} className={`page-item ${currentPage === i ? 'active' : ''}`}>
+                                                    <button className={`page-link border-0 rounded px-3 py-2 ${currentPage === i ? 'text-white' : 'bg-light text-dark'}`} style={currentPage === i ? { backgroundColor: '#1A162E' } : {}} onClick={() => setCurrentPage(i)} aria-label={`Page ${i + 1}`} aria-current={currentPage === i ? "page" : undefined}>{i + 1}</button>
+                                                </li>
+                                            ))}
+                                            <li className={`page-item ${currentPage >= totalPages - 1 ? 'disabled' : ''}`}>
+                                                <button className="page-link border-0 bg-light rounded text-dark px-3 py-2" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= totalPages - 1} aria-label="Next page">Next</button>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </section>
 
-            <section className="content-inner bg-grey">
-                <div className="container">
-                    <div className="row sp15">
-                        <CounterSection />
+                <div className="bg-white py-5">
+                    <div className="container">
+                        <ClientsSlider />
                     </div>
                 </div>
-            </section>
-                </FadeIn>
+
+                <section className="content-inner bg-grey">
+                    <div className="container">
+                        <div className="row sp15">
+                            <CounterSection />
+                        </div>
+                    </div>
+                </section>
+            </FadeIn>
 
             <NewsLetter />
-            
-            <style dangerouslySetInnerHTML={{ __html: `
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 /* ── New Book Card Design ── */
                 .book-card-new {
                     background: #fff;
@@ -377,6 +404,38 @@ function BookListPage() {
                 .pagination .page-link:hover {
                     background-color: #1A162E !important;
                     color: white !important;
+                }
+
+                /* ── Toolbar plain button (Categories + Sort) ── */
+                .toolbar-plain-btn {
+                    background: transparent !important;
+                    background-color: transparent !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    outline: none !important;
+                    color: #1A162E !important;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    padding: 0 !important;
+                    cursor: pointer;
+                    display: inline-flex !important;
+                    align-items: center;
+                    gap: 0;
+                }
+                .toolbar-plain-btn:hover,
+                .toolbar-plain-btn:focus,
+                .toolbar-plain-btn:active,
+                .toolbar-plain-btn.show {
+                    background: transparent !important;
+                    background-color: transparent !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    color: #1A162E !important;
+                    opacity: 0.75;
+                }
+                /* Hide Bootstrap's auto-injected caret ::after */
+                .toolbar-plain-btn::after {
+                    display: none !important;
                 }
             ` }} />
         </div>
