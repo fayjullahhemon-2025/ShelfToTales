@@ -18,10 +18,6 @@ export const MenuListArray2 = [
                 to: '/book-list',
             },
             {
-                title: 'Categories',
-                to: '/books-grid-view',
-            },
-            {
                 title: 'Best Sellers',
                 to: '/shop-list',
             },
