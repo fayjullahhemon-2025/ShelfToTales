@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 const apiHost = new URL(apiBase).host;
+const apiOrigin = new URL(apiBase).origin;
 
 const cspHeader = `
   default-src 'self';
@@ -8,7 +9,7 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
   img-src 'self' blob: data: https://images.unsplash.com https://i.pravatar.cc https://ui-avatars.com https://via.placeholder.com https://*.r2.dev https://placehold.co https://api.dicebear.com;
   font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-  connect-src 'self' ${apiBase} ws://${apiHost} wss://${apiHost} https://accounts.google.com;
+  connect-src 'self' ${apiOrigin} ws://${apiHost} wss://${apiHost} https://accounts.google.com;
   worker-src 'self' https://unpkg.com;
   frame-src 'self' https://accounts.google.com https://www.youtube.com https://www.google.com;
   object-src 'none';
