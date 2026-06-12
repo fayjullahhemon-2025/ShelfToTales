@@ -109,15 +109,17 @@ function BookListPage() {
 
                         {/* Toolbar */}
                         <div className="filter-area m-b30 p-3 bg-white rounded-3 border d-flex justify-content-between align-items-center shadow-sm">
-                            {/* Left: Categories dropdown — title always reads 'Categories' */}
+                            {/* Left: Categories dropdown */}
                             <div className="d-flex align-items-center gap-4 ps-2">
                                 <Dropdown>
                                     <Dropdown.Toggle
+                                        as="button"
                                         id="categories-dropdown"
                                         className="toolbar-plain-btn"
                                         aria-label="Filter by category"
                                     >
-                                        <i className="fa-solid fa-list-ul me-2"></i>Categories
+                                        <i className="fa-solid fa-list-ul me-2"></i>
+                                        Categories
                                         <i className="fa-solid fa-caret-down small ms-2"></i>
                                     </Dropdown.Toggle>
                                     <Dropdown.Menu>
@@ -133,15 +135,17 @@ function BookListPage() {
                                     </Dropdown.Menu>
                                 </Dropdown>
                             </div>
-                            {/* Right: Sort dropdown — no background */}
+                            {/* Right: Sort dropdown */}
                             <div className="d-flex align-items-center gap-4 pe-2">
                                 <Dropdown>
                                     <Dropdown.Toggle
+                                        as="button"
                                         id="sort-dropdown"
                                         className="toolbar-plain-btn"
                                         aria-label={`Sort books by: ${selectBtn}`}
                                     >
-                                        <i className="fa-solid fa-arrow-down-wide-short me-2"></i>{selectBtn}
+                                        <i className="fa-solid fa-arrow-down-wide-short me-2"></i>
+                                        {selectBtn}
                                         <i className="fa-solid fa-caret-down small ms-2"></i>
                                     </Dropdown.Toggle>
                                     <Dropdown.Menu>
@@ -403,32 +407,35 @@ function BookListPage() {
                 }
 
                 /* ── Toolbar plain button (Categories + Sort) ── */
-                /* Strip ALL Bootstrap dropdown-toggle styles */
-                .toolbar-plain-btn,
-                .toolbar-plain-btn:hover,
-                .toolbar-plain-btn:focus,
-                .toolbar-plain-btn:active,
-                .toolbar-plain-btn.show,
-                .toolbar-plain-btn::after {
-                    background: none !important;
+                .toolbar-plain-btn {
+                    background: transparent !important;
                     background-color: transparent !important;
                     border: none !important;
                     box-shadow: none !important;
+                    outline: none !important;
                     color: #1A162E !important;
                     font-weight: 600;
                     font-size: 0.9rem;
                     padding: 0 !important;
-                    display: flex;
+                    cursor: pointer;
+                    display: inline-flex !important;
                     align-items: center;
                     gap: 0;
-                    /* hide Bootstrap's default caret arrow */
-                    display: inline-flex !important;
                 }
+                .toolbar-plain-btn:hover,
+                .toolbar-plain-btn:focus,
+                .toolbar-plain-btn:active,
+                .toolbar-plain-btn.show {
+                    background: transparent !important;
+                    background-color: transparent !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    color: #1A162E !important;
+                    opacity: 0.75;
+                }
+                /* Hide Bootstrap's auto-injected caret ::after */
                 .toolbar-plain-btn::after {
                     display: none !important;
-                }
-                .toolbar-plain-btn:hover {
-                    opacity: 0.75 !important;
                 }
             ` }} />
         </div>
