@@ -10,6 +10,7 @@ const navItems = [
   { href: '/admin/dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
   { href: '/admin/books', icon: 'fa-book', label: 'Books' },
   { href: '/admin/categories', icon: 'fa-tags', label: 'Categories' },
+  { href: '/admin/lofi', icon: 'fa-music', label: 'Lofi Playlist' },
   { href: '/admin/users', icon: 'fa-users-gear', label: 'Users' },
   { href: '/admin/orders', icon: 'fa-boxes-stacked', label: 'Orders' },
   { href: '/admin/coupons', icon: 'fa-ticket', label: 'Coupons' },
