@@ -24,6 +24,9 @@ function BookListPage() {
     const [selectBtn, setSelectBtn] = useState('Newest');
     const [sortBy, setSortBy] = useState('id');
     const [sortDir, setSortDir] = useState('desc');
+    const [selectedCategory, setSelectedCategory] = useState('All Books');
+
+    const CATEGORIES = ['All Books', 'Fictions', 'Fantasy', 'Science'];
 
     const sortMap = {
         'Newest': { sortBy: 'id', sortDir: 'desc' },
@@ -106,25 +109,37 @@ function BookListPage() {
 
                     {/* Toolbar */}
                     <div className="filter-area m-b30 p-3 bg-white rounded-3 border d-flex justify-content-between align-items-center shadow-sm">
+                        {/* Left: Category filter */}
                         <div className="d-flex align-items-center gap-4 ps-2">
-                            <Link href="/book-list" className="text-decoration-none" style={{ color: '#1A162E' }} aria-label="List View">
-                                <i className="fa-solid fa-bars fa-lg"></i>
-                            </Link>
-                            <Link href="/book-list" className="text-decoration-none" style={{ color: '#1A162E' }} aria-label="Grid View">
-                                <i className="fa-solid fa-table-cells fa-lg"></i>
-                            </Link>
-                            <Link href="/book-list" className="text-decoration-none" style={{ color: '#1A162E' }} aria-label="Detailed Grid View">
-                                <i className="fa-solid fa-table-list fa-lg"></i>
-                            </Link>
+                            <Dropdown>
+                                <Dropdown.Toggle
+                                    className="btn btn-link fw-bold text-decoration-none d-flex align-items-center gap-2 p-0 border-0 bg-transparent i-false"
+                                    style={{ color: '#1A162E', boxShadow: 'none' }}
+                                    aria-label={`Filter by category: ${selectedCategory}`}
+                                >
+                                    <i className="fa-solid fa-list-ul"></i> {selectedCategory} <i className="fa-solid fa-caret-down small ms-1"></i>
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    {CATEGORIES.map(cat => (
+                                        <Dropdown.Item
+                                            key={cat}
+                                            onClick={() => { setSelectedCategory(cat); setCurrentPage(0); }}
+                                            active={selectedCategory === cat}
+                                        >
+                                            {cat}
+                                        </Dropdown.Item>
+                                    ))}
+                                </Dropdown.Menu>
+                            </Dropdown>
                         </div>
+                        {/* Right: Sort */}
                         <div className="d-flex align-items-center gap-4 pe-2">
-                            <div className="dropdown">
-                                <button className="btn btn-link fw-bold text-decoration-none d-flex align-items-center gap-2 p-0" type="button" style={{ color: '#1A162E' }} aria-label="Toggle categories list">
-                                    <i className="fa-solid fa-list-ul"></i> Categories
-                                </button>
-                            </div>
-                            <Dropdown className="dropdown">
-                                <Dropdown.Toggle className="btn btn-link fw-bold text-decoration-none d-flex align-items-center gap-2 p-0 border-0 bg-transparent i-false" style={{ color: '#1A162E', boxShadow: 'none' }} aria-label={`Sort books by: ${selectBtn}`}>
+                            <Dropdown>
+                                <Dropdown.Toggle
+                                    className="btn btn-link fw-semibold text-decoration-none d-flex align-items-center gap-2 p-0 border-0 bg-transparent i-false"
+                                    style={{ color: '#1A162E', boxShadow: 'none' }}
+                                    aria-label={`Sort books by: ${selectBtn}`}
+                                >
                                     <i className="fa-solid fa-arrow-down-wide-short"></i> {selectBtn} <i className="fa-solid fa-caret-down small ms-1"></i>
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu>
@@ -138,7 +153,12 @@ function BookListPage() {
                     </div>
 
                     <div className="row book-grid-row">
-                        {books.map((book, index) => (
+                        {books
+                          .filter(book =>
+                            selectedCategory === 'All Books' ||
+                            (book.category?.name || '').toLowerCase() === selectedCategory.toLowerCase()
+                          )
+                          .map((book, index) => (
                             <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6 m-b30" key={index}>
                                 <div className="book-card-new" role="article" aria-label={`Book: ${book.title}`}>
                                     {/* Cover image fills top portion */}
