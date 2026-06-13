@@ -25,6 +25,7 @@ public class SpoilerDetectionService {
     private final Optional<LlmSpoilerClassifier> llmClassifier;
     private final Optional<BookSpoilerClassifier> bookClassifier;
     private final Optional<TransformerSpoilerClassifier> transformerClassifier;
+    private final Optional<HuggingFaceSpoilerClassifier> huggingFaceClassifier;
     private final SpoilerModelRegistry modelRegistry;
     private final TrainingTriggerService trainingTriggerService;
 
@@ -94,6 +95,10 @@ public class SpoilerDetectionService {
      * 4. heuristic: Use regex-based classifier (default)
      */
     private SpoilerClassifier pickClassifier(Long bookId) {
+        if ("huggingface".equalsIgnoreCase(provider) && huggingFaceClassifier.isPresent() && huggingFaceClassifier.get().isEnabled()) {
+            return huggingFaceClassifier.get();
+        }
+
         // Book-specific classifier takes priority if configured
         if ("book-llm".equalsIgnoreCase(provider) && bookClassifier.isPresent()) {
             if (bookId != null && modelRegistry.hasActiveModel(bookId)) {
