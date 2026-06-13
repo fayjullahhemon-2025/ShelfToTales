@@ -30,6 +30,7 @@ class SpoilerDetectionServiceTest {
     @Mock private LlmSpoilerClassifier llmClassifier;
     @Mock private BookSpoilerClassifier bookClassifier;
     @Mock private TransformerSpoilerClassifier transformerClassifier;
+    @Mock private HuggingFaceSpoilerClassifier huggingFaceClassifier;
     @Mock private SpoilerModelRegistry modelRegistry;
     @Mock private TrainingTriggerService trainingTriggerService;
 
@@ -40,7 +41,7 @@ class SpoilerDetectionServiceTest {
         service = new SpoilerDetectionService(
                 heuristicClassifier, assessmentRepository, reviewRepository,
                 Optional.of(llmClassifier), Optional.of(bookClassifier),
-                Optional.of(transformerClassifier),
+                Optional.of(transformerClassifier), Optional.of(huggingFaceClassifier),
                 modelRegistry, trainingTriggerService
         );
         ReflectionTestUtils.setField(service, "provider", "heuristic");
@@ -145,5 +146,54 @@ class SpoilerDetectionServiceTest {
         verify(review).setSpoilerLevel(SpoilerLevel.MAJOR_SPOILER);
         verify(review).setSpoiler(true);
         verify(reviewRepository).save(review);
+    }
+
+    @Test
+    void usesHuggingFaceClassifier_whenProviderIsHuggingFaceAndEnabled() {
+        ReflectionTestUtils.setField(service, "provider", "huggingface");
+        when(huggingFaceClassifier.isEnabled()).thenReturn(true);
+
+        SpoilerAssessment expected = SpoilerAssessment.builder()
+                .reviewId(10L).userId(10L)
+                .spoilerLevel(SpoilerLevel.MAJOR_SPOILER)
+                .spoilerScore(BigDecimal.valueOf(0.95))
+                .spoilerSentences(List.of())
+                .sanitizedReview("[SPOILER REDACTED]")
+                .model("huggingface-loreguard-ai")
+                .build();
+        when(huggingFaceClassifier.classify(10L, 10L, "text with spoiler")).thenReturn(expected);
+        when(assessmentRepository.save(any())).thenReturn(expected);
+        when(reviewRepository.findById(10L)).thenReturn(Optional.empty());
+
+        SpoilerAssessment result = service.assessAndPersist(10L, 10L, "text with spoiler");
+
+        assertEquals("huggingface-loreguard-ai", result.getModel());
+        assertEquals(SpoilerLevel.MAJOR_SPOILER, result.getSpoilerLevel());
+        verify(huggingFaceClassifier).classify(10L, 10L, "text with spoiler");
+        verifyNoInteractions(llmClassifier);
+    }
+
+    @Test
+    void fallsBack_whenProviderIsHuggingFaceButDisabled() {
+        ReflectionTestUtils.setField(service, "provider", "huggingface");
+        when(huggingFaceClassifier.isEnabled()).thenReturn(false);
+
+        SpoilerAssessment expectedHeuristic = SpoilerAssessment.builder()
+                .reviewId(11L).userId(10L)
+                .spoilerLevel(SpoilerLevel.SAFE)
+                .spoilerScore(BigDecimal.ZERO)
+                .spoilerSentences(List.of())
+                .sanitizedReview("text")
+                .model("heuristic-v1")
+                .build();
+        when(heuristicClassifier.classify(11L, 10L, "text")).thenReturn(expectedHeuristic);
+        when(assessmentRepository.save(any())).thenReturn(expectedHeuristic);
+        when(reviewRepository.findById(11L)).thenReturn(Optional.empty());
+
+        SpoilerAssessment result = service.assessAndPersist(11L, 10L, "text");
+
+        assertEquals("heuristic-v1", result.getModel());
+        verify(heuristicClassifier).classify(11L, 10L, "text");
+        verify(huggingFaceClassifier, never()).classify(any(), any(), any());
     }
 }
