@@ -15,6 +15,7 @@ import { FadeIn } from '../../components/common/AnimationUtils';
 //Component
 import NewsLetter from '../../components/features/NewsLetter';
 import ReportButton from '../../components/features/ReportButton';
+import ReviewCard from '../../components/features/Review/ReviewCard';
 
 //Images
 const profile2 = '/assets/images/profile2.jpg';
@@ -221,71 +222,6 @@ function ReviewCommentsThread({ reviewId }) {
     );
 }
 
-function CommentBlog({id, title, comment, date, rating, avatar, isSpoiler}){
-    const [reveal, setReveal] = useState(false);
-    const isBlurred = isSpoiler && !reveal;
-
-    return(
-        <>
-            <div className="comment-body" id="div-comment-3" style={{ position: 'relative' }}>
-                <div className="comment-author vcard">
-                    <img loading="lazy" decoding="async" src={avatar || profile2} alt="" className="avatar" onError={(e) => { e.target.onerror = null; e.target.src = profile2; }}/>
-                    <cite className="fn">{title}</cite> <span className="says">says:</span>
-                    <div className="comment-meta" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Link href={"#"}>{new Date(date).toLocaleDateString()}</Link>
-                        {id && <ReportButton targetType="REVIEW" targetId={id} />}
-                    </div>
-                </div>
-                <div className="comment-content dlab-page-text" style={{ position: 'relative' }}>
-                    <div style={{
-                        filter: isBlurred ? 'blur(6px)' : 'none',
-                        transition: 'filter 0.3s ease',
-                        pointerEvents: isBlurred ? 'none' : 'auto',
-                        userSelect: isBlurred ? 'none' : 'auto'
-                    }}>
-                        <p>{comment}</p>
-                    </div>
-                    {isBlurred && (
-                        <div 
-                            onClick={() => setReveal(true)}
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                                border: '1px dashed #ff5e5e',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                padding: '10px',
-                                textAlign: 'center',
-                                zIndex: 10
-                            }}
-                        >
-                            <span style={{ color: '#d9534f', fontWeight: 'bold', fontSize: '13px' }}>
-                                <i className="fa fa-warning"></i> Spoiler Warning
-                            </span>
-                            <span style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
-                                Click to reveal this review.
-                            </span>
-                        </div>
-                    )}
-                    <div className="dz-rating" style={{ marginTop: '10px' }}>
-                        {[...Array(5)].map((_, i) => (
-                            <i key={i} className={`fa fa-star ${i < rating ? 'text-yellow' : 'text-muted'}`}></i>
-                        ))}
-                    </div>
-                </div>
-            </div>
-            {id && <ReviewCommentsThread reviewId={id} />}
-        </>
-    )
-}
 
 function ShopDetail(){
     const { id } = useParams();
@@ -295,7 +231,6 @@ function ShopDetail(){
     const [count, setCount] = useState(1);
     const [comment, setComment] = useState('');
     const [rating, setRating] = useState(5);
-    const [isSpoiler, setIsSpoiler] = useState(false);
     const [hideSpoilers, setHideSpoilers] = useState(false);
     const [similarBooks, setSimilarBooks] = useState([]);
 
@@ -356,11 +291,10 @@ function ShopDetail(){
             await reviewService.addReview(id, {
                 rating: parseInt(rating),
                 comment,
-                isSpoiler
+                isSpoiler: false
             });
             Swal.fire('Success', 'Review submitted successfully!', 'success');
             setComment('');
-            setIsSpoiler(false);
             await fetchReviews();
         } catch (error) {
             const errorMsg = error.response?.data?.message || 'Failed to submit review';
@@ -494,7 +428,7 @@ function ShopDetail(){
                                                             <ol className="comment-list">
                                                                 {reviews.filter(r => !hideSpoilers || !r.isSpoiler).map((rev, index) => (
                                                                     <li key={index} className="comment even thread-even depth-1">
-                                                                        <CommentBlog id={rev.id} title={rev.user?.username || 'User'} comment={rev.comment} date={rev.createdAt} rating={rev.rating} avatar={rev.user?.profileImageUrl} isSpoiler={rev.isSpoiler} />
+                                                                        <ReviewCard id={rev.id} title={rev.user?.username || 'User'} comment={rev.comment} date={rev.createdAt} rating={rev.rating} avatar={rev.user?.profileImageUrl} isSpoiler={rev.isSpoiler} />
                                                                     </li>
                                                                 ))}
                                                             </ol>
@@ -513,18 +447,6 @@ function ShopDetail(){
                                                                         </select>
                                                                         <textarea placeholder="Type Comment Here" className="form-control" value={comment} onChange={(e) => setComment(e.target.value)} required></textarea>
                                                                     </p>
-                                                                    <div className="form-check mb-3">
-                                                                        <input 
-                                                                            type="checkbox" 
-                                                                            className="form-check-input" 
-                                                                            id="isSpoiler" 
-                                                                            checked={isSpoiler} 
-                                                                            onChange={(e) => setIsSpoiler(e.target.checked)} 
-                                                                        />
-                                                                        <label className="form-check-label text-muted" htmlFor="isSpoiler" style={{ fontSize: '13px', cursor: 'pointer', userSelect: 'none' }}>
-                                                                            This review contains spoilers (will be hidden by default)
-                                                                        </label>
-                                                                    </div>
                                                                     <p className="col-md-12 col-sm-12 col-xs-12 form-submit">
                                                                         <button type="submit" className="submit btn btn-primary filled">
                                                                         Submit Now <i className="fa fa-angle-right m-l10"></i>
