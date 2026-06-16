@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { getMockFlipbook } from '@/data/mockFlipbook';
 import { useFlipbook } from '@/hooks/flipbook/useFlipbook';
 import { useFullscreen } from '@/hooks/flipbook/useFullscreen';
+import { bookService } from '@/lib/api';
 import FlipbookCanvas from './FlipbookCanvas';
 import FlipbookToolbar from './FlipbookToolbar';
 import PageNavigator from './PageNavigator';
@@ -25,8 +26,88 @@ export default function FlipbookViewer({ flipbookId }) {
   const containerRef = useRef(null);
   const fullscreen = useFullscreen(containerRef);
 
-  const flipbook = useMemo(() => getMockFlipbook(flipbookId), [flipbookId]);
-  const state = useFlipbook({ flipbook });
+  const [bookData, setBookData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const isNumeric = typeof flipbookId === 'number' || (typeof flipbookId === 'string' && /^\d+$/.test(flipbookId));
+
+  useEffect(() => {
+    if (!isNumeric) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    bookService.getById(flipbookId)
+      .then((res) => {
+        setBookData(res.data);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch book details for flipbook', err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [flipbookId, isNumeric]);
+
+  const flipbook = useMemo(() => {
+    if (isNumeric) {
+      if (!bookData) return null;
+      const total = 10;
+      const pages = Array.from({ length: total }, (_, i) => {
+        const isCover = i === 0;
+        const isBack = i === total - 1;
+        let image = bookData.coverUrl || 'https://picsum.photos/seed/fb-cover/1200/800';
+        if (i > 0 && i < total - 1) {
+          image = `https://picsum.photos/seed/fb-page-${bookData.id}-${i}/1200/800`;
+        }
+        let text = `Chapter ${i}: Reading preview of "${bookData.title}".\n\n`;
+        if (isCover) {
+          text = `${bookData.title}\nBy ${bookData.author}\n\n${bookData.description || ''}`;
+        } else if (isBack) {
+          text = `Thank you for reading the preview of "${bookData.title}".\n\nISBN: ${bookData.isbn || 'N/A'}\nPublished: ${bookData.publishedDate || 'N/A'}\nCategory: ${bookData.categoryName || 'N/A'}`;
+        } else {
+          const paragraphs = (bookData.description || 'Welcome to the preview of this book. ShelfToTales communities offer reviews, ratings, recommendations and more. Join us for the full experience.').split('\n');
+          const pContent = paragraphs[i % paragraphs.length] || `This is a preview page of "${bookData.title}". Please purchase the book to read the complete version.`;
+          text += pContent;
+        }
+
+        return {
+          id: `page-${bookData.id}-${i}`,
+          index: i,
+          image,
+          width: 1200,
+          height: 800,
+          title: isCover ? 'Cover' : isBack ? 'End' : `Page ${i + 1}`,
+          text,
+        };
+      });
+
+      return {
+        id: String(bookData.id),
+        title: bookData.title,
+        author: bookData.author,
+        description: bookData.description,
+        cover: bookData.coverUrl,
+        pages,
+        createdAt: bookData.publishedDate || '2026-01-01',
+      };
+    } else {
+      return getMockFlipbook(flipbookId);
+    }
+  }, [isNumeric, bookData, flipbookId]);
+
+  const state = useFlipbook({ flipbook, bookId: isNumeric ? Number(flipbookId) : null });
+
+  if (isNumeric && loading) {
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border text-primary mb-3" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="text-muted">Loading flipbook...</p>
+      </div>
+    );
+  }
 
   if (!flipbook) {
     return (

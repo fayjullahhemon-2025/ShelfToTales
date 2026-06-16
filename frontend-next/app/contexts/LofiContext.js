@@ -133,17 +133,23 @@ export function LofiProvider({ children }) {
     });
 
     // Fetch songs from API, fall back to hardcoded tracks
-    playlistService.getAll()
-      .then(res => {
-        const apiTracks = res.data?.map(s => ({
-          title: s.title,
-          artist: s.artist || '',
-          url: s.fileUrl,
-          coverUrl: s.coverUrl || FALLBACK_TRACKS[0].coverUrl,
-        }));
-        if (apiTracks && apiTracks.length > 0) setTracks(apiTracks);
-      })
-      .catch(() => {});
+    const refreshTracks = () => {
+      playlistService.getAll()
+        .then(res => {
+          const apiTracks = res.data?.map(s => ({
+            title: s.title,
+            artist: s.artist || '',
+            url: s.fileUrl,
+            coverUrl: s.coverUrl || FALLBACK_TRACKS[0].coverUrl,
+          }));
+          if (apiTracks && apiTracks.length > 0) setTracks(apiTracks);
+        })
+        .catch(() => {});
+    };
+    refreshTracks();
+
+    const onPlaylistUpdated = () => refreshTracks();
+    window.addEventListener('lofi:playlist-updated', onPlaylistUpdated);
 
     isInitialized.current = true;
 
@@ -152,7 +158,8 @@ export function LofiProvider({ children }) {
       musicAudio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       musicAudio.removeEventListener('ended', handleEnded);
       musicAudio.pause();
-      
+      window.removeEventListener('lofi:playlist-updated', onPlaylistUpdated);
+
       Object.values(ambientAudioRefs.current).forEach((audio) => {
         audio.pause();
       });
@@ -164,6 +171,7 @@ export function LofiProvider({ children }) {
     if (!isInitialized.current || !musicAudioRef.current) return;
 
     const currentTrack = tracks[currentTrackIndex];
+    if (!currentTrack) return;
     if (musicAudioRef.current.src !== currentTrack.url) {
       musicAudioRef.current.src = currentTrack.url;
       musicAudioRef.current.load();
@@ -172,10 +180,13 @@ export function LofiProvider({ children }) {
     musicAudioRef.current.volume = volume;
 
     if (isPlaying) {
-      musicAudioRef.current.play().catch((err) => {
-        console.error("Lofi music playback failed/blocked:", err);
-        setIsPlaying(false);
-      });
+      const playPromise = musicAudioRef.current.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch((err) => {
+          console.error("Lofi music playback failed/blocked:", err);
+          setIsPlaying(false);
+        });
+      }
     } else {
       musicAudioRef.current.pause();
     }

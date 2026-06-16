@@ -4,6 +4,7 @@
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { bookService, bookshelfService } from '../lib/api';
 import './VirtualBookshelf.css';
 import Swal from 'sweetalert2';
@@ -20,6 +21,7 @@ const demoBooksList = [
 ];
 
 function VirtualBookshelfInner() {
+    const router = useRouter();
     // User-scoped localStorage keys
     const uid = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}').id || 'guest'; } catch { return 'guest'; } })();
     const ukey = (k) => `${k}_${uid}`;
@@ -708,7 +710,8 @@ function VirtualBookshelfInner() {
                         
                         <div className="d-flex justify-content-end gap-2">
                             <button className="btn btn-outline-secondary rounded-pill px-3" onClick={() => setSelectedBookForModal(null)}>Cancel</button>
-                            <button className="btn btn-primary rounded-pill px-3" onClick={() => { handleReadBook(selectedBookForModal); setSelectedBookForModal(null); }}>Read Book</button>
+                            <button className="btn btn-primary rounded-pill px-3" onClick={() => { router.push(`/read-book/${selectedBookForModal.bookId}`); setSelectedBookForModal(null); }}>Read PDF</button>
+                            <button className="btn btn-info rounded-pill px-3" onClick={() => { router.push(`/flipbook/${selectedBookForModal.bookId}`); setSelectedBookForModal(null); }}>Read Flipbook</button>
                             <button className="btn btn-warning rounded-pill px-4 fw-bold" style={{ backgroundColor: '#EAA451', borderColor: '#EAA451', color: '#000' }} onClick={handleSaveModal}>Save Changes</button>
                         </div>
                     </div>

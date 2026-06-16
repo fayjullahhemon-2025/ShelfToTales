@@ -71,7 +71,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                  uri.startsWith("/api/admin/coupons") ||
                  uri.startsWith("/api/admin/reports") ||
                  uri.startsWith("/api/ai/chat") ||
-                 uri.startsWith("/api/reviews/"));
+                 uri.startsWith("/api/reviews/") ||
+                 uri.startsWith("/api/rooms/"));
     }
 
     @Override

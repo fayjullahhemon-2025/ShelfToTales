@@ -15,6 +15,14 @@ vi.mock('@/lib/api', () => ({
   },
 }));
 
+// Mock useAuthContext — return authenticated by default.
+vi.mock('./AuthContext', () => ({
+  useAuthContext: vi.fn(() => ({
+    isAuthenticated: true,
+    loading: false,
+  })),
+}));
+
 import { cartService } from '@/lib/api';
 
 // ---------------------------------------------------------------------------
@@ -80,6 +88,8 @@ function renderWithProvider() {
 describe('CartContext', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default mock so auto-fetch on mount resolves silently
+    cartService.getCart.mockResolvedValue({ data: { items: [], count: 0, total: 0 } });
   });
 
   it('starts with empty cart', () => {

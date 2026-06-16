@@ -71,3 +71,15 @@ vi.mock('sockjs-client', () => {
   };
 });
 
+// framer-motion / IntersectionObserver needs a shim in jsdom
+if (typeof window !== 'undefined' && !window.IntersectionObserver) {
+  class IntersectionObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() { return []; }
+  }
+  Object.defineProperty(window, 'IntersectionObserver', { value: IntersectionObserver, writable: true, configurable: true });
+  Object.defineProperty(globalThis, 'IntersectionObserver', { value: IntersectionObserver, writable: true, configurable: true });
+}
+

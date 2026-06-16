@@ -8,9 +8,11 @@ import com.example.shelftotales.catalog.domain.*;
 import com.example.shelftotales.bookshelf.domain.*;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,33 +21,39 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @RequestMapping("/api/admin/orders")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Slf4j
 public class AdminOrderController {
+    private final OrderService orderService;
     private final OrderRepository orderRepository;
 
-    @PutMapping("/{id}/status")
-    public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrdersForAdmin());
+    }
 
-        String statusStr = body.get("status");
-        if (statusStr == null || statusStr.isBlank()) {
-            throw new IllegalArgumentException("Status is required");
-        }
-
-        OrderStatus newStatus;
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOrderById(@PathVariable Long id) {
         try {
-            newStatus = OrderStatus.valueOf(statusStr.toUpperCase());
+            Order order = orderRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
+            return ResponseEntity.ok(orderService.mapToOrderResponse(order));
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid order status: " + statusStr +
-                    ". Valid values: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED");
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
+    }
 
-        order.transitionTo(newStatus);
-
-        if (body.containsKey("trackingNumber")) {
-            order.setTrackingNumber(body.get("trackingNumber"));
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        try {
+            OrderResponse updated = orderService.adminUpdateStatus(id, body.get("status"), body.get("trackingNumber"));
+            log.info("Admin updated order #{} status to {}", id, body.get("status"));
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.warn("Admin order update failed: orderId={}, error={}", id, e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("Admin order update error: orderId={}", id, e);
+            return ResponseEntity.internalServerError().body(Map.of("message", "Failed to update order status"));
         }
-
-        return ResponseEntity.ok(orderRepository.save(order));
     }
 }

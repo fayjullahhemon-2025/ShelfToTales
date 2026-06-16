@@ -1,5 +1,6 @@
 package com.example.shelftotales.commerce.application;
 
+import com.example.shelftotales.auth.domain.Role;
 import com.example.shelftotales.auth.domain.User;
 import com.example.shelftotales.auth.infrastructure.UserRepository;
 import com.example.shelftotales.catalog.application.CategoryResponse;
@@ -15,6 +16,7 @@ import com.example.shelftotales.notification.NotificationFactory;
 import com.example.shelftotales.notification.NotificationType;
 import com.example.shelftotales.event.OrderConfirmedEvent;
 import com.example.shelftotales.shared.util.AuthUtils;
+import com.example.shelftotales.social.application.NotificationService;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.context.ApplicationEventPublisher;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final NotificationFactory notificationFactory;
     private final ApplicationEventPublisher eventPublisher;
+    private final NotificationService notificationService;
 
     @Transactional
     @Retry(name = "orderCheckout")
@@ -117,7 +120,49 @@ public class OrderService {
         
         order.transitionTo(OrderStatus.DELIVERED);
         Order savedOrder = orderRepository.save(order);
+
+        String bookNames = savedOrder.getItems().stream()
+                .map(item -> item.getBook().getTitle())
+                .collect(Collectors.joining(", "));
+        String message = user.getFullName() + " marked order #" + savedOrder.getId() + " as received. Books: " + bookNames;
+
+        List<User> admins = userRepository.findByRole(Role.ADMIN);
+        for (User admin : admins) {
+            notificationService.create(admin.getId(), user.getId(), "ORDER_RECEIVED", "ORDER", savedOrder.getId(), message);
+        }
+
+        log.info("Order marked as received: orderId={}, userId={}, notified {} admin(s)", savedOrder.getId(), user.getId(), admins.size());
         return mapToOrderResponse(savedOrder);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getAllOrdersForAdmin() {
+        List<Order> orders = orderRepository.findAll();
+        return orders.stream()
+                .map(this::mapToOrderResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public OrderResponse adminUpdateStatus(Long orderId, String statusStr, String trackingNumber) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+        if (statusStr == null || statusStr.isBlank()) {
+            throw new IllegalArgumentException("Status is required");
+        }
+        OrderStatus newStatus;
+        try {
+            newStatus = OrderStatus.valueOf(statusStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid order status: " + statusStr +
+                    ". Valid values: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED");
+        }
+        order.transitionTo(newStatus);
+        if (trackingNumber != null && !trackingNumber.isBlank()) {
+            order.setTrackingNumber(trackingNumber);
+        }
+        Order saved = orderRepository.save(order);
+        return mapToOrderResponse(saved);
     }
 
     public OrderResponse mapToOrderResponse(Order order) {
@@ -146,6 +191,9 @@ public class OrderService {
                 .couponCode(order.getCouponCode())
                 .discountAmount(order.getDiscountAmount())
                 .items(itemResponses)
+                .userName(order.getUser() != null ? order.getUser().getFullName() : null)
+                .userEmail(order.getUser() != null ? order.getUser().getEmail() : null)
+                .trackingNumber(order.getTrackingNumber())
                 .build();
     }
 }

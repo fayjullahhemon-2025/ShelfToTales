@@ -29,6 +29,17 @@ public class RoomMemberService {
     }
 
     @Transactional
+    public void joinRoom(Long roomId) {
+        User currentUser = AuthUtils.getCurrentUser(userRepository);
+        ReadingRoom room = readingRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+        if (!"PUBLIC".equalsIgnoreCase(room.getVisibility())) {
+            throw new IllegalArgumentException("Cannot join a private room without an invite");
+        }
+        addMember(roomId, currentUser.getId(), "MEMBER");
+    }
+
+    @Transactional
     public void removeMember(Long roomId, Long userId) {
         User currentUser = AuthUtils.getCurrentUser(userRepository);
         RoomMember ownerMember = roomMemberRepository.findByRoomIdAndUserId(roomId, currentUser.getId())

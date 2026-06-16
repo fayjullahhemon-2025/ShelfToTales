@@ -99,7 +99,7 @@ public class EnhancedCheckoutServiceTest {
                 return order;
             });
 
-            Order result = checkoutService.checkout(10L, "BKASH", "DISCOUNT20");
+            OrderResponse result = checkoutService.checkout(10L, "BKASH", "DISCOUNT20");
 
             assertNotNull(result);
             assertEquals(100L, result.getId());
@@ -139,7 +139,7 @@ public class EnhancedCheckoutServiceTest {
                 return order;
             });
 
-            Order result = checkoutService.checkout(10L, "COD", null);
+            OrderResponse result = checkoutService.checkout(10L, "COD", null);
 
             assertNotNull(result);
             assertEquals(101L, result.getId());

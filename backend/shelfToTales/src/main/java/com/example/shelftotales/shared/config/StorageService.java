@@ -78,7 +78,7 @@ public class StorageService {
             if (!validExt || !validMime) {
                 throw new IllegalArgumentException("Only PDF files are allowed (.pdf)");
             }
-        } else if ("playlist".equals(folder)) {
+        } else if ("playlist".equals(folder) || "room-playlist".equals(folder)) {
             boolean validExt = ext.equals(".mp3") || ext.equals(".wav") || ext.equals(".ogg") || ext.equals(".m4a");
             boolean validMime = contentType.startsWith("audio/");
             if (!validExt || !validMime) {

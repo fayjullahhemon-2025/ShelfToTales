@@ -12,6 +12,9 @@ import com.example.shelftotales.bookshelf.infrastructure.ShelfBookRepository;
 import com.example.shelftotales.auth.infrastructure.UserRepository;
 import com.example.shelftotales.bookshelf.application.strategy.ReadingStatusTransitionContext;
 import com.example.shelftotales.shared.util.AuthUtils;
+import com.example.shelftotales.commerce.infrastructure.OrderRepository;
+import com.example.shelftotales.commerce.domain.OrderStatus;
+import com.example.shelftotales.auth.domain.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ public class ShelfBookService {
     private final UserRepository userRepository;
     private final ReadingStatusTransitionContext readingStatusTransitionContext;
     private final ApplicationEventPublisher eventPublisher;
+    private final OrderRepository orderRepository;
 
     private Bookshelf getOwnedShelf(Long shelfId) {
         User user = AuthUtils.getCurrentUser(userRepository);
@@ -48,6 +52,15 @@ public class ShelfBookService {
         Bookshelf shelf = getOwnedShelf(shelfId);
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new IllegalArgumentException("Book not found: " + bookId));
+
+        // Enforce purchase/received check for non-admin/mod users
+        User user = AuthUtils.getCurrentUser(userRepository);
+        if (user.getRole() != Role.ADMIN && user.getRole() != Role.MODERATOR) {
+            boolean hasPurchasedAndReceived = orderRepository.existsByUserIdAndItemsBookIdAndStatus(user.getId(), bookId, OrderStatus.DELIVERED);
+            if (!hasPurchasedAndReceived && !book.isPreviewAvailable()) {
+                throw new IllegalArgumentException("You must purchase this book and mark it as received before adding it to your bookshelf.");
+            }
+        }
 
         ShelfBook shelfBook = shelf.addBook(book);
         bookshelfRepository.save(shelf);

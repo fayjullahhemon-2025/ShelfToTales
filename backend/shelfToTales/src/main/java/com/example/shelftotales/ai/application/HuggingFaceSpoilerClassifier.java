@@ -16,6 +16,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.core.ParameterizedTypeReference;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 import reactor.netty.http.client.HttpClient;
@@ -129,17 +131,29 @@ public class HuggingFaceSpoilerClassifier implements SpoilerClassifier {
     }
 
     private Mono<HfResponse> pollQueueData(String sessionHash, String eventId) {
+        ParameterizedTypeReference<ServerSentEvent<String>> typeRef =
+                new ParameterizedTypeReference<ServerSentEvent<String>>() {};
+
         return webClient.get()
                 .uri(spaceUrl + "/queue/data?session_hash=" + sessionHash)
                 .retrieve()
-                .bodyToFlux(String.class)
-                .filter(line -> line.contains("process_completed"))
+                .bodyToFlux(typeRef)
+                .filter(event -> "process_completed".equals(event.event()) || 
+                                 (event.data() != null && event.data().contains("process_completed")))
                 .next()
-                .flatMap(line -> {
+                .flatMap(event -> {
                     try {
-                        JsonNode node = objectMapper.readTree(line);
+                        String data = event.data();
+                        if (data == null || data.isBlank()) {
+                            return Mono.error(new IllegalStateException("Empty data in process_completed event"));
+                        }
+                        JsonNode node = objectMapper.readTree(data);
                         JsonNode outputNode = node.path("output");
                         JsonNode dataNode = outputNode.path("data").path(0);
+                        if (dataNode.isMissingNode() || dataNode.isNull()) {
+                            // Try fallback to search under root data path
+                            dataNode = node.path("data").path(0);
+                        }
                         if (dataNode.isMissingNode() || dataNode.isNull()) {
                             return Mono.error(new IllegalStateException("Invalid data in process_completed payload"));
                         }

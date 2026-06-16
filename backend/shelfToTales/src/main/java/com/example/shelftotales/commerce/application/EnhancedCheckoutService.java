@@ -6,6 +6,7 @@ import com.example.shelftotales.commerce.application.payment.*;
 
 import com.example.shelftotales.auth.domain.*;
 import com.example.shelftotales.catalog.domain.*;
+import com.example.shelftotales.catalog.application.CategoryResponse;
 import com.example.shelftotales.bookshelf.domain.*;
 import com.example.shelftotales.auth.infrastructure.*;
 import com.example.shelftotales.catalog.infrastructure.*;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,12 +39,16 @@ public class EnhancedCheckoutService {
     private final PaymentGatewayContext paymentGatewayContext;
 
     @Transactional
-    public Order checkout(Long addressId, String paymentMethod, String couponCode) {
+    public OrderResponse checkout(Long addressId, String paymentMethod, String couponCode) {
         User user = AuthUtils.getCurrentUser(userRepository);
+        log.info("Checkout initiated: userId={}, addressId={}, paymentMethod={}", user.getId(), addressId, paymentMethod);
+
         List<CartItem> cartItems = cartItemRepository.findByUserIdWithBook(user.getId());
+        log.info("Cart items found: userId={}, count={}", user.getId(), cartItems.size());
 
         if (cartItems.isEmpty()) {
-            throw new IllegalArgumentException("Cart is empty");
+            throw new IllegalArgumentException(
+                "Your cart is empty. Please add books to your cart before placing an order.");
         }
 
         // Validate address
@@ -99,6 +105,38 @@ public class EnhancedCheckoutService {
 
         log.info("Enhanced checkout complete: orderId={}, payment={}, discount={}",
                 savedOrder.getId(), method, discount);
-        return savedOrder;
+        return mapToOrderResponse(savedOrder);
+    }
+
+    private OrderResponse mapToOrderResponse(Order order) {
+        List<OrderItemResponse> itemResponses = order.getItems().stream()
+                .map(item -> OrderItemResponse.builder()
+                        .id(item.getId())
+                        .bookId(item.getBook().getId())
+                        .bookTitle(item.getBook().getTitle())
+                        .bookImageUrl(item.getBook().getCoverUrl())
+                        .quantity(item.getQuantity())
+                        .price(item.getPrice())
+                        .category(item.getBook().getCategory() != null ? CategoryResponse.builder()
+                                .id(item.getBook().getCategory().getId())
+                                .name(item.getBook().getCategory().getName())
+                                .description(item.getBook().getCategory().getDescription())
+                                .build() : null)
+                        .build())
+                .collect(Collectors.toList());
+
+        return OrderResponse.builder()
+                .id(order.getId())
+                .orderDate(order.getOrderDate())
+                .totalAmount(order.getTotalAmount())
+                .status(order.getStatus())
+                .paymentMethod(order.getPaymentMethod())
+                .couponCode(order.getCouponCode())
+                .discountAmount(order.getDiscountAmount())
+                .items(itemResponses)
+                .userName(order.getUser() != null ? order.getUser().getFullName() : null)
+                .userEmail(order.getUser() != null ? order.getUser().getEmail() : null)
+                .trackingNumber(order.getTrackingNumber())
+                .build();
     }
 }

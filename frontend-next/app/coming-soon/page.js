@@ -62,10 +62,13 @@ function ComingSoon(){
 	const form = useRef();
 	const sendEmail = (e) => {
 		e.preventDefault();
-		//emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', form.current, 'YOUR_USER_ID')
-		const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'service_gfykn6i';
-		const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || 'template_iy1pb0b';
-		const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'HccoOtZS6GHw-N-m6';
+		const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '';
+		const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '';
+		const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || '';
+		if (!serviceId || !templateId || !publicKey) {
+			console.error('EmailJS is not configured. Please set NEXT_PUBLIC_EMAILJS_SERVICE_ID, NEXT_PUBLIC_EMAILJS_TEMPLATE_ID, and NEXT_PUBLIC_EMAILJS_PUBLIC_KEY env variables.');
+			return;
+		}
 		emailjs.sendForm(serviceId, templateId, e.target, publicKey)
 		  .then((result) => {
 			  console.log(result.text);

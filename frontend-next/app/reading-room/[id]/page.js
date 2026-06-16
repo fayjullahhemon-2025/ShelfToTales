@@ -7,7 +7,8 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { readingRoomService } from '../../lib/api';
 import BookPreviewPanel from '../../components/features/ReadingRoom/BookPreviewPanel';
-import MusicPlayerPanel from '../../components/features/ReadingRoom/MusicPlayerPanel';
+import RoomMusicPlayerPanel from '../../components/features/ReadingRoom/RoomMusicPlayerPanel';
+import { RoomMusicProvider } from '../../contexts/RoomMusicContext';
 import AdminSongManager from '../../components/features/ReadingRoom/AdminSongManager';
 import RoomMembersPanel from '../../components/features/ReadingRoom/RoomMembersPanel';
 import InviteFriendsModal from '../../components/features/ReadingRoom/InviteFriendsModal';
@@ -36,35 +37,52 @@ export default function ReadingRoomDetail() {
 
   useEffect(() => {
     const u = localStorage.getItem('user');
-    if (!u) { router.push('/shop-login'); return; }
-    setUser(JSON.parse(u));
+    const token = localStorage.getItem('token');
+    if (!u || !token) { router.push('/shop-login'); return; }
+    const currentUser = JSON.parse(u);
+    setUser(currentUser);
     if (!roomId) { router.push('/reading-room'); return; }
 
     (async () => {
       try {
         const rooms = await readingRoomService.getAll();
         const found = (rooms.data || []).find(r => r.id === roomId);
-        if (found) setRoom(found); else router.push('/reading-room');
+        if (found) {
+          setRoom(found);
+          if (found.visibility === 'PUBLIC' && !found.isMember) {
+            try { await readingRoomService.joinRoom(roomId); } catch { /* already a member or no perm */ }
+          }
+        } else router.push('/reading-room');
         const msgs = await readingRoomService.getMessages(roomId);
         setMessages(msgs.data || []);
       } catch { router.push('/reading-room'); }
     })();
 
+    const wsHost = process.env.NEXT_PUBLIC_WS_URL || 'localhost:8080';
     const client = new Client({
-      webSocketFactory: () => new SockJS(`http://${process.env.NEXT_PUBLIC_WS_URL || 'localhost:8080'}/ws`),
+      webSocketFactory: () => new SockJS(`http://${wsHost}/ws`),
       reconnectDelay: 5000,
+      connectHeaders: { Authorization: `Bearer ${token}` },
     });
     client.onConnect = () => {
       setConnected(true);
       stompRef.current = client;
       client.subscribe(`/topic/room/${roomId}`, (msg) => {
-        const m = JSON.parse(msg.body);
-        setMessages(prev => prev.some(x => x.id === m.id) ? prev : [...prev, m]);
+        try {
+          const m = JSON.parse(msg.body);
+          setMessages(prev => prev.some(x => x.id === m.id) ? prev : [...prev, m]);
+        } catch { /* ignore malformed payloads */ }
       });
     };
     client.onDisconnect = () => setConnected(false);
+    client.onStompError = (frame) => {
+      console.error('STOMP error from server:', frame.headers['message'], frame.body);
+      setConnected(false);
+    };
     client.activate();
-    return () => client.deactivate();
+    return () => {
+      try { client.deactivate(); } catch { /* noop */ }
+    };
   }, [roomId, router]);
 
   useEffect(() => {
@@ -75,8 +93,13 @@ export default function ReadingRoomDetail() {
 
   const send = (e) => {
     e?.preventDefault();
-    if (!newMsg.trim() || !stompRef.current || !connected) return;
-    stompRef.current.publish({ destination: `/app/chat/${roomId}`, body: JSON.stringify({ content: newMsg, senderEmail: user.email }) });
+    const text = newMsg.trim();
+    if (!text || !stompRef.current || !connected) return;
+    // STOMP is the only persist path; ChatWebSocketController.postMessage does the write.
+    stompRef.current.publish({
+      destination: `/app/chat/${roomId}`,
+      body: JSON.stringify({ content: text, senderEmail: user.email }),
+    });
     setNewMsg('');
   };
 
@@ -175,14 +198,20 @@ export default function ReadingRoomDetail() {
 
           {/* Music Section */}
           <div className="rc-music-section">
-            <MusicPlayerPanel isAdmin={user?.role === 'ADMIN'} onOpenAdmin={() => setShowAdmin(true)} />
+            <RoomMusicProvider roomId={roomId} stompClient={stompRef.current} connected={connected}>
+              <RoomMusicPlayerPanel isAdmin={user?.role === 'ADMIN'} onOpenAdmin={() => setShowAdmin(true)} />
+            </RoomMusicProvider>
           </div>
         </div>
       </div>
 
       {/* Admin Modal */}
       {showAdmin && (
-        <AdminSongManager onClose={() => setShowAdmin(false)} onSongsUpdated={() => {}} />
+        <AdminSongManager
+          roomId={roomId}
+          onClose={() => setShowAdmin(false)}
+          onSongsUpdated={() => {}}
+        />
       )}
 
       {/* Members Panel */}

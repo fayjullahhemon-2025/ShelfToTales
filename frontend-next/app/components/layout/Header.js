@@ -65,7 +65,7 @@ function Header(){
 		} else if (notif.referenceType === 'USER') {
 			router.push(`/reader-network`);
 		} else if (notif.referenceType === 'ORDER') {
-			router.push(`/purchase-history`);
+			router.push(user?.role === 'ADMIN' ? `/admin/orders` : `/purchase-history`);
 		} else if (notif.referenceType === 'BOOK') {
 			router.push(`/shop-detail/${notif.referenceId}`);
 		}

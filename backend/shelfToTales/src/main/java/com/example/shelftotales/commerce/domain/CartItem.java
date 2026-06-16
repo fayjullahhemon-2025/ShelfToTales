@@ -53,16 +53,30 @@ public class CartItem {
      * Update quantity with validation.
      */
     public void updateQuantity(int newQuantity) {
-        validateQuantity(newQuantity);
+        int oldQuantity = this.quantity;
         this.quantity = newQuantity;
+        try {
+            validateQuantity(newQuantity);
+            validateStockAvailability();
+        } catch (RuntimeException e) {
+            this.quantity = oldQuantity;
+            throw e;
+        }
     }
 
     /**
      * Increment quantity by amount.
      */
     public void addQuantity(int amount) {
-        validateQuantity(this.quantity + amount);
-        this.quantity += amount;
+        int oldQuantity = this.quantity;
+        this.quantity = this.quantity + amount;
+        try {
+            validateQuantity(this.quantity);
+            validateStockAvailability();
+        } catch (RuntimeException e) {
+            this.quantity = oldQuantity;
+            throw e;
+        }
     }
 
     /**

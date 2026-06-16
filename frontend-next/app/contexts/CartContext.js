@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useReducer, useCallback, useMemo } from 'react';
+import { createContext, useContext, useReducer, useCallback, useMemo, useEffect } from 'react';
 import { cartService } from '@/lib/api';
+import { useAuthContext } from './AuthContext';
 
 // ---------------------------------------------------------------------------
 // Reducer
@@ -51,6 +52,16 @@ const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+  const { isAuthenticated, loading: authLoading } = useAuthContext();
+
+  // Auto-fetch cart when the user is authenticated
+  useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
+    cartService
+      .getCart()
+      .then(({ data }) => dispatch({ type: ACTIONS.SET_CART, payload: data }))
+      .catch(() => {});
+  }, [isAuthenticated, authLoading]);
 
   /**
    * Shared helper — sets loading, calls the API function, dispatches the

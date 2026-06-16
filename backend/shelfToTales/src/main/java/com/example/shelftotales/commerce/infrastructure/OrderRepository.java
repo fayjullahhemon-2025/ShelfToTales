@@ -34,4 +34,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT DISTINCT i.book.id FROM Order o JOIN o.items i WHERE o.user.id = :userId AND o.status <> 'CANCELLED'")
     java.util.List<Long> findBoughtBookIdsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT DISTINCT i.book.id FROM Order o JOIN o.items i WHERE o.user.id = :userId AND o.status = 'DELIVERED'")
+    java.util.List<Long> findDeliveredBookIdsByUserId(@Param("userId") Long userId);
 }

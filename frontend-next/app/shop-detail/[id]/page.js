@@ -231,6 +231,8 @@ function ShopDetail(){
     const [count, setCount] = useState(1);
     const [comment, setComment] = useState('');
     const [rating, setRating] = useState(5);
+    const [isSpoilerReview, setIsSpoilerReview] = useState(false);
+    const [hoverRating, setHoverRating] = useState(0);
     const [hideSpoilers, setHideSpoilers] = useState(false);
     const [similarBooks, setSimilarBooks] = useState([]);
 
@@ -273,6 +275,15 @@ function ShopDetail(){
     };
 
     const handleAddToCart = async () => {
+        if (book && Number(book.stock) <= 0) {
+            Swal.fire('Out of stock', 'This book is currently unavailable.', 'warning');
+            return;
+        }
+        if (book && count > Number(book.stock)) {
+            Swal.fire('Limited stock', `Only ${book.stock} copy available in stock.`, 'warning');
+            setCount(Math.max(1, Number(book.stock)));
+            return;
+        }
         try {
             await addToCart(id, count);
             Swal.fire({ icon: 'success', title: 'Added to cart', showConfirmButton: false, timer: 1500, toast: true, position: 'top-end' });
@@ -280,7 +291,8 @@ function ShopDetail(){
             if (error.response?.status === 401) {
                 Swal.fire('Error', 'Please login to add to cart', 'error');
             } else {
-                Swal.fire('Error', error.response?.data?.message || 'Failed to add to cart', 'error');
+                const msg = error.response?.data?.message || 'Failed to add to cart';
+                Swal.fire('Error', /stock/i.test(msg) ? msg : msg, 'error');
             }
         }
     };
@@ -291,10 +303,12 @@ function ShopDetail(){
             await reviewService.addReview(id, {
                 rating: parseInt(rating),
                 comment,
-                isSpoiler: false
+                isSpoiler: isSpoilerReview
             });
             Swal.fire('Success', 'Review submitted successfully!', 'success');
             setComment('');
+            setRating(5);
+            setIsSpoilerReview(false);
             await fetchReviews();
         } catch (error) {
             const errorMsg = error.response?.data?.message || 'Failed to submit review';
@@ -368,20 +382,33 @@ function ShopDetail(){
                                                 </div>
                                                 <div className="product-num">
                                                     <div className="quantity btn-quantity style-1 me-3">
-                                                            <button className="btn btn-plus" type="button"                                                                 
-                                                                onClick={() => setCount(count + 1)}
+                                                            <button className="btn btn-plus" type="button"
+                                                                disabled={Number(book.stock) <= 0 || count >= Number(book.stock)}
+                                                                onClick={() => setCount(prev => Math.min(Number(book.stock), prev + 1))}
                                                             >
                                                                 <i className="ti-plus"></i>
                                                             </button>
                                                             <input className="quantity-input" type="text" value={count} name="demo_vertical2" readOnly />
-                                                            <button className="btn btn-minus " type="button"                                                             
-                                                                onClick={() => setCount(Math.max(1, count - 1))}
+                                                            <button className="btn btn-minus " type="button"
+                                                                onClick={() => setCount(prev => Math.max(1, prev - 1))}
                                                             >
                                                                 <i className="ti-minus"></i>
-                                                            </button> 
+                                                            </button>
                                                         </div>
-                                                                                    <button onClick={handleAddToWishlist} className="btn btn-primary btnhover btnhover2"><i className="flaticon-heart"></i> <span>Add to wishlist</span></button>
-                                                    <button onClick={handleAddToCart} className="btn btn-primary btnhover btnhover2 ms-2"><i className="flaticon-shopping-cart-1"></i> <span>Add to cart</span></button>
+                                                        {Number(book.stock) > 0 && Number(book.stock) <= 5 && (
+                                                            <small className="text-warning me-2">Only {book.stock} in stock</small>
+                                                        )}
+                                                        {Number(book.stock) <= 0 && (
+                                                            <small className="text-danger me-2">Out of stock</small>
+                                                        )}
+                                                        <button onClick={handleAddToWishlist} className="btn btn-primary btnhover btnhover2"><i className="flaticon-heart"></i> <span>Add to wishlist</span></button>
+                                                        <button onClick={handleAddToCart} disabled={Number(book.stock) <= 0} className="btn btn-primary btnhover btnhover2 ms-2"><i className="flaticon-shopping-cart-1"></i> <span>{Number(book.stock) <= 0 ? 'Out of stock' : 'Add to cart'}</span></button>
+                                                        {book.previewAvailable && (
+                                                            <>
+                                                                <Link href={`/flipbook/${book.id}`} className="btn btn-secondary btnhover btnhover2 ms-2"><i className="flaticon-open-book-1"></i> <span>Preview Flipbook</span></Link>
+                                                                <Link href={`/read-book/${book.id}`} className="btn btn-outline-primary btnhover btnhover2 ms-2"><span>Preview PDF</span></Link>
+                                                            </>
+                                                        )}
                                                 </div>
                                             </div>
                                         </div>
@@ -417,18 +444,18 @@ function ShopDetail(){
                                                     <div className="post-comments comments-area style-1 clearfix">
                                                         <div className="d-flex justify-content-between align-items-center mb-3">
                                                             <h4 className="comments-title mb-0">{reviews.length} COMMENTS</h4>
-                                                            {reviews.some(r => r.isSpoiler) && (
+                                                            {reviews.some(r => r.spoiler) && (
                                                                 <label className="form-check d-flex align-items-center gap-2" style={{ cursor: 'pointer' }}>
                                                                     <input type="checkbox" className="form-check-input" checked={hideSpoilers} onChange={() => setHideSpoilers(!hideSpoilers)}/>
-                                                                    <span className="small text-muted">Hide spoiler reviews ({reviews.filter(r => r.isSpoiler).length})</span>
+                                                                    <span className="small text-muted">Hide spoiler reviews ({reviews.filter(r => r.spoiler).length})</span>
                                                                 </label>
                                                             )}
                                                         </div>
                                                         <div id="comment">
                                                             <ol className="comment-list">
-                                                                {reviews.filter(r => !hideSpoilers || !r.isSpoiler).map((rev, index) => (
+                                                                {reviews.filter(r => !hideSpoilers || !r.spoiler).map((rev, index) => (
                                                                     <li key={index} className="comment even thread-even depth-1">
-                                                                        <ReviewCard id={rev.id} title={rev.user?.username || 'User'} comment={rev.comment} date={rev.createdAt} rating={rev.rating} avatar={rev.user?.profileImageUrl} isSpoiler={rev.isSpoiler} />
+                                                                        <ReviewCard id={rev.id} title={rev.user?.username || 'User'} comment={rev.comment} date={rev.createdAt} rating={rev.rating} avatar={rev.user?.profileImageUrl} isSpoiler={rev.spoiler} />
                                                                     </li>
                                                                 ))}
                                                             </ol>
@@ -437,14 +464,41 @@ function ShopDetail(){
                                                             <h4 className="comment-reply-title" id="reply-title">LEAVE A REPLY</h4>
                                                             <div className="clearfix">
                                                                 <form onSubmit={handleReviewSubmit} className="comment-form">
+                                                                    <div className="d-flex align-items-center mb-3 gap-2">
+                                                                        <span className="fw-semibold text-secondary" style={{ fontSize: '0.9rem' }}>YOUR RATING:</span>
+                                                                        <div className="d-flex gap-1">
+                                                                            {[1, 2, 3, 4, 5].map((num) => (
+                                                                                <i
+                                                                                    key={num}
+                                                                                    className={`fa fa-star cursor-pointer ${
+                                                                                        num <= (hoverRating || rating) ? 'text-yellow' : 'text-muted'
+                                                                                    }`}
+                                                                                    style={{ fontSize: '1.5rem', cursor: 'pointer', transition: 'transform 0.1s ease, color 0.1s' }}
+                                                                                    onClick={() => setRating(num)}
+                                                                                    onMouseEnter={() => setHoverRating(num)}
+                                                                                    onMouseLeave={() => setHoverRating(0)}
+                                                                                    onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.85)'; }}
+                                                                                    onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                                                                                    role="button"
+                                                                                    aria-label={`Rate ${num} Stars`}
+                                                                                />
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="form-check mb-3">
+                                                                        <input 
+                                                                            type="checkbox" 
+                                                                            className="form-check-input" 
+                                                                            id="isSpoilerCheckbox" 
+                                                                            checked={isSpoilerReview} 
+                                                                            onChange={(e) => setIsSpoilerReview(e.target.checked)}
+                                                                            style={{ cursor: 'pointer' }}
+                                                                        />
+                                                                        <label className="form-check-label small text-muted" htmlFor="isSpoilerCheckbox" style={{ cursor: 'pointer', userSelect: 'none' }}>
+                                                                            This review contains spoilers
+                                                                        </label>
+                                                                    </div>
                                                                     <p className="comment-form-comment">
-                                                                        <select className="form-control mb-2" value={rating} onChange={(e) => setRating(e.target.value)}>
-                                                                            <option value="5">5 Stars</option>
-                                                                            <option value="4">4 Stars</option>
-                                                                            <option value="3">3 Stars</option>
-                                                                            <option value="2">2 Stars</option>
-                                                                            <option value="1">1 Star</option>
-                                                                        </select>
                                                                         <textarea placeholder="Type Comment Here" className="form-control" value={comment} onChange={(e) => setComment(e.target.value)} required></textarea>
                                                                     </p>
                                                                     <p className="col-md-12 col-sm-12 col-xs-12 form-submit">

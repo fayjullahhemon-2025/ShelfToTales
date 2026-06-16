@@ -19,6 +19,12 @@ public class RoomInviteController {
         return ResponseEntity.ok(roomMemberService.getMembers(roomId));
     }
 
+    @PostMapping("/{roomId}/join")
+    public ResponseEntity<Void> joinRoom(@PathVariable Long roomId) {
+        roomMemberService.joinRoom(roomId);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{roomId}/members/{userId}")
     public ResponseEntity<Void> removeMember(@PathVariable Long roomId, @PathVariable Long userId) {
         roomMemberService.removeMember(roomId, userId);

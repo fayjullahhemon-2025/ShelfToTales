@@ -25,4 +25,7 @@ public class OrderResponse {
     private String couponCode;
     private BigDecimal discountAmount;
     private List<OrderItemResponse> items;
+    private String userName;
+    private String userEmail;
+    private String trackingNumber;
 }

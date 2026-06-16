@@ -34,19 +34,24 @@ function ShopCheckout() {
   useEffect(() => {
     const loadCheckoutData = async () => {
       try {
-        const [cartRes, addressRes] = await Promise.all([
+        const [cartResult, addressResult] = await Promise.allSettled([
           cartService.getCart(),
           addressService.getAll(),
         ]);
 
-        setCart(cartRes.data);
+        if (cartResult.status === 'fulfilled') {
+          setCart(cartResult.value.data);
+        } else {
+          setCart({ items: [], totalPrice: 0 });
+        }
 
-        const list = addressRes.data || [];
-        setAddresses(list);
-
-        const defaultAddress = list.find((address) => address.isDefault) || list[0] || null;
-        setSelectedAddressId(defaultAddress?.id || null);
-        setShowAddressForm(list.length === 0);
+        if (addressResult.status === 'fulfilled') {
+          const list = addressResult.value.data || [];
+          setAddresses(list);
+          const defaultAddress = list.find((address) => address.isDefault) || list[0] || null;
+          setSelectedAddressId(defaultAddress?.id || null);
+          setShowAddressForm(list.length === 0);
+        }
       } catch (error) {
         console.error('Failed to load checkout data:', error);
         setCart({ items: [], totalPrice: 0 });
@@ -54,6 +59,20 @@ function ShopCheckout() {
     };
 
     loadCheckoutData();
+  }, []);
+
+  // Re-fetch cart once on focus in case items were added from another tab
+  useEffect(() => {
+    const onFocus = () => {
+      cartService.getCart()
+        .then(({ data }) => setCart(data))
+        .catch(() => {});
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', onFocus);
+      return () => window.removeEventListener('focus', onFocus);
+    }
+    return undefined;
   }, []);
 
   const selectedAddress = useMemo(
@@ -127,8 +146,41 @@ function ShopCheckout() {
       return;
     }
 
+    if (!cart || !cart.items || cart.items.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Your cart is empty',
+        text: 'Add a book to your cart before placing an order.',
+        confirmButtonText: 'Browse books',
+      }).then((r) => { if (r.isConfirmed) router.push('/shop-grid'); });
+      return;
+    }
+
     setPlacing(true);
     try {
+      let freshCart;
+      try {
+        const res = await cartService.getCart();
+        freshCart = res.data;
+      } catch {
+        freshCart = cart;
+      }
+
+      if (!freshCart || !freshCart.items || freshCart.items.length === 0) {
+        setCart({ items: [], totalPrice: 0 });
+        Swal.fire({
+          icon: 'warning',
+          title: 'Your cart is empty',
+          text: 'Your cart has no items. Browse the shop and add a book first.',
+          confirmButtonText: 'Browse books',
+        }).then((r) => { if (r.isConfirmed) router.push('/shop-grid'); });
+        return;
+      }
+
+      if (paymentMethod === 'BKASH' || paymentMethod === 'SSLCOMMERZ') {
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+      }
+
       const response = await checkoutService.checkout({
         paymentMethod,
         addressId: selectedAddressId,
@@ -151,16 +203,29 @@ function ShopCheckout() {
         window.sessionStorage.setItem('latestCheckoutSummary', JSON.stringify(confirmation));
       }
 
+      const gatewayLabel = paymentMethod === 'COD'
+        ? 'Order placed'
+        : `${paymentMethod === 'BKASH' ? 'bKash' : 'SSLCommerz'} payment confirmed`;
+      const txnId = order.paymentMethod ? `(Gateway: ${order.paymentMethod})` : '';
       await Swal.fire({
         icon: 'success',
-        title: 'Order placed',
-        text: `Order #${order.id} is confirmed.`,
-        timer: 1600,
+        title: gatewayLabel,
+        text: `Order #${order.id} is confirmed. ${txnId}`,
+        timer: 1800,
         showConfirmButton: false,
       });
       router.push(`/order-detail/${order.id}`);
     } catch (error) {
-      Swal.fire('Order failed', error.response?.data?.message || 'Failed to place order', 'error');
+      const status = error.response?.status;
+      const message = error.response?.data?.message || error.response?.data?.error || 'Failed to place order';
+      const isEmpty = /cart is empty/i.test(message);
+      Swal.fire({
+        icon: isEmpty ? 'warning' : 'error',
+        title: isEmpty ? 'Cart is empty' : 'Order failed',
+        text: isEmpty
+          ? 'Your cart has no items. Browse the shop and add a book first.'
+          : `Status ${status || '?'}: ${message}`,
+      });
     } finally {
       setPlacing(false);
     }

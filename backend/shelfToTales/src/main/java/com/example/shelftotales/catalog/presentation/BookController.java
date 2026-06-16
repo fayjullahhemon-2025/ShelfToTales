@@ -8,6 +8,7 @@ import com.example.shelftotales.catalog.application.BookResponse;
 import com.example.shelftotales.shared.dto.PagedResponse;
 import com.example.shelftotales.catalog.application.ReadBookResponse;
 import com.example.shelftotales.catalog.application.BookService;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -89,6 +90,27 @@ public class BookController {
         return bookService.getReadBookInfo(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/purchased")
+    @Operation(summary = "Get all books purchased and marked as received by the user")
+    public ResponseEntity<List<BookResponse>> getPurchasedBooks(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal(expression = "this") Object principal) {
+        Long userId = null;
+        if (principal instanceof com.example.shelftotales.auth.domain.User) {
+            userId = ((com.example.shelftotales.auth.domain.User) principal).getId();
+        } else {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof com.example.shelftotales.auth.domain.User) {
+                userId = ((com.example.shelftotales.auth.domain.User) auth.getPrincipal()).getId();
+            }
+        }
+
+        if (userId == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        return ResponseEntity.ok(bookService.getPurchasedBooks(userId));
     }
 
     @GetMapping("/mood/{mood}")

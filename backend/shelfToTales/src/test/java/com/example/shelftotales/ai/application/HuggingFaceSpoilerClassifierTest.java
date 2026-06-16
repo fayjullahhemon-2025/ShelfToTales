@@ -68,9 +68,9 @@ class HuggingFaceSpoilerClassifierTest {
                 .setBody("{\"event_id\":\"test-event-id\"}"));
 
         // 3. Queue data stream returns process_completed
-        String sseEvent = "{\"output\":{\"data\":[{\"is_spoiler\":false,\"probability\":0.15,\"label\":\"safe\",\"source\":\"Queue\"}]},\"msg\":\"process_completed\"}";
+        String sseEvent = "event: process_completed\ndata: {\"output\":{\"data\":[{\"is_spoiler\":false,\"probability\":0.15,\"label\":\"safe\",\"source\":\"Queue\"}]}}\n\n";
         mockWebServer.enqueue(new MockResponse()
-                .setHeader("Content-Type", "application/json")
+                .setHeader("Content-Type", "text/event-stream")
                 .setBody(sseEvent));
 
         SpoilerAssessment assessment = classifier.classify(1L, 10L, "safe review text");

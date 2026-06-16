@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { playlistService } from '../../../lib/api';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { roomPlaylistService } from '../../../lib/api';
 
-export default function AdminSongManager({ onClose, onSongsUpdated }) {
+export default function AdminSongManager({ roomId, onClose, onSongsUpdated }) {
   const [songs, setSongs] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState('');
@@ -12,20 +12,21 @@ export default function AdminSongManager({ onClose, onSongsUpdated }) {
   const [error, setError] = useState('');
   const fileRef = useRef(null);
 
-  const loadSongs = async () => {
+  const loadSongs = useCallback(async () => {
+    if (!roomId) return;
     try {
-      const res = await playlistService.getAll();
+      const res = await roomPlaylistService.list(roomId);
       setSongs(res.data || []);
     } catch {
       setError('Failed to load songs');
     }
-  };
+  }, [roomId]);
 
-  React.useEffect(() => { loadSongs(); }, []);
+  useEffect(() => { loadSongs(); }, [loadSongs]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file || !title.trim()) {
+    if (!roomId || !file || !title.trim()) {
       setError('Title and file are required');
       return;
     }
@@ -36,7 +37,7 @@ export default function AdminSongManager({ onClose, onSongsUpdated }) {
       fd.append('file', file);
       fd.append('title', title.trim());
       fd.append('artist', artist.trim());
-      await playlistService.addSong(fd);
+      await roomPlaylistService.addSong(roomId, fd);
       setTitle('');
       setArtist('');
       setFile(null);
@@ -51,9 +52,10 @@ export default function AdminSongManager({ onClose, onSongsUpdated }) {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Remove this song from the playlist?')) return;
+    if (!roomId) return;
+    if (!confirm('Remove this song from the room playlist?')) return;
     try {
-      await playlistService.deleteSong(id);
+      await roomPlaylistService.deleteSong(roomId, id);
       await loadSongs();
       onSongsUpdated?.();
     } catch {
@@ -62,16 +64,15 @@ export default function AdminSongManager({ onClose, onSongsUpdated }) {
   };
 
   return (
-    <div className="rp-admin-overlay" role="dialog" aria-label="Manage playlist">
+    <div className="rp-admin-overlay" role="dialog" aria-label="Manage room playlist">
       <div className="rp-admin-modal">
         <div className="rp-admin-header">
-          <h3>Manage Playlist</h3>
+          <h3>Manage Room Playlist</h3>
           <button onClick={onClose} className="rp-admin-close" aria-label="Close">
             <i className="fa-solid fa-xmark" />
           </button>
         </div>
 
-        {/* Upload Form */}
         <form onSubmit={handleUpload} className="rp-admin-form">
           <div className="rp-admin-field">
             <label htmlFor="song-title">Title</label>
@@ -111,11 +112,10 @@ export default function AdminSongManager({ onClose, onSongsUpdated }) {
           </button>
         </form>
 
-        {/* Song List */}
         <div className="rp-admin-list">
           <h4>Current Playlist ({songs.length})</h4>
           {songs.length === 0 ? (
-            <p className="rp-admin-empty">No songs yet</p>
+            <p className="rp-admin-empty">No songs yet for this room</p>
           ) : (
             songs.map((song) => (
               <div key={song.id} className="rp-admin-song">

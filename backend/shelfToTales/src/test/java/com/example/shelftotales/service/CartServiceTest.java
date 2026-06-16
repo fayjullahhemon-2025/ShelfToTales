@@ -184,6 +184,58 @@ class CartServiceTest {
     }
 
     @Test
+    void addToCart_existingItemPlusNewExceedsStock_throwsAndDoesNotPersist() {
+        // existingItem.quantity = 2; testBook.stock = 5; adding 4 more would total 6.
+        try (MockedStatic<AuthUtils> auth = mockStatic(AuthUtils.class)) {
+            auth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(testUser);
+            when(bookRepository.findById(10L)).thenReturn(Optional.of(testBook));
+            when(cartItemRepository.findByUserIdAndBookId(1L, 10L)).thenReturn(Optional.of(existingItem));
+
+            IllegalArgumentException ex = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> cartService.addToCart(10L, 4)
+            );
+            assertTrue(ex.getMessage().toLowerCase().contains("stock"));
+            // Existing quantity must NOT have been mutated.
+            assertEquals(2, existingItem.getQuantity());
+            verify(cartItemRepository, never()).save(any());
+        }
+    }
+
+    @Test
+    void addToCart_exactlyAtStock_succeeds() {
+        // existingItem.quantity = 2; testBook.stock = 5; adding 3 lands exactly on stock.
+        try (MockedStatic<AuthUtils> auth = mockStatic(AuthUtils.class)) {
+            auth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(testUser);
+            when(bookRepository.findById(10L)).thenReturn(Optional.of(testBook));
+            when(cartItemRepository.findByUserIdAndBookId(1L, 10L)).thenReturn(Optional.of(existingItem));
+            when(cartItemRepository.findByUserIdWithBook(1L)).thenReturn(List.of(existingItem));
+
+            cartService.addToCart(10L, 3);
+
+            assertEquals(5, existingItem.getQuantity());
+            verify(cartItemRepository).save(existingItem);
+        }
+    }
+
+    @Test
+    void updateQuantity_overStock_throws() {
+        try (MockedStatic<AuthUtils> auth = mockStatic(AuthUtils.class)) {
+            auth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(testUser);
+            when(cartItemRepository.findByUserIdAndBookId(1L, 10L)).thenReturn(Optional.of(existingItem));
+
+            // existingItem.quantity = 2; testBook.stock = 5; setting to 10 must fail.
+            IllegalArgumentException ex = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> cartService.updateQuantity(10L, 10)
+            );
+            assertTrue(ex.getMessage().toLowerCase().contains("stock"));
+            assertEquals(2, existingItem.getQuantity());
+            verify(cartItemRepository, never()).save(any());
+        }
+    }
+
+    @Test
     void removeFromCart_callsRepository() {
         try (MockedStatic<AuthUtils> auth = mockStatic(AuthUtils.class)) {
             auth.when(() -> AuthUtils.getCurrentUser(userRepository)).thenReturn(testUser);

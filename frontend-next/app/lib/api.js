@@ -71,7 +71,7 @@ export const bookService = {
   getAll: (params = {}) => api.get('/books', { params }),
   getById: (id) => api.get(`/books/${id}`),
   getByCategory: (categoryId) => api.get('/books', { params: { categoryId } }),
-  getMyBooks: () => api.get('/books'),
+  getMyBooks: () => api.get('/books/purchased'),
   getSimilar: (id) => api.get(`/books/${id}/similar`),
   getByMood: (mood) => api.get(`/books/mood/${mood}`),
   search: (query) => api.get('/books', { params: { q: query } }),
@@ -167,6 +167,7 @@ export const readingRoomService = {
   getMessages: (roomId) => api.get(`/rooms/${roomId}/messages`),
   postMessage: (roomId, content) => api.post(`/rooms/${roomId}/messages`, { content }),
   getMembers: (roomId) => api.get(`/rooms/${roomId}/members`),
+  joinRoom: (roomId) => api.post(`/rooms/${roomId}/join`),
   removeMember: (roomId, userId) => api.delete(`/rooms/${roomId}/members/${userId}`),
   invite: (roomId, userIds) => api.post(`/rooms/${roomId}/invites`, { userIds }),
   getInvites: (roomId) => api.get(`/rooms/${roomId}/invites`),
@@ -197,6 +198,7 @@ export const adminUserService = {
 };
 
 export const adminOrderService = {
+  getAll: () => api.get('/admin/orders'),
   updateStatus: (id, status) => api.put(`/admin/orders/${id}/status`, { status }),
 };
 
@@ -318,6 +320,16 @@ export const playlistService = {
   }),
   updateSong: (id, data) => api.put(`/admin/playlist/songs/${id}`, data),
   deleteSong: (id) => api.delete(`/admin/playlist/songs/${id}`),
+};
+
+export const roomPlaylistService = {
+  list: (roomId) => api.get(`/rooms/${roomId}/playlist/songs`),
+  addSong: (roomId, formData) => api.post(`/rooms/${roomId}/playlist/songs`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  updateSong: (roomId, id, data) => api.put(`/rooms/${roomId}/playlist/songs/${id}`, data),
+  deleteSong: (roomId, id) => api.delete(`/rooms/${roomId}/playlist/songs/${id}`),
+  getPlayerState: (roomId) => api.get(`/rooms/${roomId}/player-state`),
 };
 
 export const donationService = {

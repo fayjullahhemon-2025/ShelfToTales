@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -101,6 +102,15 @@ public class BookService {
             return true;
         }
         return orderRepository.existsByUserIdAndItemsBookIdAndStatus(userId, bookId, OrderStatus.DELIVERED);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookResponse> getPurchasedBooks(Long userId) {
+        List<Long> bookIds = orderRepository.findDeliveredBookIdsByUserId(userId);
+        List<Book> books = bookRepository.findAllById(bookIds);
+        return books.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

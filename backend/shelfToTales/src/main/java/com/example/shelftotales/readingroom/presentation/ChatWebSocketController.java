@@ -34,7 +34,7 @@ public class ChatWebSocketController {
 
         RoomMessageResponse response = readingRoomService.postMessage(roomId, content, sender);
 
-        // Broadcast to all clients subscribed to this room topic
+        // Persist + broadcast. Frontend must not also POST /api/rooms/{id}/messages.
         messagingTemplate.convertAndSend("/topic/room/" + roomId, response);
     }
 }
