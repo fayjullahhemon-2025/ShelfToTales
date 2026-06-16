@@ -29,7 +29,6 @@ pacman-cli/
 # Migration/scaffolding artifacts
 MIGRATION_CHECKLIST.md
 docs/
-scripts/
 frontend/
 
 # OS
