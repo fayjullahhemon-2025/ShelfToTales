@@ -38,4 +38,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByBookId(Long bookId);
 
     long countByBookIdAndSpoilerLevelIsNotNull(Long bookId);
+
+    List<Review> findByUserIdAndRatingGreaterThanEqualAndCreatedAtAfter(
+            Long userId, int minRating, java.time.Instant after);
 }
