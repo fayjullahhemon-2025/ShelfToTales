@@ -108,13 +108,13 @@ function SearchResults() {
             className={`sr-tab ${activeTab === 'text' ? 'active' : ''}`}
             onClick={() => setActiveTab('text')}
           >
-            Title/Author ({textResults.length})
+            Title/Author ({textResults.filter(b => b.matchedSources?.includes('text')).length})
           </button>
           <button
             className={`sr-tab ${activeTab === 'semantic' ? 'active' : ''}`}
             onClick={() => setActiveTab('semantic')}
           >
-            Semantic ({textResults.length})
+            Semantic ({textResults.filter(b => b.matchedSources?.includes('semantic')).length})
           </button>
           <button
             className={`sr-tab ${activeTab === 'image' ? 'active' : ''}`}

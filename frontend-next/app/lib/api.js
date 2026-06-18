@@ -267,7 +267,6 @@ export const friendService = {
 export const aiService = {
   chat: (message) => api.post('/ai/chat', { message }),
   clearHistory: () => api.delete('/ai/chat'),
-  semanticSearch: (query, limit) => api.get('/search/semantic', { params: { q: query, limit } }),
 };
 
 export const searchService = {

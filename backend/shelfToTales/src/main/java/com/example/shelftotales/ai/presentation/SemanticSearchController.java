@@ -1,7 +1,6 @@
 package com.example.shelftotales.ai.presentation;
 
 import com.example.shelftotales.ai.application.EmbeddingService;
-import com.example.shelftotales.ai.application.SemanticSearchResponse;
 import com.example.shelftotales.ai.application.UnifiedSearchResponse;
 import com.example.shelftotales.ai.application.UnifiedSearchService;
 import com.example.shelftotales.ai.application.UnifiedSearchResponse.SearchHit;
