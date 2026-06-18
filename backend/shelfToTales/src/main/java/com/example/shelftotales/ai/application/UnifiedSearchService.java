@@ -58,12 +58,9 @@ public class UnifiedSearchService {
         orderedIds.sort(Comparator.<Long, Double>comparing(scores::get).reversed());
 
         int sizeSafe = Math.max(1, size);
-        int total = Math.min(orderedIds.size(), sizeSafe * 2);
+        int total = orderedIds.size();
         int from = Math.max(0, page) * sizeSafe;
-        // Slice must extend at least up to the larger input list so the test's
-        // disjoint 25+25 ids produce a page2 with 5 items (25 - 20).
-        int sliceCap = Math.max(total, Math.max(textResults.size(), semanticResults.size()));
-        int to = Math.min(from + sizeSafe, sliceCap);
+        int to = Math.min(from + sizeSafe, total);
 
         List<SearchHit> out = new ArrayList<>();
         for (Long id : orderedIds.subList(from, to)) {

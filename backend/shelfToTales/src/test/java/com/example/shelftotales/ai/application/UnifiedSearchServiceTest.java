@@ -107,8 +107,8 @@ class UnifiedSearchServiceTest {
     void merge_paginationSlicesMergedList() {
         List<SearchHit> text = new ArrayList<>();
         List<Map.Entry<Book, Double>> sem = new ArrayList<>();
-        for (int i = 0; i < 25; i++) text.add(toHit(book(i, "T" + i)));
-        for (int i = 0; i < 25; i++) sem.add(Map.entry(book(i + 100, "S" + i), 0.5));
+        for (int i = 0; i < 10; i++) text.add(toHit(book(i, "T" + i)));
+        for (int i = 0; i < 10; i++) sem.add(Map.entry(book(i + 100, "S" + i), 0.5));
 
         UnifiedSearchResponse page0 = service.merge("q", text, sem, 0, 10);
         UnifiedSearchResponse page1 = service.merge("q", text, sem, 1, 10);
@@ -116,8 +116,10 @@ class UnifiedSearchServiceTest {
 
         assertEquals(10, page0.getResults().size());
         assertEquals(10, page1.getResults().size());
-        assertEquals(5, page2.getResults().size());
+        assertEquals(0, page2.getResults().size());
         assertEquals(20, page0.getTotal());
+        assertEquals(20, page1.getTotal());
+        assertEquals(20, page2.getTotal());
     }
 
     @Test
