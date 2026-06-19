@@ -290,6 +290,13 @@ export const searchService = {
       params: { limit },
     });
   },
+
+  // Fire-and-forget click analytics. Errors are intentionally swallowed
+  // so analytics outages never break the search UX.
+  trackClick: ({ bookId, query, position, source }) =>
+    api
+      .post('/search/events', { bookId, query, position, source })
+      .catch(() => {}),
 };
 
 export const addressService = {
