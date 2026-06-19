@@ -12,14 +12,16 @@ import { bookService } from '../lib/api';
 import NewsLetter from '../components/features/NewsLetter';
 import { FadeIn } from '../components/common/AnimationUtils';
 
+const CATEGORIES = ['All Books', 'Fictions', 'Fantasy', 'Science'];
+
 function ShopList(){
     const [books, setBooks] = useState([]);
-    const [accordBtn, setAccordBtn] = useState();
     const [selectBtn, setSelectBtn] = useState('Newest');
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [sortBy, setSortBy] = useState('id');
     const [sortDir, setSortDir] = useState('desc');
+    const [selectedCategory, setSelectedCategory] = useState('All Books');
 
     const sortMap = {
         'Newest': { sortBy: 'id', sortDir: 'desc' },
@@ -51,127 +53,135 @@ function ShopList(){
         setCurrentPage(0);
     };
 
+    const filteredBooks = books.filter(book =>
+        selectedCategory === 'All Books' ||
+        (book.category?.name || '').toLowerCase() === selectedCategory.toLowerCase()
+    );
+
     return(
         <>
             <div className="page-content bg-grey">
                 <FadeIn>
                 <section className="content-inner-1 border-bottom">
                     <div className="container">
-                        <div className="d-flex justify-content-between align-items-center">
-                            <h4 className="title">Books</h4>
+                        {/* Title */}
+                        <div className="d-flex justify-content-between align-items-center m-b20">
+                            <h4 className="title mb-0 fw-bold" style={{ color: '#1A162E' }}>Books</h4>
                         </div>
-                        <div className="filter-area m-b30">
-                            <div className="grid-area">
-                                <div className="shop-tab">
-                                    <ul className="nav text-center product-filter justify-content-end" role="tablist">
-                                        <li className="nav-item">
-                                            <Link href={"/books-list"} className="nav-link active" aria-label="List View">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M3 5H21C21.2652 5 21.5196 4.89464 21.7071 4.7071C21.8946 4.51957 22 4.26521 22 4C22 3.73478 21.8946 3.48043 21.7071 3.29289C21.5196 3.10536 21.2652 3 21 3H3C2.73478 3 2.48043 3.10536 2.29289 3.29289C2.10536 3.48043 2 3.73478 2 4C2 4.26521 2.10536 4.51957 2.29289 4.7071C2.48043 4.89464 2.73478 5 3 5Z" fill="#AAAAAA"></path>
-                                                <path d="M3 13H21C21.2652 13 21.5196 12.8947 21.7071 12.7071C21.8946 12.5196 22 12.2652 22 12C22 11.7348 21.8946 11.4804 21.7071 11.2929C21.5196 11.1054 21.2652 11 21 11H3C2.73478 11 2.48043 11.1054 2.29289 11.2929C2.10536 11.4804 2 11.7348 2 12C2 12.2652 2.10536 12.5196 2.29289 12.7071C2.48043 12.8947 2.73478 13 3 13Z" fill="#AAAAAA"></path>
-                                                <path d="M3 21H21C21.2652 21 21.5196 20.8947 21.7071 20.7071C21.8946 20.5196 22 20.2652 22 20C22 19.7348 21.8946 19.4804 21.7071 19.2929C21.5196 19.1054 21.2652 19 21 19H3C2.73478 19 2.48043 19.1054 2.29289 19.2929C2.10536 19.4804 2 19.7348 2 20C2 20.2652 2.10536 20.5196 2.29289 20.7071C2.48043 20.8947 2.73478 21 3 21Z" fill="#AAAAAA"></path>
-                                                </svg>
-                                            </Link>
-                                        </li>
-                                        <li className="nav-item">
-                                            <Link href={"/books-grid-view"} className="nav-link" aria-label="Grid View">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M3 11H10C10.2652 11 10.5196 10.8946 10.7071 10.7071C10.8946 10.5196 11 10.2652 11 10V3C11 2.73478 10.8946 2.48043 10.7071 2.29289C10.5196 2.10536 10.2652 2 10 2H3C2.73478 2 2.48043 2.10536 2.29289 2.29289C2.10536 2.48043 2 2.73478 2 3V10C2 10.2652 2.10536 10.5196 2.29289 10.7071C2.48043 10.8946 2.73478 11 3 11ZM4 4H9V9H4V4Z" fill="#AAAAAA"></path>
-                                                <path d="M14 11H21C21.2652 11 21.5196 10.8946 21.7071 10.7071C21.8946 10.5196 22 10.2652 22 10V3C22 2.73478 21.8946 2.48043 21.7071 2.29289C21.5196 2.10536 21.2652 2 21 2H14C13.7348 2 13.4804 2.10536 13.2929 2.29289C13.1054 2.48043 13 2.73478 13 3V10C13 10.2652 13.1054 10.5196 13.2929 10.7071C13.4804 10.8946 13.7348 11 14 11ZM15 4H20V9H15V4Z" fill="#AAAAAA"></path>
-                                                <path d="M3 22H10C10.2652 22 10.5196 21.8946 10.7071 21.7071C10.8946 21.5196 11 21.2652 11 21V14C11 13.7348 10.8946 13.4804 10.7071 13.2929C10.5196 13.1054 10.2652 13 10 13H3C2.73478 13 2.48043 13.1054 2.29289 13.2929C2.10536 13.4804 2 13.7348 2 14V21C2 21.2652 2.10536 21.5196 2.29289 21.7071C2.48043 21.8946 2.73478 22 3 22ZM4 15H9V20H4V15Z" fill="#AAAAAA"></path>
-                                                <path d="M14 22H21C21.2652 22 21.5196 21.8946 21.7071 21.7071C21.8946 21.5196 22 21.2652 22 21V14C22 13.7348 21.8946 13.4804 21.7071 13.2929C21.5196 13.1054 21.2652 13 21 13H14C13.7348 13 13.4804 13.1054 13.2929 13.2929C13.1054 13.4804 13 13.7348 13 14V21C13 21.2652 13.1054 21.5196 13.2929 21.7071C13.4804 21.8946 13.7348 22 14 22ZM15 15H20V20H15V15Z" fill="#AAAAAA"></path>
-                                                </svg>
-                                            </Link>
-                                        </li>
-                                        <li className="nav-item">
-                                            <Link href={"/books-grid-view-sidebar"} className="nav-link" aria-label="Grid View with Sidebar">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M3 22H21C21.2652 22 21.5196 21.8946 21.7071 21.7071C21.8946 21.5196 22 21.2652 22 21V3C22 2.73478 21.8946 2.48043 21.7071 2.29289C21.5196 2.10536 21.2652 2 21 2H3C2.73478 2 2.48043 2.10536 2.29289 2.29289C2.10536 2.48043 2 2.73478 2 3V21C2 21.2652 2.10536 21.5196 2.29289 21.7071C2.48043 21.8946 2.73478 22 3 22ZM13 4H20V11H13V4ZM13 13H20V20H13V13ZM4 4H11V20H4V4Z" fill="#AAAAAA"></path>
-                                                </svg>
-                                            </Link>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div className="category">
-                                <div className="filter-category">
-                                    <Link href={"#"} data-bs-toggle="collapse"  
-                                        onClick={() => setAccordBtn(!accordBtn)}
-                                        aria-label="Toggle categories list"
-                                        aria-expanded={accordBtn ? "true" : "false"}
+
+                        {/* Filter Toolbar — matches book-list design */}
+                        <div className="filter-area m-b30 p-3 bg-white rounded-3 border d-flex justify-content-between align-items-center shadow-sm">
+                            {/* Left: Categories */}
+                            <div className="d-flex align-items-center gap-4 ps-2">
+                                <Dropdown>
+                                    <Dropdown.Toggle
+                                        as="button"
+                                        id="sl-categories-dropdown"
+                                        className="sl-toolbar-btn"
+                                        aria-label="Filter by category"
                                     >
-                                        <i className="fas fa-list me-2"></i>
+                                        <i className="fa-solid fa-list-ul me-2"></i>
                                         Categories
-                                    </Link>
-                                </div>
-                                <div className="form-group">
-                                    <i className="fas fa-sort-amount-down me-2 text-secondary"></i>                                   
-                                    <Dropdown>
-                                        <Dropdown.Toggle  className="i-false" aria-label={`Sort books by: ${selectBtn}`}>{selectBtn} <i className="ms-4 font-14 fa-solid fa-caret-down" /></Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item onClick={()=>handleSortChange('Newest')}>Newest</Dropdown.Item>
-                                            <Dropdown.Item onClick={()=>handleSortChange('Oldest')}>Oldest</Dropdown.Item>
-                                            <Dropdown.Item onClick={()=>handleSortChange('Price Low')}>Price Low</Dropdown.Item>
-                                            <Dropdown.Item onClick={()=>handleSortChange('Price High')}>Price High</Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
-                                </div>
+                                        <i className="fa-solid fa-caret-down small ms-2"></i>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        {CATEGORIES.map(cat => (
+                                            <Dropdown.Item
+                                                key={cat}
+                                                onClick={() => { setSelectedCategory(cat); setCurrentPage(0); }}
+                                                active={selectedCategory === cat}
+                                            >
+                                                {cat}
+                                            </Dropdown.Item>
+                                        ))}
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            </div>
+                            {/* Right: Sort */}
+                            <div className="d-flex align-items-center gap-4 pe-2">
+                                <Dropdown>
+                                    <Dropdown.Toggle
+                                        as="button"
+                                        id="sl-sort-dropdown"
+                                        className="sl-toolbar-btn"
+                                        aria-label={`Sort books by: ${selectBtn}`}
+                                    >
+                                        <i className="fa-solid fa-arrow-down-wide-short me-2"></i>
+                                        {selectBtn}
+                                        <i className="fa-solid fa-caret-down small ms-2"></i>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item onClick={() => handleSortChange('Newest')}>Newest</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => handleSortChange('Oldest')}>Oldest</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => handleSortChange('Price Low')}>Price Low</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => handleSortChange('Price High')}>Price High</Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
                             </div>
                         </div>
 
-                        <div className="row ">
-                            {books.map((data, i)=>(                                
-                                <div className="col-md-12 col-sm-12" key={i}>
-                                    <div className="dz-shop-card style-2">
-                                        <div className="dz-media">
-                                            <img loading="lazy" decoding="async" src={data.imageUrl} alt={`Cover of ${data.title}`} style={{width: '150px'}} />
+                        {/* Book list */}
+                        <div className="row">
+                            {filteredBooks.map((data, i) => (
+                                <div className="col-12 mb-3" key={i}>
+                                    <div className="sl-book-card">
+                                        {/* Cover image */}
+                                        <div className="sl-book-cover">
+                                            <img
+                                                loading="lazy"
+                                                decoding="async"
+                                                src={data.coverUrl || data.imageUrl || '/placeholder-book.png'}
+                                                alt={`Cover of ${data.title}`}
+                                            />
                                         </div>
-                                        <div className="dz-content">
-                                            <div className="dz-header">
-                                                <div>
-                                                    <ul className="dz-tags">
-                                                        <li><Link href={"#"}>{data.category?.name}</Link></li>
-                                                    </ul>
-                                                    <h4 className="title mb-0"><Link href={`/shop-detail/${data.id}`}>{data.title}</Link></h4>
+                                        {/* Content */}
+                                        <div className="sl-book-content">
+                                            <div className="sl-book-top">
+                                                <div className="sl-book-meta">
+                                                    {data.category?.name && (
+                                                        <span className="sl-book-category">{data.category.name}</span>
+                                                    )}
+                                                    <h5 className="sl-book-title">
+                                                        <Link href={`/shop-detail/${data.id}`}>{data.title}</Link>
+                                                    </h5>
+                                                    {data.description && (
+                                                        <p className="sl-book-desc">{data.description}</p>
+                                                    )}
                                                 </div>
-                                                <div className="price">
-                                                    <span className="price-num text-primary">${data.discountPrice || data.price}</span>
-                                                    {data.discountPrice && <del>${data.price}</del>}
+                                                <div className="sl-book-price">
+                                                    <span className="sl-price-main">${data.discountPrice || data.price}</span>
+                                                    {data.discountPrice && <del className="sl-price-old">${data.price}</del>}
+                                                    <div className="sl-rating">
+                                                        <span className="sl-rating-num">4.0</span>
+                                                        <div className="sl-stars">
+                                                            {[1,2,3,4].map(s => (
+                                                                <i key={s} className="fa-solid fa-star text-warning"></i>
+                                                            ))}
+                                                            <i className="fa-regular fa-star text-warning"></i>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            
-                                            <div className="dz-body">
-                                                <div className="dz-rating-box">
-                                                    <div>
-                                                        <p className="dz-para">{data.description}</p>
-                                                    </div>
-                                                    <div className="review-num">
-                                                        <h4>4.0</h4>
-                                                        <ul className="dz-rating">
-                                                            <li><i className="flaticon-star text-yellow"></i></li>	
-                                                            <li><i className="flaticon-star text-yellow"></i></li>	
-                                                            <li><i className="flaticon-star text-yellow"></i></li>	
-                                                            <li><i className="flaticon-star text-yellow"></i></li>		
-                                                            <li><i className="flaticon-star text-muted"></i></li>		
-                                                        </ul>
-                                                    </div>
+                                            <div className="sl-book-bottom">
+                                                <div className="sl-author">
+                                                    <span className="sl-author-label">Written by</span>
+                                                    <span className="sl-author-name">{data.author || 'Unknown'}</span>
                                                 </div>
-                                                <div className="rate">
-                                                    <ul className="book-info">
-                                                        <li><span>Writen by</span>{data.author}</li>
-                                                    </ul>
-                                                    <div className="d-flex">
-                                                        <Link href={`/shop-detail/${data.id}`} className="btn btn-secondary btnhover btnhover2" aria-label={`View details of ${data.title}`}>View Details</Link>
-                                                    </div>
-                                                </div>
+                                                <Link
+                                                    href={`/shop-detail/${data.id}`}
+                                                    className="sl-view-btn"
+                                                    aria-label={`View details of ${data.title}`}
+                                                >
+                                                    View Details
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            ))}   
-                             
+                            ))}
                         </div>
 
+                        {/* Pagination */}
                         {totalPages > 1 && (
                             <div className="row align-items-center mt-4">
                                 <div className="col-12">
@@ -196,10 +206,201 @@ function ShopList(){
                     </div>
                 </section>
                 </FadeIn>
-                <NewsLetter />      
+                <NewsLetter />
             </div>
+
+            <style dangerouslySetInnerHTML={{ __html: `
+                /* ── Toolbar buttons ── */
+                .sl-toolbar-btn {
+                    background: transparent !important;
+                    background-color: transparent !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    outline: none !important;
+                    color: #1A162E !important;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    padding: 0 !important;
+                    cursor: pointer;
+                    display: inline-flex !important;
+                    align-items: center;
+                }
+                .sl-toolbar-btn:hover,
+                .sl-toolbar-btn:focus,
+                .sl-toolbar-btn:active,
+                .sl-toolbar-btn.show {
+                    background: transparent !important;
+                    background-color: transparent !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    color: #1A162E !important;
+                    opacity: 0.75;
+                }
+                .sl-toolbar-btn::after {
+                    display: none !important;
+                }
+
+                /* ── Book card ── */
+                .sl-book-card {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 24px;
+                    background: #fff;
+                    border-radius: 12px;
+                    padding: 20px 24px;
+                    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+                    transition: box-shadow 0.25s ease, transform 0.25s ease;
+                }
+                .sl-book-card:hover {
+                    box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+                    transform: translateY(-2px);
+                }
+
+                /* Cover */
+                .sl-book-cover {
+                    flex-shrink: 0;
+                    width: 110px;
+                    height: 150px;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    background: #eee;
+                }
+                .sl-book-cover img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                }
+
+                /* Content wrapper */
+                .sl-book-content {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    min-height: 150px;
+                    gap: 12px;
+                }
+
+                /* Top row: meta + price */
+                .sl-book-top {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    gap: 16px;
+                }
+                .sl-book-meta {
+                    flex: 1;
+                }
+                .sl-book-category {
+                    display: inline-block;
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: #E9AD28;
+                    margin-bottom: 4px;
+                }
+                .sl-book-title {
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    color: #1A162E;
+                    margin: 0 0 6px;
+                    line-height: 1.3;
+                }
+                .sl-book-title a {
+                    color: inherit;
+                    text-decoration: none;
+                }
+                .sl-book-title a:hover { color: #E9AD28; }
+                .sl-book-desc {
+                    font-size: 0.82rem;
+                    color: #666;
+                    margin: 0;
+                    line-height: 1.5;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+
+                /* Price + rating column */
+                .sl-book-price {
+                    text-align: right;
+                    flex-shrink: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                    gap: 6px;
+                }
+                .sl-price-main {
+                    font-size: 1.2rem;
+                    font-weight: 700;
+                    color: #2563EB;
+                }
+                .sl-price-old {
+                    font-size: 0.8rem;
+                    color: #999;
+                    margin-left: 6px;
+                }
+                .sl-rating {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                    gap: 2px;
+                }
+                .sl-rating-num {
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: #1A162E;
+                }
+                .sl-stars { display: flex; gap: 2px; font-size: 0.78rem; }
+
+                /* Bottom row: author + button */
+                .sl-book-bottom {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding-top: 8px;
+                    border-top: 1px solid #f0f0f0;
+                }
+                .sl-author {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1px;
+                }
+                .sl-author-label {
+                    font-size: 0.72rem;
+                    color: #aaa;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+                .sl-author-name {
+                    font-size: 0.88rem;
+                    font-weight: 600;
+                    color: #1A162E;
+                }
+                .sl-view-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 8px 20px;
+                    background: #1A162E;
+                    color: #fff !important;
+                    border-radius: 8px;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    text-decoration: none !important;
+                    transition: background 0.2s ease;
+                }
+                .sl-view-btn:hover { background: #E9AD28; color: #1A162E !important; }
+
+                /* Pagination */
+                .pagination .page-link:hover {
+                    background-color: #1A162E !important;
+                    color: white !important;
+                }
+            `}} />
         </>
     )
 }
 export default ShopList;
-
