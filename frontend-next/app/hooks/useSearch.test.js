@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
 
 vi.mock('@/lib/api', () => ({
   __esModule: true,
@@ -11,9 +11,14 @@ vi.mock('@/lib/api', () => ({
 import { searchService } from '@/lib/api';
 import { useSearch } from './useSearch';
 
-describe('useSearch', () => {
+describe('useSearch (fake timers)', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     searchService.unifiedSearch.mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('debounces: 3 calls in 100ms fire 1 fetch', async () => {
@@ -30,23 +35,22 @@ describe('useSearch', () => {
     });
 
     expect(searchService.unifiedSearch).not.toHaveBeenCalled();
-    await waitFor(() => expect(searchService.unifiedSearch).toHaveBeenCalledTimes(1));
-    expect(searchService.unifiedSearch).toHaveBeenCalledWith('abc', {});
+    await act(async () => { vi.advanceTimersByTime(50); });
+    expect(searchService.unifiedSearch).toHaveBeenCalledTimes(1);
+    expect(searchService.unifiedSearch).toHaveBeenCalledWith('abc', { source: undefined });
   });
 
   it('surfaces signals from the response', async () => {
     searchService.unifiedSearch.mockResolvedValue({
-      data: {
-        results: [],
-        total: 0,
-        signals: { text: 'ok', semantic: 'degraded' },
-      },
+      data: { results: [], total: 0, signals: { text: 'ok', semantic: 'degraded' } },
     });
 
     const { result } = renderHook(() => useSearch({ debounceMs: 10 }));
     act(() => result.current.run('cosmos'));
-    await waitFor(() => expect(searchService.unifiedSearch).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(result.current.loading).toBe(false));
+    await act(async () => {
+      vi.advanceTimersByTime(10);
+      await Promise.resolve();
+    });
 
     expect(result.current.signals).toEqual({ text: 'ok', semantic: 'degraded' });
   });
@@ -56,17 +60,35 @@ describe('useSearch', () => {
 
     const { result } = renderHook(() => useSearch({ debounceMs: 10 }));
     act(() => result.current.run('x'));
-    await waitFor(() => expect(searchService.unifiedSearch).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(result.current.error).toBeTruthy());
+    await act(async () => {
+      vi.advanceTimersByTime(10);
+      await Promise.resolve();
+    });
 
+    expect(result.current.error).toBeTruthy();
     expect(result.current.data).toBeNull();
   });
 
   it('blank query clears results without firing a fetch', async () => {
     const { result } = renderHook(() => useSearch({ debounceMs: 10 }));
     act(() => result.current.run('   '));
-    await waitFor(() => expect(result.current.loading).toBe(false));
+    await act(async () => { vi.advanceTimersByTime(10); });
     expect(searchService.unifiedSearch).not.toHaveBeenCalled();
     expect(result.current.data).toBeNull();
+  });
+
+  it('forwards source opt to the API', async () => {
+    searchService.unifiedSearch.mockResolvedValue({
+      data: { results: [], total: 0, signals: { text: 'ok', semantic: 'ok' } },
+    });
+
+    const { result } = renderHook(() => useSearch({ debounceMs: 10 }));
+    act(() => result.current.run('cosmos', { source: 'text' }));
+    await act(async () => {
+      vi.advanceTimersByTime(10);
+      await Promise.resolve();
+    });
+
+    expect(searchService.unifiedSearch).toHaveBeenCalledWith('cosmos', { source: 'text' });
   });
 });
