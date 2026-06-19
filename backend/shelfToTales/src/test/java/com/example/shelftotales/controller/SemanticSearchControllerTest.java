@@ -52,7 +52,7 @@ class SemanticSearchControllerTest {
     void search_shouldReturn200() throws Exception {
         when(bookService.getBooks(anyString(), any(), any(), any(), any(Boolean.class), any(), anyInt(), anyInt(), anyString(), anyString()))
                 .thenReturn(com.example.shelftotales.shared.dto.PagedResponse.<com.example.shelftotales.catalog.application.BookResponse>builder().content(java.util.List.of()).build());
-        when(unifiedSearchService.merge(anyString(), any(), any(), anyInt(), anyInt()))
+        when(unifiedSearchService.merge(anyString(), any(), any(), anyInt(), anyInt(), any(), any(), any()))
                 .thenReturn(com.example.shelftotales.ai.application.UnifiedSearchResponse.builder()
                         .query("test")
                         .results(java.util.List.of())

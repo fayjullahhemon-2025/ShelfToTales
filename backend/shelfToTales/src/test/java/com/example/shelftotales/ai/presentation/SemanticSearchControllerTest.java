@@ -44,7 +44,7 @@ class SemanticSearchControllerTest {
                         .build());
         when(embeddingService.searchSimilar(anyString(), anyInt(), any()))
                 .thenReturn(java.util.List.of());
-        when(unifiedSearchService.merge(anyString(), any(), any(), anyInt(), anyInt()))
+        when(unifiedSearchService.merge(anyString(), any(), any(), anyInt(), anyInt(), any(), any(), any()))
                 .thenReturn(com.example.shelftotales.ai.application.UnifiedSearchResponse.builder()
                         .query("cosmos")
                         .results(java.util.List.of())
@@ -67,7 +67,7 @@ class SemanticSearchControllerTest {
                         .build());
         when(embeddingService.searchSimilar(anyString(), anyInt(), any()))
                 .thenThrow(new RuntimeException("onnx down"));
-        when(unifiedSearchService.merge(anyString(), any(), any(), anyInt(), anyInt()))
+        when(unifiedSearchService.merge(anyString(), any(), any(), anyInt(), anyInt(), any(), any(), any()))
                 .thenReturn(com.example.shelftotales.ai.application.UnifiedSearchResponse.builder()
                         .query("cosmos")
                         .signals(com.example.shelftotales.ai.application.UnifiedSearchResponse.Signals.builder()
@@ -85,7 +85,7 @@ class SemanticSearchControllerTest {
                 .thenThrow(new RuntimeException("db down"));
         when(embeddingService.searchSimilar(anyString(), anyInt(), any()))
                 .thenReturn(java.util.List.of());
-        when(unifiedSearchService.merge(anyString(), any(), any(), anyInt(), anyInt()))
+        when(unifiedSearchService.merge(anyString(), any(), any(), anyInt(), anyInt(), any(), any(), any()))
                 .thenReturn(com.example.shelftotales.ai.application.UnifiedSearchResponse.builder()
                         .query("cosmos")
                         .signals(com.example.shelftotales.ai.application.UnifiedSearchResponse.Signals.builder()

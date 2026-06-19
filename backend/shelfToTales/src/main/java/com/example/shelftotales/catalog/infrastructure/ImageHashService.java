@@ -6,9 +6,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Base64;
 
 @Service
 public class ImageHashService {
@@ -30,6 +32,30 @@ public class ImageHashService {
                 throw new IOException("Unable to read image from URL: " + imageUrl);
             }
             return computeDHash(image);
+        }
+    }
+
+    /**
+     * Decode a base64 string (with or without data-URL prefix) and compute its dHash.
+     */
+    public long computeDHashFromBase64(String base64) {
+        if (base64 == null || base64.isBlank()) {
+            throw new IllegalArgumentException("base64 payload is empty");
+        }
+        String payload = base64;
+        int comma = payload.indexOf(',');
+        if (payload.startsWith("data:") && comma >= 0) {
+            payload = payload.substring(comma + 1);
+        }
+        byte[] bytes = Base64.getDecoder().decode(payload);
+        try (InputStream in = new ByteArrayInputStream(bytes)) {
+            BufferedImage image = ImageIO.read(in);
+            if (image == null) {
+                throw new IOException("Unable to read image from base64 payload");
+            }
+            return computeDHash(image);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to decode image from base64: " + e.getMessage(), e);
         }
     }
 

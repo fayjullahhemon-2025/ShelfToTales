@@ -53,7 +53,10 @@ public class SemanticSearchController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "24") int size,
             @RequestParam(defaultValue = "title") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(required = false) String source,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) String image) {
 
         String trimmed = q == null ? "" : q.trim();
         if (trimmed.isEmpty()) {
@@ -109,7 +112,18 @@ public class SemanticSearchController {
                     503, "Service Unavailable", "Search temporarily unavailable"));
         }
 
-        UnifiedSearchResponse resp = unifiedSearchService.merge(trimmed, textHits, semHits, page, size);
+        Long imageQueryHash = null;
+        boolean imageMatched = false;
+        if (image != null && !image.isBlank()) {
+            try {
+                imageQueryHash = imageHashService.computeDHashFromBase64(image);
+                imageMatched = true;
+            } catch (RuntimeException e) {
+                log.warn("Unified search: image hash failed: {}", e.getMessage());
+            }
+        }
+        UnifiedSearchResponse resp = unifiedSearchService.merge(trimmed, textHits, semHits, page, size, source, cursor, imageQueryHash);
+        resp.setImageMatched(imageMatched);
         resp.setSignals(Signals.builder().text(textStatus).semantic(semanticStatus).build());
         return ResponseEntity.ok(resp);
     }
@@ -127,7 +141,7 @@ public class SemanticSearchController {
         UnifiedSearchResponse resp = unifiedSearchService.merge(
                 q, List.of(),
                 embeddingService.searchSimilar(q, Math.max(limit, 24), null),
-                0, limit);
+                0, limit, null, null, null);
         return ResponseEntity.ok(resp);
     }
 
