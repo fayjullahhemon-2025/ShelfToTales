@@ -3,12 +3,15 @@
 import React from 'react';
 import Swal from 'sweetalert2';
 import { reportService } from '@/lib/api';
+import { useAuthToken } from '@/hooks/useAuthToken';
 
 /**
  * Reusable button to report flagged content (Review, Blog, Listing).
  * Opens a SweetAlert2 modal with a form that adheres to Vercel Web Interface Guidelines.
  */
 export default function ReportButton({ targetType, targetId, className }) {
+  const [token] = useAuthToken();
+
   const normalizeTargetType = (type) => {
     if (!type) return type;
     if (type === 'BLOG') return 'BLOG_POST';
@@ -37,8 +40,8 @@ export default function ReportButton({ targetType, targetId, className }) {
     e.preventDefault();
     e.stopPropagation();
 
-    // Check if user is logged in
-    const token = typeof window !== 'undefined' ? window.localStorage.getItem('token') : null;
+    // Check if user is logged in. `token` is read once at mount via
+    // useAuthToken; this handler just consults the state.
     if (!token) {
       Swal.fire({
         icon: 'warning',
