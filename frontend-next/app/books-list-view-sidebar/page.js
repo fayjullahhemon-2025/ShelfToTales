@@ -6,6 +6,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { bookService, categoryService, wishlistService } from '../lib/api';
 import { useCart } from '../hooks/useCart';
+import { useAuthToken } from '../hooks/useAuthToken';
 import Swal from 'sweetalert2';
 import PageTitle from '../components/layout/PageTitle';
 import '../books-grid-view-sidebar/BooksSidebar.css';
@@ -25,6 +26,7 @@ function BooksListViewSidebar() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [minRating, setMinRating] = useState('');
   const [loading, setLoading] = useState(true);
+  const [token] = useAuthToken();
   const size = 10;
 
   useEffect(() => {
@@ -65,14 +67,14 @@ function BooksListViewSidebar() {
         position: 'top-end'
       });
     } catch (e) {
-      if (e.response?.status === 401 || !localStorage.getItem('token')) {
+      if (e.response?.status === 401 || !token) {
         Swal.fire('Session Expired', 'Please log in again to add items to cart', 'warning');
         window.location.href = '/shop-login';
       } else {
         Swal.fire('Error', e.response?.data?.message || 'Failed to add to cart', 'error');
       }
     }
-  }, [addToCart]);
+  }, [addToCart, token]);
 
   const addToWishlist = useCallback(async (id) => {
     try {

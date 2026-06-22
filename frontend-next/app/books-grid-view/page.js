@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Dropdown } from 'react-bootstrap';
 import { bookService, wishlistService } from '../lib/api';
 import { useCart } from '../hooks/useCart';
+import { useAuthToken } from '../hooks/useAuthToken';
 import Swal from 'sweetalert2';
 import { FadeIn, StaggerContainer, StaggerItem } from '../components/common/AnimationUtils';
 
@@ -27,6 +28,7 @@ function BooksGridView() {
     const [totalPages, setTotalPages] = useState(1);
     const [sortBy, setSortBy] = useState('id');
     const [sortDir, setSortDir] = useState('desc');
+    const [token] = useAuthToken();
 
     const sortMap = {
         'Newest': { sortBy: 'id', sortDir: 'desc' },
@@ -72,14 +74,14 @@ function BooksGridView() {
             await addToCart(bookId, 1);
             Swal.fire({ icon: 'success', title: 'Added to cart', showConfirmButton: false, timer: 1500, toast: true, position: 'top-end' });
         } catch (error) {
-            if (error.response?.status === 401 || !localStorage.getItem('token')) {
+            if (error.response?.status === 401 || !token) {
                 Swal.fire('Session Expired', 'Please log in again', 'warning');
                 window.location.href = '/shop-login';
             } else {
                 Swal.fire('Error', error.response?.data?.message || 'Failed to add to cart', 'error');
             }
         }
-    }, []);
+    }, [addToCart, token]);
 
     const handleQuickView = useCallback((book) => {
         setSelectedBook(book);
