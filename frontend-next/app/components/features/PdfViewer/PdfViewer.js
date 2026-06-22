@@ -34,6 +34,9 @@ function PdfViewer({ url, title, initialPage = 1, onPageChange }) {
   const goToPrevPage = () => setPageNumber(p => Math.max(1, p - 1));
   const goToNextPage = () => setPageNumber(p => Math.min(numPages || 1, p + 1));
 
+  // Note: this triggers the onPageChange effect below, which means the parent
+  // receives a callback for a value it just sent in. ReadBookInner treats this
+  // as a no-op save, but other consumers should be aware.
   useEffect(() => {
     const nextPage = Math.max(1, Number(initialPage) || 1);
     setPageNumber((current) => (current === nextPage ? current : nextPage));
