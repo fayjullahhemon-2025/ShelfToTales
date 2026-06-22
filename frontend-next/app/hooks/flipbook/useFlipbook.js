@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useReadingProgress } from '../useReadingProgress';
+import { useAuthToken } from '../useAuthToken';
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2.5;
@@ -50,7 +51,9 @@ export function useFlipbook({ flipbook, bookId = null } = {}) {
   const numericBookId = typeof bookId === 'number' || (typeof bookId === 'string' && /^\d+$/.test(bookId))
     ? Number(bookId)
     : null;
-  const progress = useReadingProgress({ bookId: numericBookId });
+  const [token, setToken] = useAuthToken();
+
+  const progress = useReadingProgress({ bookId: token ? numericBookId : null });
 
   const [zoom, setZoom] = useState(1);
   const [mode, setMode] = useState('single');
@@ -68,18 +71,18 @@ export function useFlipbook({ flipbook, bookId = null } = {}) {
 
   // Hydrate the page from the backend once the progress fetch lands.
   useEffect(() => {
-    if (numericBookId == null) return;
+    if (numericBookId == null || !token) return;
     if (!progress.loading && progress.currentPage > 0 && progress.currentPage < totalPages) {
       setPageIndex(progress.currentPage);
     }
-  }, [numericBookId, progress.loading, progress.currentPage, totalPages]);
+  }, [numericBookId, token, progress.loading, progress.currentPage, totalPages]);
 
   // Persist the page whenever the user changes it (debounced inside the hook).
   useEffect(() => {
-    if (numericBookId == null) return;
+    if (numericBookId == null || !token) return;
     if (progress.loading) return;
     progress.savePage(pageIndex);
-  }, [numericBookId, pageIndex, progress.loading, progress.savePage]);
+  }, [numericBookId, token, pageIndex, progress.loading, progress.savePage]);
 
   const goTo = useCallback((index) => {
     setPageIndex((current) => {

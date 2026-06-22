@@ -7,6 +7,7 @@ import { bookService, quoteService } from '../../lib/api';
 import Swal from 'sweetalert2';
 import ClientOnly from '../../components/ClientOnly';
 import { useReadingProgress } from '../../hooks/useReadingProgress';
+import { useAuthToken } from '../../hooks/useAuthToken';
 import dynamicImport from 'next/dynamic';
 const PdfViewer = dynamicImport(() => import('../../components/features/PdfViewer/PdfViewer'), { ssr: false });
 import '../../components/features/PdfViewer/PdfViewer.css';
@@ -25,10 +26,11 @@ function ReadBookInner() {
   const [themeStyle, setThemeStyle] = useState('sunset');
   const [submitting, setSubmitting] = useState(false);
   const [readingMode, setReadingMode] = useState(false);
+  const [token, setToken] = useAuthToken();
 
   const containerRef = useRef(null);
   const numericBookId = bookId && /^\d+$/.test(String(bookId)) ? Number(bookId) : null;
-  const readingProgress = useReadingProgress({ bookId: numericBookId });
+  const readingProgress = useReadingProgress({ bookId: token ? numericBookId : null });
 
   const THEMES = {
     sunset: 'linear-gradient(135deg, #ff5e62, #ff9966)',
@@ -125,7 +127,7 @@ function ReadBookInner() {
         </div>
 
         {/* Selection Tooltip */}
-        {tooltipPos && (
+        {tooltipPos && token && (
           <button
             type="button"
             onClick={handleShareClick}
