@@ -18,15 +18,13 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class ChatService {
 
     private static final int MAX_HISTORY = 10;
+    /** Sentinel session key for unauthenticated visitors. User IDs are positive; -1L never collides. */
+    private static final long ANONYMOUS_SESSION_ID = -1L;
     private static final String SYSTEM_PROMPT = """
             You are ShelfToTales, a friendly and knowledgeable bookstore customer support assistant.
 
@@ -61,9 +59,10 @@ public class ChatService {
 
     public ChatResponse chat(String userMessage) {
         evictStaleSessions();
-        User currentUser = AuthUtils.getCurrentUser(userRepository);
-        sessionLastAccess.put(currentUser.getId(), System.currentTimeMillis());
-        List<ChatMessage> history = sessions.computeIfAbsent(currentUser.getId(), k -> new ArrayList<>());
+        Optional<User> maybeUser = getOptionalCurrentUser();
+        Long sessionKey = maybeUser.map(User::getId).orElse(ANONYMOUS_SESSION_ID);
+        sessionLastAccess.put(sessionKey, System.currentTimeMillis());
+        List<ChatMessage> history = sessions.computeIfAbsent(sessionKey, k -> new ArrayList<>());
         history.add(ChatMessage.user(userMessage));
         if (history.size() > MAX_HISTORY) history.subList(0, history.size() - MAX_HISTORY).clear();
 
@@ -82,9 +81,12 @@ public class ChatService {
 
         // Build multi-domain context
         String catalogContext = buildCatalogContext(bookResults);
-        String orderContext = buildOrderContext(currentUser.getId());
-        String statsContext = buildReadingStats(currentUser.getId());
-        String userContext = buildUserContext(currentUser);
+        String orderContext = maybeUser.map(user -> buildOrderContext(user.getId()))
+                .orElse("\n## Order History\n(Sign in to view orders)\n");
+        String statsContext = maybeUser.map(user -> buildReadingStats(user.getId()))
+                .orElse("\n## Reading Stats\n(Sign in to view reading stats)\n");
+        String userContext = maybeUser.map(this::buildUserContext)
+                .orElse("\n## User\n- Name: Guest\n- Member since: guest session\n");
 
         // Build conversation history context
         String historyContext = buildHistoryContext(history);
@@ -107,7 +109,7 @@ public class ChatService {
 
         List<ChatResponse.BookRecommendation> recommendations = bookResults.stream()
                 .map(e -> {
-                    String reason = generateBookReason(e.getKey(), e.getValue(), currentUser.getId());
+                    String reason = generateBookReason(e.getKey(), e.getValue(), maybeUser.map(User::getId).orElse(null));
                     return ChatResponse.BookRecommendation.builder()
                         .bookId(e.getKey().getId()).title(e.getKey().getTitle())
                         .author(e.getKey().getAuthor()).coverUrl(e.getKey().getCoverUrl())
@@ -119,9 +121,15 @@ public class ChatService {
     }
 
     public void clearSession() {
-        User currentUser = AuthUtils.getCurrentUser(userRepository);
-        sessions.remove(currentUser.getId());
-        sessionLastAccess.remove(currentUser.getId());
+        Long sessionKey = getOptionalCurrentUser().map(User::getId).orElse(ANONYMOUS_SESSION_ID);
+        sessions.remove(sessionKey);
+        sessionLastAccess.remove(sessionKey);
+    }
+
+    private Optional<User> getOptionalCurrentUser() {
+        String email = AuthUtils.getCurrentUserEmailOrNull();
+        if (email == null) return Optional.empty();
+        return userRepository.findByEmail(email);
     }
 
     private String buildConversationQuery(List<ChatMessage> history, String currentMessage) {
