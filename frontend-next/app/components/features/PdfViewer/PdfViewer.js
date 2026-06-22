@@ -21,6 +21,7 @@ function PdfViewer({ url, title, initialPage = 1, onPageChange }) {
 
   const onDocumentLoadSuccess = useCallback(({ numPages: total }) => {
     setNumPages(total);
+    setPageNumber((current) => Math.min(Math.max(1, current), total));
     setLoading(false);
   }, []);
 
@@ -32,6 +33,11 @@ function PdfViewer({ url, title, initialPage = 1, onPageChange }) {
 
   const goToPrevPage = () => setPageNumber(p => Math.max(1, p - 1));
   const goToNextPage = () => setPageNumber(p => Math.min(numPages || 1, p + 1));
+
+  useEffect(() => {
+    const nextPage = Math.max(1, Number(initialPage) || 1);
+    setPageNumber((current) => (current === nextPage ? current : nextPage));
+  }, [initialPage]);
 
   useEffect(() => {
     if (typeof onPageChange === 'function') onPageChange(pageNumber);
