@@ -14,6 +14,13 @@ import { useReadingProgress } from './useReadingProgress';
 
 describe('useReadingProgress', () => {
   beforeEach(() => {
+    // The unmount-flush PATCH in production carries the JWT read from
+    // window.localStorage by app/lib/api.js. Without a token shim here
+    // the hook's cleanup would fire a 401 the same way the reader page
+    // would before the user logged in.
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('token', 'test-token');
+    }
     api.get.mockReset();
     api.patch.mockReset();
   });
@@ -63,5 +70,21 @@ describe('useReadingProgress', () => {
     const { result } = renderHook(() => useReadingProgress({ bookId: 7, debounceMs: 1000 }));
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.error).toBeTruthy();
+  });
+
+  it('flushes pending page when the reader unmounts', async () => {
+    api.get.mockResolvedValueOnce({ data: { currentPage: 0, totalPages: 100, lastReadAt: null } });
+    api.patch.mockResolvedValue({ data: { currentPage: 9, totalPages: 100, lastReadAt: 'x' } });
+    const { result, unmount } = renderHook(() => useReadingProgress({ bookId: 7, debounceMs: 1000 }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    act(() => result.current.savePage(9));
+    unmount();
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith(
+      '/reading-progress',
+      { currentPage: 9 },
+      { params: { bookId: 7 } }
+    ));
   });
 });
