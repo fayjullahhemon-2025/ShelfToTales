@@ -8,11 +8,12 @@ import Link from 'next/link';
 import PageTitle from '../components/layout/PageTitle';
 import { bookService, comparisonService } from '../lib/api';
 import { FadeIn } from '../components/common/AnimationUtils';
+import { useAuthToken } from '../hooks/useAuthToken';
 
 function ProductComparisonInner() {
     const [comparisonList, setComparisonList] = useState([]);
     const [availableBooks, setAvailableBooks] = useState([]);
-    const [token, setToken] = useState(null);
+    const [token] = useAuthToken();
 
     useEffect(() => {
         const fetchBooks = async () => {
@@ -25,11 +26,8 @@ function ProductComparisonInner() {
         };
         fetchBooks();
 
-        const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-        setToken(storedToken);
-
         const fetchComparison = async () => {
-            if (storedToken) {
+            if (token) {
                 try {
                     const response = await comparisonService.getComparisonList();
                     setComparisonList(response.data || []);
@@ -45,7 +43,7 @@ function ProductComparisonInner() {
             }
         };
         fetchComparison();
-    }, []);
+    }, [token]);
 
     const addToComparison = async (bookId) => {
         if (comparisonList.length >= 4) {
