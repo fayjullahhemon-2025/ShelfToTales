@@ -10,6 +10,9 @@ import { useEffect, useState } from 'react';
  * re-reading localStorage on every render. The value is stable for the
  * lifetime of the component — call `setToken(...)` from the auth flow to
  * trigger a refresh.
+ *
+ * Note: this hook does not subscribe to the `storage` event — a logout in
+ * another tab will not refresh the token until the next mount.
  */
 export function useAuthToken() {
   const [token, setToken] = useState(null);
