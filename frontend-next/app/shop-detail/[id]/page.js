@@ -9,6 +9,7 @@ import { useParams } from 'next/navigation';
 import { Nav, Tab } from 'react-bootstrap';
 import { bookService, wishlistService, reviewService, reviewCommentService } from '../../lib/api';
 import { useCart } from '../../hooks/useCart';
+import { useAuthToken } from '../../hooks/useAuthToken';
 import Swal from 'sweetalert2';
 import { FadeIn } from '../../components/common/AnimationUtils';
 
@@ -27,13 +28,12 @@ function ReviewCommentsThread({ reviewId }) {
     const [replyingToId, setReplyingToId] = useState(null);
     const [replyContent, setReplyContent] = useState('');
     const [submitting, setSubmitting] = useState(false);
-    const [token, setToken] = useState(null);
+    const [token] = useAuthToken();
     const [currentUserId, setCurrentUserId] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            setToken(localStorage.getItem('token'));
             setIsAdmin(localStorage.getItem('role') === 'ADMIN');
             const profile = localStorage.getItem('profile');
             if (profile) {
